@@ -12,6 +12,14 @@ Features:
 * Collect powerups to gain ability to eat ghosts :Powerups:
 * Collect orbs to gain points :Orbs:
 * Can dodge and jump over ghosts :Movement:
+* Points are calculated into money, players can use money to buy skins or upgrades, or can choose to watch ads to get those features. :Monetise:
+* Low poly
+* Modern Horror
+
+Controls:
+* Gyro
+* input system
+* other
 
 ## Dependencies
 * Unity 3D, Blender, Maya
@@ -27,10 +35,13 @@ Instructions to build on Android platforms:
 
 ## TODO
 
-* Build player,enemy,fruits and orb models.
+* Build player,enemy,fruits and orb models. (use temporary models)
 * Build Map.
 * Make movement features.
 * Make First Person.
+
+## Reference
+* MAZE build: https://www.youtube.com/watch?v=TMOEYdV4Ot4&t=1555s
 
 ## Contact
 
