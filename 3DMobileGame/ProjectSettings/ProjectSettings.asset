@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: f3e4da264886d794bb864818a90d11d3
+  productGUID: c7fc5e373d6c8f44ea5a2c3d45e4947f
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: MobileGame
+  productName: 3DMobileGame
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -848,14 +848,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: MobileGame
+  metroPackageName: 3DMobileGame
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: MobileGame
+  metroApplicationDescription: 3DMobileGame
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -926,10 +926,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 9e3e2b5d-4acf-47a9-9afe-fc62f875dec8
+  cloudProjectId: 43829462-d0c3-4118-ac70-b8e64fa324f2
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: MobileGame 2025-10-02_13-39-22
+  projectName: 3DMobileGame
   organizationId: unity_00a8b2361da95a1180da
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
