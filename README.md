@@ -36,6 +36,8 @@ Instructions to build on Android platforms:
 ## TODO
 
 * Build player,enemy,fruits and orb models. (use temporary models)
+* Dark SkyBox/SkyDom
+* Make it creepy
 * Build Map.
 * Make movement features.
 * Make First Person.
