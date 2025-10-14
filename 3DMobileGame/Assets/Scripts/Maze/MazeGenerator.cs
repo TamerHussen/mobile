@@ -11,7 +11,7 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField]
     private int _CellWidth;
 
-    [SerializeField] 
+    [SerializeField]
     private int _CellDepth;
 
     private Cell[,] _CellGrid;
@@ -28,7 +28,7 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        GenerateMaze(null, _CellGrid[0,0]);
+        GenerateMaze(null, _CellGrid[0, 0]);
     }
 
     private void GenerateMaze(Cell previousCell, Cell currentCell)
@@ -40,7 +40,7 @@ public class MazeGenerator : MonoBehaviour
         do
         {
             nextCell = GetNextUnvisitedCell(currentCell);
-                
+
             if (nextCell != null)
             {
                 GenerateMaze(currentCell, nextCell);
@@ -61,7 +61,7 @@ public class MazeGenerator : MonoBehaviour
         int x = (int)currentCell.transform.position.x;
         int z = (int)currentCell.transform.position.z;
 
-        if (x + 1  < _CellWidth)
+        if (x + 1 < _CellWidth)
         {
             var cellToRight = _CellGrid[x + 1, z];
 
@@ -140,6 +140,6 @@ public class MazeGenerator : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 }

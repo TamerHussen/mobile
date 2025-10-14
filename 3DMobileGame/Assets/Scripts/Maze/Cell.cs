@@ -33,7 +33,7 @@ public class Cell : MonoBehaviour
     {
         _FrontWall.SetActive(false);
     }
-    public void ClearBackWall() 
+    public void ClearBackWall()
     {
         _BackWall.SetActive(false);
     }
