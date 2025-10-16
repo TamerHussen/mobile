@@ -10,6 +10,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _jumpForce = 7f;
     [SerializeField] private float _jumpAccelThreshold = 1.5f; // Adjust to control jump sensitivity
 
+
+    //Walls
+    [SerializeField] Transform NorthWall;
+    [SerializeField] Transform SouthWall;
+    [SerializeField] Transform EastWall;
+    [SerializeField] Transform WestWall;
+
+    bool teleported;
+
+
+
     private bool _isGrounded = true;
 
     private void Awake()
@@ -67,4 +78,48 @@ public class PlayerController : MonoBehaviour
             _isGrounded = true;
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.layer == 7)
+        {
+            
+            if (!teleported && other.gameObject.CompareTag("NorthWall"))
+            {
+                teleported = true;
+                transform.position = SouthWall.transform.position;
+
+            }
+            if (!teleported && other.gameObject.CompareTag("SouthWall"))
+            {
+                teleported = true;
+                transform.position = NorthWall.transform.position;
+            }
+            if (!teleported && other.gameObject.CompareTag("EastWall"))
+            {
+                teleported = true;
+                transform.position = WestWall.transform.position;
+            }
+            if (!teleported && other.gameObject.CompareTag("WestWall"))
+            {
+                teleported = true;
+                transform.position = EastWall.transform.position;
+            }
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.layer == 7)
+        {
+            Invoke("setTeleportCooldownOFF", 1f);
+        }
+    }
+
+    void setTeleportCooldownOFF()
+    {
+        teleported = false;
+    }
+
+
+
 }

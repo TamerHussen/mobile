@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - NorthWall
+  - EastWall
+  - SouthWall
+  - WestWall
   layers:
   - Default
   - TransparentFX
@@ -12,12 +16,12 @@ TagManager:
   - Water
   - UI
   - Gound
+  - Portal
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - NorthWall
+  - SouthWall
+  - EastWall
+  - SouthWall
   - 
   - 
   - 
