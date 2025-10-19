@@ -357,6 +357,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -482,6 +483,27 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11cf7ba0389db45479d1d2f590bf8cae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerRigidbody: {fileID: 512262383}
+  playerTransform: {fileID: 512262384}
+  enableGyro: 1
+  yawSmooth: 6
+  cameraSmooth: 8
+  lookSensitivity: 1
+  maxUpPitch: 60
+  maxDownPitch: -60
+  leanAmount: 0.5
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -723,7 +745,6 @@ GameObject:
   - component: {fileID: 512262383}
   - component: {fileID: 512262381}
   - component: {fileID: 512262386}
-  - component: {fileID: 512262385}
   - component: {fileID: 512262387}
   m_Layer: 0
   m_Name: Player
@@ -779,7 +800,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 64
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!4 &512262384
 Transform:
@@ -798,18 +819,6 @@ Transform:
   - {fileID: 1679135236}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &512262385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 512262380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f53f045fc3a61744879f26664f79729, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &512262386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1094,7 +1103,7 @@ GameObject:
   - component: {fileID: 993998629}
   - component: {fileID: 993998628}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1167,7 +1176,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 993998620}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1055890465
 GameObject:
   m_ObjectHideFlags: 0
@@ -1841,7 +1850,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1679135236}
-  - component: {fileID: 1679135237}
   m_Layer: 0
   m_Name: Camrig
   m_TagString: Untagged
@@ -1866,21 +1874,6 @@ Transform:
   - {fileID: 1671841390}
   m_Father: {fileID: 512262384}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1679135237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679135235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1babd026151ccf42820c4f04b840143, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 512262384}
-  rotationSpeed: 5
-  leanAmount: 15
 --- !u!1001 &1679221499
 PrefabInstance:
   m_ObjectHideFlags: 0

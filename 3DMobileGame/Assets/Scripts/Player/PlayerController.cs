@@ -41,22 +41,24 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        // Joystick input
-        Vector3 direction = new Vector3(_joystick.Horizontal, 0f, _joystick.Vertical);
+        Vector3 input = new Vector3(_joystick.Horizontal, 0f, _joystick.Vertical);
+        if (input.magnitude > 1f) input.Normalize();
 
-        if (direction.magnitude > 1f)
-            direction.Normalize();
+        Vector3 forward = transform.forward; // use the player object itself
+        forward.y = 0f;
+        Vector3 right = transform.right;
+        right.y = 0f;
 
-        // Player moves in its own facing direction (gyro will handle turning)
-        Vector3 move = transform.TransformDirection(direction) * _moveSpeed;
+        Vector3 moveDir = (forward * input.z + right * input.x).normalized;
+        Vector3 move = moveDir * _moveSpeed;
+
         _rigidbody.linearVelocity = new Vector3(move.x, _rigidbody.linearVelocity.y, move.z);
 
-        // Update animation speed
         if (_animator != null)
-        {
-            _animator.SetFloat("Speed", direction.magnitude);
-        }
+            _animator.SetFloat("Speed", input.magnitude);
     }
+
+
 
     private void CheckJumpByAccelerometer()
     {

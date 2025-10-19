@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class RandomEnemyMovement : MonoBehaviour
+public class EnemyMovement : MonoBehaviour
 {
     public NavMeshAgent Agent;
     public float Range;
