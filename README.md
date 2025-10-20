@@ -22,7 +22,6 @@ Controls:
 * Accelerometer
 * Haptic Feedback
 * Joystick
-* other
 
 ## Dependencies
 * Unity 3D, Blender, Maya
@@ -44,7 +43,7 @@ Instructions to build on Android platforms:
 * Build Map. Done
 * Make movement features. Done
 * Make First Person. Done
-* Add gyro and acceleromenter. Done
+* Add gyro and accelerometer. Done
 * Add mobile Controls. Done
 * Add haptic feedback. Done
 * Add jumpscares. Done
@@ -55,7 +54,7 @@ Instructions to build on Android platforms:
 * Enemy movement: https://youtu.be/ploU82inrCw
 * Player movement: https://youtu.be/f473C43s8nE
 * Gyro script: https://docs.unity3d.com/6000.2/Documentation/ScriptReference/Gyroscope.html
-* Acceleromenter Script: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Accelerometer.html
+* Accelerometer Script: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Accelerometer.html
 * Joystick movement: https://www.youtube.com/watch?v=7bQqpTkZTkk
 * Haptic feedback: https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.0/manual/simple-haptic-feedback.html
 * Jumpscares: https://youtu.be/qnNRdUMULoo
