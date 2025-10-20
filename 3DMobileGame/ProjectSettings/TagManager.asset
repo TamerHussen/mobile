@@ -8,6 +8,7 @@ TagManager:
   - EastWall
   - SouthWall
   - WestWall
+  - Collectible
   layers:
   - Default
   - TransparentFX

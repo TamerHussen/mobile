@@ -55,7 +55,7 @@ public class MenuScript : MonoBehaviour
         panelToOpen.SetActive(true);
     }
 
-    // Close a panel and optionally reopen a parent panel
+    // Close a panel and can reopen a parent panel
     public void ClosePanel(GameObject panelToClose, GameObject panelToReturnTo = null, bool resumeGame = false)
     {
         panelToClose.SetActive(false);

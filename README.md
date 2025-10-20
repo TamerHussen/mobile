@@ -44,6 +44,12 @@ Instructions to build on Android platforms:
 
 ## Reference
 * MAZE build: https://www.youtube.com/watch?v=TMOEYdV4Ot4&t=1555s
+* Joystick asset: https://assetstore.unity.com/packages/tools/input-management/joystick-pack-107631
+* Enemy movement: https://youtu.be/ploU82inrCw
+* Player movement: https://youtu.be/f473C43s8nE
+* Gyro script: https://docs.unity3d.com/6000.2/Documentation/ScriptReference/Gyroscope.html
+* Acceleromenter Script: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Accelerometer.html
+* Joystick movement: https://www.youtube.com/watch?v=7bQqpTkZTkk
 
 ## Contact
 

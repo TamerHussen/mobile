@@ -4,12 +4,12 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private FixedJoystick _joystick;
+    [SerializeField] private FixedJoystick _joystick; // Move joystick
+    [SerializeField] private FixedJoystick _lookJoystick; // Look joystick
     [SerializeField] private Animator _animator;
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _jumpForce = 7f;
     [SerializeField] private float _jumpAccelThreshold = 1.5f; // Adjust to control jump sensitivity
-
 
     //Walls
     [SerializeField] Transform NorthWall;
@@ -23,10 +23,16 @@ public class PlayerController : MonoBehaviour
 
     private bool _isGrounded = true;
 
+    // Dodge fields
+    private Vector3 _dodgeVelocity = Vector3.zero;
+    private float _dodgeTimeRemaining = 0f;
+
     private void Awake()
     {
         if (_rigidbody == null)
             _rigidbody = GetComponent<Rigidbody>();
+
+        _rigidbody.constraints |= RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     private void FixedUpdate()
@@ -34,6 +40,15 @@ public class PlayerController : MonoBehaviour
         RotatePlayer();
         Move();
 
+        if (_dodgeTimeRemaining > 0f)
+        {
+            _dodgeTimeRemaining -= Time.fixedDeltaTime;
+            if (_dodgeTimeRemaining <= 0f)
+            {
+                _dodgeTimeRemaining = 0f;
+                _dodgeVelocity = Vector3.zero;
+            }
+        }
     }
 
     private void Update()
@@ -43,19 +58,27 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        // Get input each frame (Update-driven)
         Vector3 input = new Vector3(_joystick.Horizontal, 0f, _joystick.Vertical);
         if (input.sqrMagnitude > 1f)
             input.Normalize();
 
+        Vector3 horizontalVelocity;
+        if (_dodgeTimeRemaining > 0f)
+        {
+            horizontalVelocity = new Vector3(_dodgeVelocity.x, 0f, _dodgeVelocity.z);
+        }
+        else
+        {
+            // Move relative to world, not player rotation
+            Vector3 moveDir = (Vector3.forward * input.z + Vector3.right * input.x).normalized;
+            moveDir = Quaternion.Euler(0f, currentYaw, 0f) * moveDir; // apply facing direction to movement
+            Vector3 baseMove = moveDir * _moveSpeed;
+            horizontalVelocity = new Vector3(baseMove.x, 0f, baseMove.z);
+        }
 
-
-        // Movement direction relative to player rotation
-        Vector3 moveDir = (transform.forward * input.z + transform.right * input.x).normalized;
-        Vector3 targetVel = moveDir * _moveSpeed;
+        Vector3 targetVel = horizontalVelocity;
         targetVel.y = _rigidbody.linearVelocity.y;
 
-        // Use MovePosition instead of editing velocity directly
         Vector3 newPos = _rigidbody.position + targetVel * Time.fixedDeltaTime;
         _rigidbody.MovePosition(newPos);
 
@@ -63,26 +86,33 @@ public class PlayerController : MonoBehaviour
             _animator.SetFloat("Speed", input.magnitude);
     }
 
-
-
     private void RotatePlayer()
     {
-        float turnSpeed = 150f; // degrees per second, tune as needed
-        float joystickInput = _joystick.Horizontal;
+        if (_lookJoystick == null) return;
 
-        // accumulate yaw based on joystick input
-        currentYaw += joystickInput * turnSpeed * Time.deltaTime;
+        float turnSpeed = 100f;
+        float lookInput = _lookJoystick.Horizontal;
+
+        currentYaw += lookInput * turnSpeed * Time.deltaTime;
 
         Quaternion targetRotation = Quaternion.Euler(0f, currentYaw, 0f);
         _rigidbody.MoveRotation(Quaternion.Slerp(_rigidbody.rotation, targetRotation, Time.deltaTime * 8f));
     }
 
+    public void StartDodge(Vector3 worldDirection, float strength, float duration)
+    {
+        Vector3 dir = worldDirection;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) dir = transform.forward;
+
+        _dodgeVelocity = dir.normalized * strength;
+        _dodgeTimeRemaining = Mathf.Max(0.05f, duration);
+    }
 
     private void CheckJumpByAccelerometer()
     {
         Vector3 accel = Input.acceleration;
 
-        // Simple jump detection: upward acceleration spike
         if (_isGrounded && accel.sqrMagnitude > _jumpAccelThreshold * _jumpAccelThreshold)
         {
             _rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
@@ -92,7 +122,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Basic ground check
         if (collision.contacts.Length > 0 && collision.contacts[0].normal.y > 0.7f)
         {
             _isGrounded = true;
@@ -103,12 +132,10 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.layer == 7)
         {
-
             if (!teleported && other.gameObject.CompareTag("NorthWall"))
             {
                 teleported = true;
                 transform.position = SouthWall.transform.position;
-
             }
             if (!teleported && other.gameObject.CompareTag("SouthWall"))
             {
@@ -127,6 +154,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject.layer == 7)
@@ -140,6 +168,11 @@ public class PlayerController : MonoBehaviour
         teleported = false;
     }
 
-
-
+    // allow enemy to call vibration
+    public void Vibrate()
+    {
+    #if UNITY_ANDROID || UNITY_IOS
+        Handheld.Vibrate();
+    #endif
+    }
 }
