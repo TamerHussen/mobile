@@ -9,23 +9,24 @@ public class EnemyMovement : MonoBehaviour
     public float Range;
     public Transform CentrePoint;
 
-    public Transform Player;           // Reference to player
-    public float DetectionRange = 8f;  // How close player needs to be to chase
-    public float LosePlayerTime = 3f;  // Time before going back to patrol
+    public Transform Player;
+    public float DetectionRange = 8f;
+    public float LosePlayerTime = 3f;
 
     private float LastSeenPlayerTime;
 
-    // --- HAPTIC SETTINGS (small, tweak in inspector) ---
     [Header("Haptics")]
-    public float proximityHapticRange = 3f;   // vibrate when player within this distance
-    public float proximityHapticCooldown = 1.0f; // seconds between proximity vibrates
-    public float chaseStartHapticCooldown = 3.0f; // seconds between chase-start vibrates
+    public float proximityHapticRange = 3f;
+    public float proximityHapticCooldown = 1.0f;
+    public float chaseStartHapticCooldown = 3.0f;
 
     private float lastProximityHaptic = -999f;
     private float lastChaseStartHaptic = -999f;
 
     public JumpScareManager jumpScareManager;
 
+    public float freezeTimeAfterScare = 2.5f; // how long enemy freezes
+    private bool frozen = false;
 
     void Start()
     {
@@ -34,6 +35,8 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
+        if (frozen) return; // skip all logic when frozen
+
         float distanceToPlayer = Vector3.Distance(transform.position, Player.position);
 
         // HAPTIC: proximity pulse (throttled)
@@ -45,7 +48,6 @@ public class EnemyMovement : MonoBehaviour
 
         if (distanceToPlayer <= DetectionRange)
         {
-            // haptic when chase begins (throttled)
             if (Time.time - lastChaseStartHaptic >= chaseStartHapticCooldown)
             {
                 TriggerPlayerHaptic();
@@ -66,7 +68,7 @@ public class EnemyMovement : MonoBehaviour
                 Vector3 point;
                 if (RandomPoint(CentrePoint.position, Range, out point))
                 {
-                    Debug.DrawRay(point, Vector3.up, Color.red, 1.0f); // shows enemy tracks
+                    Debug.DrawRay(point, Vector3.up, Color.red, 1.0f);
                     Agent.SetDestination(point);
                 }
             }
@@ -86,7 +88,6 @@ public class EnemyMovement : MonoBehaviour
         return false;
     }
 
-    // Calls the player's Vibrate helper if available.
     private void TriggerPlayerHaptic()
     {
         if (Player == null) return;
@@ -98,10 +99,9 @@ public class EnemyMovement : MonoBehaviour
         }
         else
         {
-            // fallback to generic vibrate (device)
-        #if UNITY_ANDROID || UNITY_IOS
+    #if UNITY_ANDROID || UNITY_IOS
             Handheld.Vibrate();
-        #endif
+    #endif
         }
     }
 
@@ -110,8 +110,19 @@ public class EnemyMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             if (jumpScareManager != null)
+            {
                 jumpScareManager.TriggerRandomJumpScare();
+                StartCoroutine(FreezeEnemy()); // enemy freezes after scare
+            }
         }
     }
 
+    private IEnumerator FreezeEnemy()
+    {
+        frozen = true;
+        if (Agent != null) Agent.isStopped = true;
+        yield return new WaitForSeconds(freezeTimeAfterScare);
+        if (Agent != null) Agent.isStopped = false;
+        frozen = false;
+    }
 }
