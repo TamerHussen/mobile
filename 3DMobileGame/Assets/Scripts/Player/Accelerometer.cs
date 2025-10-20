@@ -3,24 +3,15 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Accelerometer : MonoBehaviour
 {
-    [Header("References")]
     [SerializeField] private Rigidbody playerRigidbody;
     [SerializeField] private PlayerController playerController;
 
-    [Header("Dodge Settings")]
-    [Tooltip("Higher = harder to trigger")]
     [SerializeField] private float shakeThreshold = 2.2f;
 
-    [Tooltip("How strong the dash is (world units per second)")]
     [SerializeField] private float dodgeForce = 8f;
-
-    [Tooltip("Time the dodge lasts (seconds)")]
     [SerializeField] private float dodgeDuration = 0.18f;
-
-    [Tooltip("Time between dashes")]
     [SerializeField] private float dodgeCooldown = 1.2f;
 
-    [Tooltip("Low-pass filter factor for gravity smoothing (0..1). Lower = more smoothing)")]
     [Range(0.01f, 0.5f)]
     [SerializeField] private float lowPassFilterFactor = 0.1f;
 

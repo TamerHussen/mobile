@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private FixedJoystick _joystick; // Move joystick
     [SerializeField] private FixedJoystick _lookJoystick; // Look joystick
     [SerializeField] private Animator _animator;
+
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _jumpForce = 7f;
     [SerializeField] private float _jumpAccelThreshold = 1.5f; // Adjust to control jump sensitivity
@@ -72,7 +73,6 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // Move relative to world, not player rotation
             Vector3 moveDir = (Vector3.forward * input.z + Vector3.right * input.x).normalized;
             moveDir = Quaternion.Euler(0f, currentYaw, 0f) * moveDir; // apply facing direction to movement
             Vector3 baseMove = moveDir * _moveSpeed;
@@ -176,8 +176,8 @@ public class PlayerController : MonoBehaviour
     // allow enemy to call vibration
     public void Vibrate()
     {
-    #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
         Handheld.Vibrate();
-    #endif
+#endif
     }
 }

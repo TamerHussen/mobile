@@ -3,7 +3,8 @@ using UnityEngine;
 public class EnemyProximityHaptics : MonoBehaviour
 {
     public Transform player;
-    public EnemyMovement enemy; // Reference to the enemy
+    public EnemyMovement enemy;
+
     public float maxDistance = 10f; // Distance at which vibration starts
     public float minInterval = 0.2f; // Fastest heartbeat vibration
     public float maxInterval = 1f; // Slowest heartbeat vibration
@@ -32,8 +33,8 @@ public class EnemyProximityHaptics : MonoBehaviour
 
     private void TriggerVibration()
     {
-    #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
         Handheld.Vibrate();
-    #endif
+#endif
     }
 }

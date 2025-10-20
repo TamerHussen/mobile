@@ -5,14 +5,9 @@ using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
 {
-    [SerializeField]
-    private Cell _CellPrefab;
-
-    [SerializeField]
-    private int _CellWidth;
-
-    [SerializeField]
-    private int _CellDepth;
+    [SerializeField] private Cell _CellPrefab;
+    [SerializeField] private int _CellWidth;
+    [SerializeField] private int _CellDepth;
 
     private Cell[,] _CellGrid;
 

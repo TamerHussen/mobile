@@ -4,7 +4,7 @@ using TMPro;
 public class PlayerScore : MonoBehaviour
 {
     public int score = 0;
-    public TextMeshProUGUI scoreText; 
+    public TextMeshProUGUI scoreText;
 
     private void Start()
     {
@@ -15,7 +15,7 @@ public class PlayerScore : MonoBehaviour
     {
         if (other.CompareTag("Collectible"))
         {
-            score += 10; // +10 per orb
+            score += 10;
             UpdateScoreUI();
             Destroy(other.gameObject);
         }

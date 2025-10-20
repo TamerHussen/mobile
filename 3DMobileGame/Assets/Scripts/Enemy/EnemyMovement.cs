@@ -15,7 +15,6 @@ public class EnemyMovement : MonoBehaviour
 
     private float LastSeenPlayerTime;
 
-    [Header("Haptics")]
     public float proximityHapticRange = 3f;
     public float proximityHapticCooldown = 1.0f;
     public float chaseStartHapticCooldown = 3.0f;
@@ -35,11 +34,10 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-        if (frozen) return; // skip all logic when frozen
+        if (frozen) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, Player.position);
 
-        // HAPTIC: proximity pulse (throttled)
         if (distanceToPlayer <= proximityHapticRange && Time.time - lastProximityHaptic >= proximityHapticCooldown)
         {
             TriggerPlayerHaptic();
@@ -84,6 +82,7 @@ public class EnemyMovement : MonoBehaviour
             result = hit.position;
             return true;
         }
+        result = Vector3.zero;
         result = Vector3.zero;
         return false;
     }

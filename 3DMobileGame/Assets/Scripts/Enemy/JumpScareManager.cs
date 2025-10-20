@@ -4,14 +4,14 @@ using UnityEngine.UI;
 [System.Serializable]
 public class JumpScare
 {
-    public Sprite image;       // Image for the jumpscare
-    public AudioClip audio;    // Sound for the jumpscare
+    public Sprite image;
+    public AudioClip audio;
 }
 
 public class JumpScareManager : MonoBehaviour
 {
-    public Image jumpscareUI;       // Fullscreen UI Image for jumpscare
-    public AudioSource audioSource; // AudioSource to play sound
+    public Image jumpscareUI;   
+    public AudioSource audioSource; 
     public JumpScare[] jumpscares;
 
     public float displayTime = 3.5f;  // How long the image stays
@@ -39,9 +39,9 @@ public class JumpScareManager : MonoBehaviour
         Invoke(nameof(HideJumpScare), displayTime);
         Invoke(nameof(ResetScare), scareCooldown);
 
-    #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
         Handheld.Vibrate();
-    #endif
+#endif
     }
 
     private void HideJumpScare()

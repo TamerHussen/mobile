@@ -2,16 +2,11 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject _LeftWall;
-    [SerializeField]
-    private GameObject _RightWall;
-    [SerializeField]
-    private GameObject _FrontWall;
-    [SerializeField]
-    private GameObject _BackWall;
-    [SerializeField]
-    private GameObject _UnvisitedBlock;
+    [SerializeField] private GameObject _LeftWall;
+    [SerializeField] private GameObject _RightWall;
+    [SerializeField] private GameObject _FrontWall;
+    [SerializeField] private GameObject _BackWall;
+    [SerializeField] private GameObject _UnvisitedBlock;
 
     public bool IsVisited { get; private set; }
 

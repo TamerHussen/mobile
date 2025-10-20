@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class MenuScript : MonoBehaviour
 {
-    [Header("Panels")]
     public GameObject mainMenuPanel;
     public GameObject levelSelectPanel;
     public GameObject pauseMenuPanel;

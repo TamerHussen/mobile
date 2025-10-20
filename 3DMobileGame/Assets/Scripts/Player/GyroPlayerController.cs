@@ -2,11 +2,9 @@ using UnityEngine;
 
 public class GyroPlayerController : MonoBehaviour
 {
-    [Header("References")]
     public Rigidbody playerRigidbody;
     public Transform playerTransform;
 
-    [Header("Settings")]
     public bool enableGyro = true;
     public float yawSmooth = 6f;
     public float cameraSmooth = 8f;
@@ -42,7 +40,7 @@ public class GyroPlayerController : MonoBehaviour
     private System.Collections.IEnumerator InitGyro()
     {
         Input.gyro.enabled = true;
-        yield return new WaitForSeconds(0.3f); // wait a bit for gyro to initialize
+        yield return new WaitForSeconds(0.3f); // wait for gyro to initialize
         CalibrateGyro();
         gyroReady = true;
     }
