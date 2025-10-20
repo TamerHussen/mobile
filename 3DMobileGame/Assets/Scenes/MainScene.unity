@@ -2024,6 +2024,7 @@ MonoBehaviour:
   - image: {fileID: -400161915, guid: eea216eb151d15846890f71a3844b3bc, type: 3}
     audio: {fileID: 8300000, guid: f93758da03cfb764696e14182d0acd83, type: 3}
   displayTime: 3.5
+  scareCooldown: 5
 --- !u!4 &667310014
 Transform:
   m_ObjectHideFlags: 0
@@ -2968,7 +2969,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1312886450
 MonoBehaviour:
   m_ObjectHideFlags: 0

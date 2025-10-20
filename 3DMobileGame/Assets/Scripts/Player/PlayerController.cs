@@ -33,6 +33,9 @@ public class PlayerController : MonoBehaviour
             _rigidbody = GetComponent<Rigidbody>();
 
         _rigidbody.constraints |= RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     private void FixedUpdate()
@@ -96,7 +99,7 @@ public class PlayerController : MonoBehaviour
         currentYaw += lookInput * turnSpeed * Time.deltaTime;
 
         Quaternion targetRotation = Quaternion.Euler(0f, currentYaw, 0f);
-        _rigidbody.MoveRotation(Quaternion.Slerp(_rigidbody.rotation, targetRotation, Time.deltaTime * 8f));
+        _rigidbody.MoveRotation(Quaternion.Slerp(_rigidbody.rotation, targetRotation, Time.fixedDeltaTime * 8f));
     }
 
     public void StartDodge(Vector3 worldDirection, float strength, float duration)
@@ -124,6 +127,8 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.contacts.Length > 0 && collision.contacts[0].normal.y > 0.7f)
         {
+            Debug.Log($"Player collided with {collision.collider.name} - contact normal: {collision.contacts[0].normal}");
+
             _isGrounded = true;
         }
     }
