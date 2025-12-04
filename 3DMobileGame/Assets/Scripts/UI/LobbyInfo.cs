@@ -10,7 +10,7 @@ public class LobbyInfo : MonoBehaviour
     public Transform previewSpawnPoint;  // for cosmetics
 
     private string selectedLevel = "None";
-    private int selectedCosmetic = -1;
+    private string selectedCosmetic = "None";
 
     void Start()
     {
@@ -27,10 +27,11 @@ public class LobbyInfo : MonoBehaviour
         selectedLevelText.text = "Level: " + levelName;
     }
 
-    public void SetSelectedCosmetic(int index)
+    public void SetSelectedCosmetic(string CosmeticName)
     {
-        selectedCosmetic = index;
-        selectedCosmeticText.text = "Cosmetic: " + index.ToString();
+        selectedCosmetic = CosmeticName;
+        selectedCosmeticText.text = "Cosmetic: " + CosmeticName;
+
     }
 
     public string GetSelectedLevel()

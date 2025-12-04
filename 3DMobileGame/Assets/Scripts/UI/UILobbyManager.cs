@@ -20,31 +20,77 @@ public class UILobbyManager : MonoBehaviour
 
     public void ShowLevels()
     {
-        HideAll();
-        levelsPanel.SetActive(true);
+        if (!levelsPanel.activeSelf)
+        {
+            HideAll();
+            levelsPanel.SetActive(true);
+
+        }
+
+        else
+        {
+            HideAll();
+        }
     }
 
     public void ShowCosmetics()
     {
-        HideAll();
-        cosmeticsPanel.SetActive(true);
+        if (!cosmeticsPanel.activeSelf)
+        {
+            HideAll();
+            cosmeticsPanel.SetActive(true);
+
+        }
+
+        else
+        {
+            HideAll();
+        }
     }
 
     public void ShowAchievements()
     {
-        HideAll();
-        achievementsPanel.SetActive(true);
+        if (!achievementsPanel.activeSelf)
+        {
+            HideAll();
+            achievementsPanel.SetActive(true);
+
+        }
+
+        else
+        {
+            HideAll();
+        }
     }
 
     public void ShowFriends()
     {
-        HideAll();
-        friendsPanel.SetActive(true);
+
+        if (!friendsPanel.activeSelf)
+        {
+            HideAll();
+            friendsPanel.SetActive(true);
+
+        }
+
+        else
+        {
+            HideAll();
+        }
     }
 
     public void ShowSettings()
     {
-        HideAll();
-        settingsPanel.SetActive(true);
+        if (!settingsPanel.activeSelf)
+        {
+            HideAll();
+            settingsPanel.SetActive(true);
+
+        }
+
+        else
+        {
+            HideAll();
+        }
     }
 }
