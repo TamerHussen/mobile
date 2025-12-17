@@ -12,7 +12,7 @@ public class LobbyInfo : MonoBehaviour
     public TextMeshProUGUI selectedLevelText;
     public TextMeshProUGUI selectedCosmeticText;
     public TextMeshProUGUI playerCountText;
-    
+
     // Preview
     public Transform previewSpawnPoint;  // for cosmetics
     public GameObject currentPreviewModel;
@@ -104,5 +104,5 @@ public class LobbyInfo : MonoBehaviour
         FindFirstObjectByType<LobbyPlayerSpawner>()?.SpawnPlayers();
     }
 
-     public List<LobbyPlayer> GetPlayers() => players;
+    public List<LobbyPlayer> GetPlayers() => players;
 }
