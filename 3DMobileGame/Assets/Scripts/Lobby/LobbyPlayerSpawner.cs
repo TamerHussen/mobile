@@ -33,6 +33,9 @@ public class LobbyPlayerSpawner : MonoBehaviour
             // add cosmetic
             player.GetComponent<PlayerCosmetic>().Apply(players[i].Cosmetic);
 
+            // add nametag
+            player.GetComponentInChildren<PlayerNames>().SetName(players[i].PlayerID);
+
             SpawnedPlayers.Add(player);
         }
     }

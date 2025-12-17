@@ -5,31 +5,21 @@ using System.Linq;
 
 public class FriendManager : MonoBehaviour
 {
-    public static FriendManager instance;
+    public static FriendManager Instance;
 
     public List<FriendData> friends = new();
 
     void Awake()
     {
-        instance = this;
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
-    // temp data
-    void Start()
-    {
-        friends.Add(new FriendData { ID = "1", DisplayName = "TimothyThe1ST", isOnline = true });
-        friends.Add(new FriendData { ID = "2", DisplayName = "FartSmella_SmartFella", isOnline = false });
-        friends.Add(new FriendData { ID = "3", DisplayName = "MJ_PJ_DJ", isOnline = true });
-
-    }
-
-    // search
-    public FriendData Search(string query)
-    {
-        return friends.FirstOrDefault(f =>
-        f.DisplayName.ToLower().Contains(query.ToLower()) ||
-        f.ID == query);
-    }
+    // invite
     public void InviteFriend(FriendData friend)
     {
         if (!friend.isOnline) return;
@@ -37,15 +27,28 @@ public class FriendManager : MonoBehaviour
         LobbyInfo.Instance.AddTestPlayer(friend.DisplayName);
     }
 
+    // remove
     public void RemoveFriend(FriendData friend)
     {
-       if (friend == null) return;
-
-       if (friends.Contains(friend))
-        {
+        if (friends.Contains(friend))
             friends.Remove(friend);
-        }
 
-        LobbyInfo.Instance.RemoveTestPlayer(friend.DisplayName);
+    }
+
+    // add
+    public void AddFriend(FriendData user)
+    {
+        if (friends.Exists(f => f.ID == user.ID))
+            return;
+
+        friends.Add(user);
+    }
+
+    // search
+    public FriendData Search(string query)
+    {
+        return friends.Find(f =>
+            f.DisplayName.ToLower().Contains(query.ToLower()) ||
+            f.ID == query);
     }
 }

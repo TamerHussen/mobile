@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using Unity.Android.Gradle.Manifest;
 
 public class FriendListItemUI : MonoBehaviour
 {
@@ -22,11 +23,13 @@ public class FriendListItemUI : MonoBehaviour
 
     public void Invite()
     {
-        FriendManager.instance.InviteFriend(friend);
+        FriendManager.Instance.InviteFriend(friend);
     }
 
     public void Remove()
     {
-        FriendManager.instance.RemoveFriend(friend);
+        FriendManager.Instance.RemoveFriend(friend);
+
+        FindFirstObjectByType<FriendListUI>()?.Refresh();
     }
 }
