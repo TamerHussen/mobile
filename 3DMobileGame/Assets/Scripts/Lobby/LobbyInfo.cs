@@ -93,7 +93,7 @@ public class LobbyInfo : MonoBehaviour
         FindFirstObjectByType<LobbyPlayerSpawner>()?.SpawnPlayers();
     }
     // test leave friend
-    public void RemoveTestPlayer()
+    public void RemoveTestPlayer(string id)
     {
         if (players.Count <= 1) return;
 
