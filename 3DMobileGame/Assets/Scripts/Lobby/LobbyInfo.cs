@@ -97,10 +97,12 @@ public class LobbyInfo : MonoBehaviour
     {
         if (players.Count <= 1) return;
 
-        players.RemoveAt(players.Count - 1);
+        var playerToRemove = players.Find(p => p.PlayerID == id);
+        if (playerToRemove != null)
+            players.Remove(playerToRemove);
+
 
         UpdateUI();
-
         FindFirstObjectByType<LobbyPlayerSpawner>()?.SpawnPlayers();
     }
 

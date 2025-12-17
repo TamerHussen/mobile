@@ -26,8 +26,17 @@ public class FriendListItemUI : MonoBehaviour
         FriendManager.Instance.InviteFriend(friend);
     }
 
+    public void Kick()
+    {
+        LobbyInfo.Instance.RemoveTestPlayer(friend.DisplayName);
+
+        Debug.Log($"{friend.DisplayName} has been kicked.");
+    }
+
     public void Remove()
     {
+        LobbyInfo.Instance.RemoveTestPlayer(friend.DisplayName);
+
         FriendManager.Instance.RemoveFriend(friend);
 
         FindFirstObjectByType<FriendListUI>()?.Refresh();
