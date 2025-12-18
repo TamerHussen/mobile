@@ -4,14 +4,20 @@ using Unity.VisualScripting;
 
 public class LobbyPlayerSpawner : MonoBehaviour
 {
+    public static LobbyPlayerSpawner Instance;
     public Transform[] SpawnPoints;
     public GameObject playerPrefab;
 
     private List<GameObject> SpawnedPlayers = new();
 
-    void Start()
+    void Awake()
     {
-        SpawnPlayers();
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        LobbyInfo.Instance?.ForceRespawn();
     }
 
     public void SpawnPlayers()
@@ -22,7 +28,9 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
         var players = LobbyInfo.Instance.GetPlayers();
 
-        for (int i = 0; i < players.Count; i++)
+        int count = Mathf.Min(players.Count, SpawnPoints.Length);
+
+        for (int i = 0; i < count; i++)
         {
             GameObject player = Instantiate(
                 playerPrefab,

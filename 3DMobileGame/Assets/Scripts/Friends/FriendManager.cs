@@ -23,6 +23,7 @@ public class FriendManager : MonoBehaviour
     public void InviteFriend(FriendData friend)
     {
         if (!friend.isOnline) return;
+        if (LobbyInfo.Instance.IsLobbyFull()) return;
 
         LobbyInfo.Instance.AddTestPlayer(friend.DisplayName);
     }

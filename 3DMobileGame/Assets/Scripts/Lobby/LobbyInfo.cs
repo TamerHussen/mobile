@@ -27,20 +27,27 @@ public class LobbyInfo : MonoBehaviour
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
         Instance = this;
-    }
 
-    void Start()
-    {
+        players.Clear();
+
         // Host
         players.Add(new LobbyPlayer
         {
             PlayerID = "Host",
             Cosmetic = "Default"
         });
+    }
 
+    void Start()
+    {
         UpdateUI();
 
+        ForceRespawn();
     }
 
     void UpdateUI()
@@ -92,20 +99,31 @@ public class LobbyInfo : MonoBehaviour
 
         UpdateUI();
 
-        FindFirstObjectByType<LobbyPlayerSpawner>()?.SpawnPlayers();
+        ForceRespawn();
     }
     // test leave friend
     public void RemoveTestPlayer(string id)
     {
-        if (players.Count <= 1) return;
+        if (id == "Host") return;
 
         var playerToRemove = players.Find(p => p.PlayerID == id);
-        if (playerToRemove != null)
-            players.Remove(playerToRemove);
+        if (playerToRemove == null) return;
+
+        players.Remove(playerToRemove);
 
 
         UpdateUI();
-        FindFirstObjectByType<LobbyPlayerSpawner>()?.SpawnPlayers();
+        ForceRespawn();
+    }
+
+    public bool IsLobbyFull()
+    {
+        return players.Count >= MaxPlayers;
+    }
+
+    public void ForceRespawn()
+    {
+        LobbyPlayerSpawner.Instance?.SpawnPlayers();
     }
 
     public List<LobbyPlayer> GetPlayers() => players;
