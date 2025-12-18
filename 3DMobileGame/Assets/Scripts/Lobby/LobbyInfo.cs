@@ -82,6 +82,8 @@ public class LobbyInfo : MonoBehaviour
     {
         if (players.Count >= MaxPlayers) return;
 
+        if (players.Exists(p => p.PlayerID == id)) return;
+
         players.Add(new LobbyPlayer
         {
             PlayerID = id,

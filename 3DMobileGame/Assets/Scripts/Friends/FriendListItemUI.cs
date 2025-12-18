@@ -9,6 +9,7 @@ public class FriendListItemUI : MonoBehaviour
     public Image ProfileImage;
     public Button InviteBtn;
     public Button RemoveBtn;
+    public Button KickBtn;
 
     private FriendData friend;
 
@@ -18,12 +19,23 @@ public class FriendListItemUI : MonoBehaviour
         NameText.text = data.DisplayName;
 
         ProfileImage.color = data.isOnline ? Color.green : Color.grey;
-        InviteBtn.interactable = data.isOnline;
+
+        bool IsInLobby = LobbyInfo.Instance.GetPlayers()
+            .Exists(p => p.PlayerID == friend.DisplayName);
+
+        InviteBtn.interactable = data.isOnline && !IsInLobby;
+        KickBtn.interactable = IsInLobby;
+
     }
 
     public void Invite()
     {
+        if (LobbyInfo.Instance.GetPlayers().Exists(p => p.PlayerID == friend.DisplayName)) return;
+
         FriendManager.Instance.InviteFriend(friend);
+
+        KickBtn.interactable = true;
+        InviteBtn.interactable = false;
     }
 
     public void Kick()
@@ -31,6 +43,10 @@ public class FriendListItemUI : MonoBehaviour
         LobbyInfo.Instance.RemoveTestPlayer(friend.DisplayName);
 
         Debug.Log($"{friend.DisplayName} has been kicked.");
+
+        KickBtn.interactable = false;
+        InviteBtn.interactable = friend.isOnline;
+
     }
 
     public void Remove()

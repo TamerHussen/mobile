@@ -789,6 +789,7 @@ MonoBehaviour:
   ProfileImage: {fileID: 7686961121848719383}
   InviteBtn: {fileID: 3047118903440518919}
   RemoveBtn: {fileID: 7068410095939596837}
+  KickBtn: {fileID: 7459978145617110380}
 --- !u!1 &5151105437606052625
 GameObject:
   m_ObjectHideFlags: 0
