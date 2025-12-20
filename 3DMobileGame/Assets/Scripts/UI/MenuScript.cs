@@ -1,3 +1,6 @@
+using Unity.Services.Friends;
+using Unity.Services.Friends.Models;
+using Unity.Services.Samples.Friends;
 using UnityEngine;
 
 public class MenuScript : MonoBehaviour
@@ -15,6 +18,14 @@ public class MenuScript : MonoBehaviour
         pauseMenuPanel.SetActive(false);
         optionsPanel.SetActive(false);
         Time.timeScale = 1f; // ensure game is running
+        SetMenuPresence();
+    }
+    async void SetMenuPresence()
+    {
+        await FriendsService.Instance.SetPresenceAsync(
+            Availability.Online,
+            new Activity { Status = "In Menu" }
+        );
     }
 
     // MAIN MENU

@@ -400,8 +400,30 @@ namespace Unity.Services.Samples.Friends
                     "An error occurred while performing the action. HttpCode: " + e.StatusCode + ", FriendsErrorCode: " + e.ErrorCode +  ", Message: " + e.Message);
             }
         }
+        public void RefreshLocalPlayerName()
+        {
+            var name = AuthenticationService.Instance.PlayerName;
 
-        [ContextMenu("DEBUG Add Fake Friend")]
+            m_LoggedPlayerProfile = new PlayerProfile(name, AuthenticationService.Instance.PlayerId);
+
+            m_LocalPlayerView.Refresh(name, "In Friends Menu", Availability.Online);
+        }
+        public async void SetGameActivity(string activity, Availability availability)
+        {
+            await FriendsService.Instance.SetPresenceAsync(
+                availability,
+                new Activity { Status = activity }
+            );
+
+            m_LocalPlayerView.Refresh(
+                m_LoggedPlayerProfile.Name,
+                activity,
+                availability
+            );
+        }
+
+
+        // DEBUG Add Fake Friend
         void DebugAddFakeFriend()
         {
             m_FriendsEntryDatas.Add(new FriendsEntryData

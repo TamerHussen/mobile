@@ -15,7 +15,7 @@ public class PlayerNames : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (cam != null) return;
+        if (cam == null) return;
 
         // face camera
         transform.rotation = Quaternion.LookRotation(transform.position - cam.position);

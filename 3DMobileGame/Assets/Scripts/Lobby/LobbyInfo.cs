@@ -3,6 +3,10 @@ using TMPro;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.VisualScripting;
+using Unity.Services.Authentication;
+using Unity.Services.Friends;
+using Unity.Services.Friends.Models;
+using Unity.Services.Samples.Friends;
 
 public class LobbyInfo : MonoBehaviour
 {
@@ -36,9 +40,10 @@ public class LobbyInfo : MonoBehaviour
         players.Clear();
 
         // Host
+        string playerName = AuthenticationService.Instance.PlayerName;
         players.Add(new LobbyPlayer
         {
-            PlayerID = "Host",
+            PlayerID = string.IsNullOrEmpty(playerName) ? "Player" : playerName,
             Cosmetic = "Default"
         });
     }
@@ -48,6 +53,15 @@ public class LobbyInfo : MonoBehaviour
         UpdateUI();
 
         ForceRespawn();
+        SetLobbyPresence();
+    }
+
+    async void SetLobbyPresence()
+    {
+        await FriendsService.Instance.SetPresenceAsync(
+            Availability.Online, 
+            new Activity { Status = "In Lobby" }
+        );
     }
 
     void UpdateUI()
@@ -66,11 +80,25 @@ public class LobbyInfo : MonoBehaviour
     public void SetSelectedCosmetic(string CosmeticName)
     {
         selectedCosmetic = CosmeticName;
+
+        if (players.Count == 0)
+        {
+            Debug.LogWarning("SetSelectedCosmetic called but no players exist yet.");
+            UpdateUI();
+            return;
+        }
+
         players[0].Cosmetic = CosmeticName;
 
         UpdatePreviewModel(CosmeticName);
         UpdateUI();
     }
+
+    bool HasHost()
+    {
+        return players != null && players.Count > 0;
+    }
+
 
     void UpdatePreviewModel(string Cosmetic)
     {
@@ -138,6 +166,15 @@ public class LobbyInfo : MonoBehaviour
     public void ForceRespawn()
     {
         LobbyPlayerSpawner.Instance?.SpawnPlayers();
+    }
+
+    public void UpdateHostName(string NewName)
+    {
+        if (players.Count == 0) return;
+
+        players[0].PlayerID = NewName;
+        ForceRespawn();
+        UpdateUI();
     }
 
     public List<LobbyPlayer> GetPlayers() => players;
