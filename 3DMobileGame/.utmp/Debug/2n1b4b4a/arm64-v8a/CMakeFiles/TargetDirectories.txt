@@ -1,0 +1,5 @@
+D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/2n1b4b4a/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/2n1b4b4a/arm64-v8a/CMakeFiles/rebuild_cache.dir
+D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/2n1b4b4a/arm64-v8a/GameActivity/CMakeFiles/game.dir
+D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/2n1b4b4a/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/2n1b4b4a/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

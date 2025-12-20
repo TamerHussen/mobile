@@ -38,6 +38,7 @@ namespace Unity.Services.Samples
                 return;
 
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
         }
     }
 }

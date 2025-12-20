@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Services.Friends.Models;
 using UnityEngine;
 
 namespace Unity.Services.Samples.Friends.UGUI
@@ -26,20 +27,27 @@ namespace Unity.Services.Samples.Friends.UGUI
             m_FriendEntries.ForEach(entry => Destroy(entry.gameObject));
             m_FriendEntries.Clear();
 
-            foreach (var friendsEntryData in m_FriendsEntryDatas)
+            foreach (var data in m_FriendsEntryDatas)
             {
                 var entry = Instantiate(m_FriendEntryViewPrefab, m_ParentTransform);
-                entry.Init(friendsEntryData.Name, friendsEntryData.Availability, friendsEntryData.Activity);
+                entry.Init(data.Name, data.Availability, data.Activity);
                 entry.removeFriendButton.onClick.AddListener(() =>
                 {
-                    onRemove?.Invoke(friendsEntryData.Id);
+                    onRemove?.Invoke(data.Id);
                     entry.gameObject.SetActive(false);
                 });
                 entry.blockFriendButton.onClick.AddListener(() =>
                 {
-                    onBlock?.Invoke(friendsEntryData.Id);
+                    onBlock?.Invoke(data.Id);
                     entry.gameObject.SetActive(false);
                 });
+                entry.inviteFriendButton.onClick.AddListener(() =>
+                {
+                    onInvite?.Invoke(data.Id);
+                });
+                entry.inviteFriendButton.interactable =
+                    data.Availability == Availability.Online;
+
                 m_FriendEntries.Add(entry);
             }
         }

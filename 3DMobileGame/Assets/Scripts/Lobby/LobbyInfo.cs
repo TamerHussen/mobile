@@ -117,7 +117,6 @@ public class LobbyInfo : MonoBehaviour
     }
 
     // fake invite
-
     public void DebugInviteFakeFriend()
     {
         if (LobbyInfo.Instance.IsLobbyFull()) return;

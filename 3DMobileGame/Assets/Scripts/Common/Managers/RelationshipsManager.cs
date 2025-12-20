@@ -35,7 +35,11 @@ namespace Unity.Services.Samples.Friends
         async void Start()
         {
             //If this is added to a larger project, the service init order should be controlled from one place, and replace this.
-            await UnityServiceAuthenticator.SignIn();
+#if UNITY_EDITOR
+            await UnityServiceAuthenticator.SignIn("EditorPlayer_" + Random.Range(1, 9999));
+#else
+    await UnityServiceAuthenticator.SignIn();
+#endif
             await Init();
         }
 

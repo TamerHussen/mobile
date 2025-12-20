@@ -13,6 +13,7 @@ namespace Unity.Services.Samples.Friends.UGUI
 
         public Button removeFriendButton = null;
         public Button blockFriendButton = null;
+        public Button inviteFriendButton = null;
 
         public void Init(string playerName, Availability presenceAvailabilityOptions, string activity)
         {
