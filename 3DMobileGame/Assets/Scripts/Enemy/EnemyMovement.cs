@@ -98,9 +98,9 @@ public class EnemyMovement : MonoBehaviour
         }
         else
         {
-    #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
             Handheld.Vibrate();
-    #endif
+#endif
         }
     }
 

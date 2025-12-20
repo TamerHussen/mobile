@@ -116,6 +116,14 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
     }
 
+    // fake invite
+
+    public void DebugInviteFakeFriend()
+    {
+        if (LobbyInfo.Instance.IsLobbyFull()) return;
+        LobbyInfo.Instance.AddTestPlayer("Friends_" + Random.Range(1, 999));
+    }
+
     public bool IsLobbyFull()
     {
         return players.Count >= MaxPlayers;
