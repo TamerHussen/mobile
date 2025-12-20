@@ -123,6 +123,13 @@ public class LobbyInfo : MonoBehaviour
         LobbyInfo.Instance.AddTestPlayer("Friends_" + Random.Range(1, 999));
     }
 
+    // host can kick players
+    public void KickPlayer(string playerID)
+    {
+        if (playerID == players[0].PlayerID) return;
+        RemoveTestPlayer(playerID);
+    }
+
     public bool IsLobbyFull()
     {
         return players.Count >= MaxPlayers;

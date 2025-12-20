@@ -14,6 +14,8 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
+            if (LobbyInfo.Instance.GetPlayers().Exists(p => p.PlayerID == friendID)) return;
+
             LobbyInfo.Instance.AddTestPlayer(friendID);
         }
     }

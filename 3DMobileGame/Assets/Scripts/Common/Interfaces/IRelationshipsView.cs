@@ -10,6 +10,12 @@ namespace Unity.Services.Samples.Friends
         IRequestListView RequestListView { get; }
         IBlockedListView BlockListView { get; }
 
-        void Init();
+        void Init()
+        {
+            FriendsListView.Hide();
+            RequestListView.Hide();
+            BlockListView.Hide();
+            AddFriendView.Hide();
+        }
     }
 }
