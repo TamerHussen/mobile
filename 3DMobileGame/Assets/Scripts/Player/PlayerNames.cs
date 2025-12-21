@@ -18,7 +18,7 @@ public class PlayerNames : MonoBehaviour
         if (cam == null) return;
 
         // face camera
-        transform.rotation = Quaternion.LookRotation(transform.position - cam.position);
+        transform.forward = cam.forward;
     }
 
     public void SetName(string PlayerName)

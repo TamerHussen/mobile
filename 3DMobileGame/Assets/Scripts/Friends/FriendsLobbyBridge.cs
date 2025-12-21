@@ -1,23 +1,34 @@
+using System.Collections.Generic;
+using Unity.Services.Friends;
+using Unity.Services.Friends.Models;
 using UnityEngine;
+
+[System.Serializable]
+public class LobbyActivity
+{
+    public string join_lobby;
+}
 
 namespace Unity.Services.Samples.Friends
 {
     public class FriendsLobbyBridge : MonoBehaviour
     {
-        public void InviteFriendToLobby(string friendID)
+        public async void InviteFriendToLobby(string friendID)
         {
-            if (LobbyInfo.Instance == null) return;
+            var lobby = UnityLobbyManager.Instance.CurrentLobby;
+            if (lobby == null) return;
 
-            if (LobbyInfo.Instance.IsLobbyFull())
+            var activityData = new LobbyActivity
             {
-                Debug.Log("lobby full");
-                return;
-            }
+                join_lobby = lobby.Id
+            };
 
-            if (LobbyInfo.Instance.GetPlayers().Exists(p => p.PlayerID == friendID)) return;
+            await FriendsService.Instance.SetPresenceAsync(
+                Availability.Online,
+                activityData
+            );
 
-            LobbyInfo.Instance.AddTestPlayer(friendID);
+            Debug.Log("Lobby advertised via presence.");
         }
     }
 }
-

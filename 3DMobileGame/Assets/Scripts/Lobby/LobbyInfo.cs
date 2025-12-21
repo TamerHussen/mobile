@@ -1,13 +1,14 @@
-using UnityEngine;
-using TMPro;
-using System.Collections.Generic;
 using NUnit.Framework;
-using Unity.VisualScripting;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
-using System.Threading.Tasks;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public class LobbyInfo : MonoBehaviour
 {
@@ -43,39 +44,15 @@ public class LobbyInfo : MonoBehaviour
         players.Clear();
     }
 
-    async void Start()
+    void Start()
     {
-        await WaitForAuthentication();
-
-        EnsureHostExists();
         UpdateUI();
         ForceRespawn();
         SetLobbyPresence();
     }
-    async Task WaitForAuthentication()
-    {
-        while (!ServicesBootstrapper.IsReady)
-            await Task.Yield();
-    }
-
-    void EnsureHostExists()
-    {
-        if (players.Count > 0) return;
-
-        string playerName = AuthenticationService.Instance.PlayerName;
-
-        players.Add(new LobbyPlayer
-        {
-            PlayerID = string.IsNullOrEmpty(playerName) ? "Player" : playerName,
-            Cosmetic = "Default"
-        });
-    }
 
     async void SetLobbyPresence()
     {
-        if (!ServicesBootstrapper.IsReady)
-            return;
-
         await FriendsService.Instance.SetPresenceAsync(
             Availability.Online,
             new Activity { Status = "In Lobby" }
@@ -130,52 +107,6 @@ public class LobbyInfo : MonoBehaviour
     public string GetSelectedLevel() => selectedLevel;
     public string GetSelectedCosmetic() => selectedCosmetic;
 
-    // test join friend
-    public void AddTestPlayer(string id)
-    {
-        if (players.Count >= MaxPlayers) return;
-
-        if (players.Exists(p => p.PlayerID == id)) return;
-
-        players.Add(new LobbyPlayer
-        {
-            PlayerID = id,
-            Cosmetic = "Default"
-        });
-
-        UpdateUI();
-
-        ForceRespawn();
-    }
-    // test leave friend
-    public void RemoveTestPlayer(string id)
-    {
-        if (id == "Host") return;
-
-        var playerToRemove = players.Find(p => p.PlayerID == id);
-        if (playerToRemove == null) return;
-
-        players.Remove(playerToRemove);
-
-
-        UpdateUI();
-        ForceRespawn();
-    }
-
-    // fake invite
-    public void DebugInviteFakeFriend()
-    {
-        if (LobbyInfo.Instance.IsLobbyFull()) return;
-        LobbyInfo.Instance.AddTestPlayer("Friends_" + Random.Range(1, 999));
-    }
-
-    // host can kick players
-    public void KickPlayer(string playerID)
-    {
-        if (playerID == players[0].PlayerID) return;
-        RemoveTestPlayer(playerID);
-    }
-
     public bool IsLobbyFull()
     {
         return players.Count >= MaxPlayers;
@@ -194,6 +125,29 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
         UpdateUI();
     }
+    public void SetPlayers(List<LobbyPlayer> newPlayers)
+    {
+        if (players.Count == newPlayers.Count &&
+            players.SequenceEqual(newPlayers, new LobbyPlayerComparer()))
+            return;
+
+        players = newPlayers;
+        UpdateUI();
+        ForceRespawn();
+    }
+    class LobbyPlayerComparer : IEqualityComparer<LobbyPlayer>
+    {
+        public bool Equals(LobbyPlayer a, LobbyPlayer b)
+        {
+            return a.PlayerID == b.PlayerID && a.Cosmetic == b.Cosmetic;
+        }
+
+        public int GetHashCode(LobbyPlayer obj)
+        {
+            return obj.PlayerID.GetHashCode();
+        }
+    }
+
 
     public List<LobbyPlayer> GetPlayers() => players;
 }
