@@ -7,6 +7,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
+using System.Threading.Tasks;
 
 public class LobbyInfo : MonoBehaviour
 {
@@ -34,13 +35,35 @@ public class LobbyInfo : MonoBehaviour
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
         Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         players.Clear();
+    }
 
-        // Host
+    async void Start()
+    {
+        await WaitForAuthentication();
+
+        EnsureHostExists();
+        UpdateUI();
+        ForceRespawn();
+        SetLobbyPresence();
+    }
+    async Task WaitForAuthentication()
+    {
+        while (!ServicesBootstrapper.IsReady)
+            await Task.Yield();
+    }
+
+    void EnsureHostExists()
+    {
+        if (players.Count > 0) return;
+
         string playerName = AuthenticationService.Instance.PlayerName;
+
         players.Add(new LobbyPlayer
         {
             PlayerID = string.IsNullOrEmpty(playerName) ? "Player" : playerName,
@@ -48,21 +71,17 @@ public class LobbyInfo : MonoBehaviour
         });
     }
 
-    void Start()
-    {
-        UpdateUI();
-
-        ForceRespawn();
-        SetLobbyPresence();
-    }
-
     async void SetLobbyPresence()
     {
+        if (!ServicesBootstrapper.IsReady)
+            return;
+
         await FriendsService.Instance.SetPresenceAsync(
-            Availability.Online, 
+            Availability.Online,
             new Activity { Status = "In Lobby" }
         );
     }
+
 
     void UpdateUI()
     {
@@ -81,10 +100,9 @@ public class LobbyInfo : MonoBehaviour
     {
         selectedCosmetic = CosmeticName;
 
-        if (players.Count == 0)
+        if (!HasHost())
         {
             Debug.LogWarning("SetSelectedCosmetic called but no players exist yet.");
-            UpdateUI();
             return;
         }
 

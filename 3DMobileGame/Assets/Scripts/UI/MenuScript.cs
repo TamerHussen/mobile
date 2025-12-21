@@ -2,6 +2,7 @@ using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MenuScript : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class MenuScript : MonoBehaviour
     // MAIN MENU
     public void OnStartButton()
     {
-        OpenPanel(levelSelectPanel, mainMenuPanel);
+        SceneManager.LoadScene("Lobby");
     }
 
     public void OnOptionsButton()
