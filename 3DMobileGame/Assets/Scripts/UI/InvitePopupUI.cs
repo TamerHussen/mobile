@@ -1,7 +1,8 @@
 using TMPro;
+using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Services.Lobbies;
 
 public class InvitePopupUI : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class InvitePopupUI : MonoBehaviour
     public TextMeshProUGUI statusText;
     public Button acceptButton;
     public Button declineButton;
+
+    public GameObject VisualPanel;
 
     private string currentJoinCode;
 
@@ -18,7 +21,7 @@ public class InvitePopupUI : MonoBehaviour
     {
         currentJoinCode = joinCode;
         statusText.text = $"Invite received to join Lobby!";
-        gameObject.SetActive(true);
+        VisualPanel.SetActive(true);
 
         acceptButton.onClick.RemoveAllListeners();
         acceptButton.onClick.AddListener(AcceptInvite);
@@ -31,14 +34,21 @@ public class InvitePopupUI : MonoBehaviour
     {
         try
         {
+            if (UnityLobbyManager.Instance.CurrentLobby != null)
+            {
+                await LobbyService.Instance.RemovePlayerAsync(
+                    UnityLobbyManager.Instance.CurrentLobby.Id,
+                    AuthenticationService.Instance.PlayerId);
+            }
+
             // Join the lobby using the code received from the friend
             await LobbyService.Instance.JoinLobbyByCodeAsync(currentJoinCode);
             Debug.Log("Joined lobby successfully!");
             gameObject.SetActive(false);
         }
-        catch (System.Exception e)
+        catch (LobbyServiceException e)
         {
-            Debug.LogError($"Failed to join lobby: {e.Message}");
+            Debug.LogError($"Failed to join lobby: {e.Reason} - {e.Message}");
         }
     }
 }

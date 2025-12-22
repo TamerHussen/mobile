@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Services.Authentication;
 using Unity.Services.Friends.Models;
 using UnityEngine;
 
@@ -25,7 +26,13 @@ namespace Unity.Services.Samples.Friends.UGUI
 
         public override void Refresh()
         {
-            m_FriendEntries.ForEach(entry => Destroy(entry.gameObject));
+            foreach (var entry in m_FriendEntries)
+            {
+                if (entry != null && entry.gameObject != null)
+                {
+                    Destroy(entry.gameObject);
+                }
+            }
             m_FriendEntries.Clear();
 
             var lobbyPlayers = LobbyInfo.Instance.GetPlayers();
@@ -37,22 +44,40 @@ namespace Unity.Services.Samples.Friends.UGUI
 
                 bool isInLobby = lobbyPlayers.Exists(p => p.PlayerID == data.Id);
 
-                entry.inviteFriendButton.interactable =
-                    data.Availability == Availability.Online && !isInLobby;
-
-                if (entry.kickPlayerButton != null)
-                {
-
-                    entry.kickPlayerButton.gameObject.SetActive(isInLobby);
-                    entry.kickPlayerButton.interactable = isInLobby;
-                }
-
                 entry.onInvite = (id) => onInvite?.Invoke(id);
                 entry.onKick = (id) => onKick?.Invoke(id);
+
+                entry.removeFriendButton.onClick.AddListener(() =>
+                {
+                    onRemove?.Invoke(data.Id);
+                    entry.gameObject.SetActive(false);
+                });
+                entry.blockFriendButton.onClick.AddListener(() =>
+                {
+                    onBlock?.Invoke(data.Id);
+                    entry.gameObject.SetActive(false);
+                });
+
+                if (isInLobby)
+                {
+                    entry.inviteFriendButton.gameObject.SetActive(false);
+                    entry.kickPlayerButton.gameObject.SetActive(true);
+
+                    // only host can kick
+                    entry.kickPlayerButton.interactable = UnityLobbyManager.Instance.CurrentLobby?.HostId == AuthenticationService.Instance.PlayerId;
+
+                }
+                else
+                {
+                    entry.inviteFriendButton.gameObject.SetActive(true);
+                    entry.kickPlayerButton.gameObject.SetActive(false);
+
+                    entry.inviteFriendButton.interactable = data.Availability == Availability.Online;
+
+                }
 
                 m_FriendEntries.Add(entry);
             }
         }
-
     }
 }

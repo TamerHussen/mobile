@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 public class PlayerNames : MonoBehaviour
@@ -24,5 +25,17 @@ public class PlayerNames : MonoBehaviour
     public void SetName(string PlayerName)
     {
         NameText.text = PlayerName;
+    }
+
+    public void UpdatePlayerUI(Player player)
+    {
+        if (player.Data.TryGetValue("DisplayName", out var nameData))
+        {
+            SetName(nameData.Value);
+        }
+        else
+        {
+            SetName("Unknown Player");
+        }
     }
 }

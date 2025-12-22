@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Samples.Friends.UGUI;
 using UnityEngine;
 
 public class UnityLobbyManager : MonoBehaviour
@@ -140,6 +142,28 @@ public class UnityLobbyManager : MonoBehaviour
     {
         CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
         SyncLobbyToLocal();
+        LobbyInfo.Instance.SubscribeToLobby(lobbyId);
+
+        Debug.Log("Successfully joined host's lobby.");
+    }
+
+    public async Task JoinLobbyByCode(string code)
+    {
+        var playerName = AuthenticationService.Instance.PlayerName;
+        var options = new JoinLobbyByCodeOptions
+        {
+            Player = new Player
+            {
+                Data = new Dictionary<string, PlayerDataObject> {
+                { "Name", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
+            }
+            }
+        };
+        CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(code, options);
+
+        pollTimer = 0;
+        SyncLobbyToLocal();
+        Debug.Log($"Joined Lobby: {CurrentLobby.Id}. Total Players: {CurrentLobby.Players.Count}");
     }
 
     // lobby sync
@@ -152,22 +176,20 @@ public class UnityLobbyManager : MonoBehaviour
 
         foreach (var p in CurrentLobby.Players)
         {
-            string name = p.Data != null && p.Data.ContainsKey("Name")
+            string displayName = (p.Data != null && p.Data.ContainsKey("Name"))
                 ? p.Data["Name"].Value
-                : "Player";
-
-            string cosmetic = p.Data != null && p.Data.ContainsKey("Cosmetic")
-                ? p.Data["Cosmetic"].Value
-                : "Default";
+                : p.Id;
 
             lobbyPlayers.Add(new LobbyPlayer
             {
-                PlayerID = name,
-                Cosmetic = cosmetic
+                PlayerID = p.Id,
+                PlayerName = displayName,
+                Cosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic")) ? p.Data["Cosmetic"].Value : "Default"
             });
         }
 
-        LobbyInfo.Instance.SetPlayers(lobbyPlayers);
+        LobbyInfo.Instance?.SetPlayers(lobbyPlayers);
+        FindFirstObjectByType<FriendsViewUGUI>()?.Refresh();
     }
 
     // Make lobby
@@ -185,20 +207,19 @@ public class UnityLobbyManager : MonoBehaviour
     {
         if (CurrentLobby == null) return;
 
-        bool isHost = IsHost();
-        var lobbyId = CurrentLobby.Id;
 
-        await LobbyService.Instance.RemovePlayerAsync(
-            lobbyId,
-            AuthenticationService.Instance.PlayerId
-        );
-
-        CurrentLobby = null;
-
-        if (!isHost)
+        try
         {
-            await EnsurePersonalLobby();
+            string lobbyId = CurrentLobby.Id;
+            CurrentLobby = null; 
+
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, AuthenticationService.Instance.PlayerId);
+            Debug.Log("Left lobby.");
         }
+        catch (Exception e) { Debug.LogError(e.Message); }
+
+        await EnsurePersonalLobby();
+
     }
 
 }

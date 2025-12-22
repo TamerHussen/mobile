@@ -8,6 +8,7 @@ using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
 using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -29,6 +30,9 @@ public class LobbyInfo : MonoBehaviour
 
     private string selectedLevel = "None";
     private string selectedCosmetic = "None";
+
+    private ILobbyEvents m_LobbyEvents;
+    private Lobby currentLobby;
 
     private List<LobbyPlayer> players = new List<LobbyPlayer>();
 
@@ -179,8 +183,46 @@ public class LobbyInfo : MonoBehaviour
                 break;
             }
         }
+        ForceRespawn();
     }
 
+    public async void RefreshLobbyData()
+    {
+        try
+        {
+            currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
+
+            List<LobbyPlayer> updatedList = new List<LobbyPlayer>();
+            foreach (var p in currentLobby.Players)
+            {
+                updatedList.Add(new LobbyPlayer { PlayerID = p.Id });
+            }
+
+            SetPlayers(updatedList);
+        }
+        catch (LobbyServiceException e) { Debug.LogError(e); }
+    }
+
+    public async void SubscribeToLobby(string lobbyId)
+    {
+        var callbacks = new LobbyEventCallbacks();
+        callbacks.LobbyChanged += OnLobbyChanged;
+        callbacks.PlayerJoined += (joinedPlayers) => RefreshLobbyData();
+        callbacks.PlayerLeft += (leftPlayers) => RefreshLobbyData();
+
+        try
+        {
+            m_LobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyId, callbacks);
+        }
+        catch (LobbyServiceException ex) { Debug.LogWarning(ex.Message); }
+    }
+
+    private void OnLobbyChanged(ILobbyChanges changes)
+    {
+        if (currentLobby == null) return;
+        changes.ApplyToLobby(currentLobby);
+        RefreshLobbyData();
+    }
 
     public List<LobbyPlayer> GetPlayers() => players;
 }

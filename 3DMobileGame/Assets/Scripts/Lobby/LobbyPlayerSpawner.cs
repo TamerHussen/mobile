@@ -1,6 +1,8 @@
-using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
+using UnityEngine;
 
 public class LobbyPlayerSpawner : MonoBehaviour
 {
@@ -32,19 +34,22 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            GameObject player = Instantiate(
-                playerPrefab,
-                SpawnPoints[i].position,
-                SpawnPoints[i].rotation
-                );
+            GameObject player = Instantiate(playerPrefab, SpawnPoints[i].position, SpawnPoints[i].rotation);
 
-            // add cosmetic
             player.GetComponent<PlayerCosmetic>().Apply(players[i].Cosmetic);
 
-            // add nametag
-            player.GetComponentInChildren<PlayerNames>().SetName(players[i].PlayerID);
+            PlayerNames nameTag = player.GetComponentInChildren<PlayerNames>();
+            if (nameTag != null)
+            {
+
+                string displayName = players[i].PlayerID;
+
+                nameTag.SetName(players[i].PlayerName);
+            }
 
             SpawnedPlayers.Add(player);
         }
+
+
     }
 }
