@@ -78,7 +78,7 @@ public class UnityLobbyManager : MonoBehaviour
     }
 
     // HOST Migration
-    async Task HandleHostMigration()
+    void HandleHostMigration()
     {
         if (CurrentLobby == null)
             return;

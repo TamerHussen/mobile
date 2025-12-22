@@ -7,22 +7,32 @@ using UnityEngine.SceneManagement;
 
 public class LobbyPresenceListener : MonoBehaviour
 {
+    private bool isInitialized= false;
+
     void Awake()
     {
-        FriendsService.Instance.PresenceUpdated += OnPresenceUpdated;
-    }
 
+    }
+    public void Initialize()
+    {
+        if (isInitialized) return;
+
+        FriendsService.Instance.PresenceUpdated += OnPresenceUpdated;
+        isInitialized = true;
+        Debug.Log("LobbyPresenceListener initialized.");
+    }
     async void OnPresenceUpdated(IPresenceUpdatedEvent e)
     {
         var presence = e.Presence;
         if (presence == null)
             return;
 
-        var activity = presence.GetActivity<LobbyActivity>();
-        if (activity == null || string.IsNullOrEmpty(activity.join_lobby))
+        var activity = presence.GetActivity<Activity>();
+        if (activity == null || activity.Properties == null)
             return;
 
-        string lobbyId = activity.join_lobby;
+        if (!activity.Properties.TryGetValue("join_lobby", out var lobbyId))
+            return;
 
         Debug.Log("Auto-joining friend's lobby: " + lobbyId);
 
@@ -32,7 +42,7 @@ public class LobbyPresenceListener : MonoBehaviour
 
     void OnDestroy()
     {
-        if (FriendsService.Instance != null)
+        if (isInitialized && FriendsService.Instance != null)
             FriendsService.Instance.PresenceUpdated -= OnPresenceUpdated;
     }
 }

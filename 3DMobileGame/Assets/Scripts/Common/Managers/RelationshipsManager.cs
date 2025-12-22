@@ -50,6 +50,12 @@ namespace Unity.Services.Samples.Friends
             RegisterFriendsEventCallbacks(); 
             
             await FriendsService.Instance.InitializeAsync();
+
+            RegisterMessageReceived();
+
+            var presenceListener = FindFirstObjectByType<LobbyPresenceListener>();
+            presenceListener?.Initialize();
+
             UIInit();
             await LogInAsync();
             RefreshAll();
@@ -93,13 +99,28 @@ namespace Unity.Services.Samples.Friends
             m_BlockListView.onUnblock += UnblockFriendAsync;
             m_LocalPlayerView.onPresenceChanged += SetPresenceAsync;
 
-            if(m_FriendsListView is IFriendsListView inviteView)
+            if (m_FriendsListView != null)
             {
-                inviteView.onInvite += ID =>
+                m_FriendsListView.onInvite += (friendId) =>
                 {
-                    FindFirstObjectByType<FriendsLobbyBridge>()?.InviteFriendToLobby(ID);
+                    Debug.Log($"Invite button clicked for friend: {friendId}");
+
+                    var bridge = FindFirstObjectByType<FriendsLobbyBridge>();
+                    if (bridge != null)
+                    {
+                        bridge.InviteFriendToLobby(friendId);
+                    }
+                    else
+                    {
+                        Debug.LogError("FriendsLobbyBridge not found in scene! Invite cannot be sent.");
+                    }
                 };
             }
+
+            m_FriendsListView.onKick += (targetId) =>
+            {
+                LobbyInfo.Instance.KickPlayer(targetId);
+            };
 
         }
 
@@ -117,7 +138,25 @@ namespace Unity.Services.Samples.Friends
             RefreshAll();
             Debug.Log($"Logged in as {m_LoggedPlayerProfile}");
         }
+        [System.Serializable]
+        public class InviteMessage
+        {
+            public string LobbyCode;
+        }
+        void RegisterMessageReceived()
+        {
+            FriendsService.Instance.MessageReceived += OnInviteReceived;
+        }
+        private void OnInviteReceived(IMessageReceivedEvent args)
+        {
+            var data = args.GetAs<InviteMessage>();
+            string joinCode = data.LobbyCode;
+            string senderId = args.UserId;
 
+            Debug.Log($"Received lobby invite {joinCode} from {senderId}");
+            InvitePopupUI.Instance?.Show(senderId, joinCode);
+
+        }
         void RefreshAll()
         {
             RefreshFriends();
@@ -179,7 +218,7 @@ namespace Unity.Services.Samples.Friends
             }
         }
 
-        void RefreshFriends()
+        public void RefreshFriends()
         {
             m_FriendsEntryDatas.Clear();
 
@@ -436,7 +475,6 @@ namespace Unity.Services.Samples.Friends
 
             m_RelationshipsView.RelationshipBarView.Refresh();
         }
-
 
         /// <summary>
         /// Returns a list of members that are not blocked by the active user.

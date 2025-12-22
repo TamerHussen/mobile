@@ -7,6 +7,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
+using Unity.Services.Lobbies;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -58,7 +59,6 @@ public class LobbyInfo : MonoBehaviour
             new Activity { Status = "In Lobby" }
         );
     }
-
 
     void UpdateUI()
     {
@@ -125,6 +125,28 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
         UpdateUI();
     }
+
+    public async void KickPlayer(string targetPlayerId)
+    {
+        try
+        {
+            // Get the current lobby ID (assuming it is stored in UnityLobbyManager)
+            string lobbyId = UnityLobbyManager.Instance.CurrentLobby.Id;
+
+            // The host uses this API to remove someone else
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, targetPlayerId);
+
+            Debug.Log($"Successfully kicked player: {targetPlayerId}");
+
+            // Refresh local UI
+            ForceRespawn();
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"Failed to kick player: {e.Message}");
+        }
+    }
+
     public void SetPlayers(List<LobbyPlayer> newPlayers)
     {
         if (players.Count == newPlayers.Count &&
@@ -145,6 +167,17 @@ public class LobbyInfo : MonoBehaviour
         public int GetHashCode(LobbyPlayer obj)
         {
             return obj.PlayerID.GetHashCode();
+        }
+    }
+    public void UpdatePlayerName(string playerId, string newName)
+    {
+        foreach (var p in players)
+        {
+            if (p.PlayerID == playerId)
+            {
+                p.PlayerID = newName;
+                break;
+            }
         }
     }
 

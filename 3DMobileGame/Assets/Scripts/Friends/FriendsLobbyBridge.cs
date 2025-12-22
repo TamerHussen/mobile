@@ -3,32 +3,38 @@ using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
 using UnityEngine;
 
-[System.Serializable]
-public class LobbyActivity
-{
-    public string join_lobby;
-}
-
 namespace Unity.Services.Samples.Friends
 {
     public class FriendsLobbyBridge : MonoBehaviour
     {
-        public async void InviteFriendToLobby(string friendID)
+        [System.Serializable]
+        public class InviteMessage
         {
-            var lobby = UnityLobbyManager.Instance.CurrentLobby;
-            if (lobby == null) return;
+            public string LobbyCode;
+        }
 
-            var activityData = new LobbyActivity
+        public async void InviteFriendToLobby(string targetId)
+        {
+            try
             {
-                join_lobby = lobby.Id
-            };
+                string code = UnityLobbyManager.Instance.CurrentLobby?.LobbyCode;
 
-            await FriendsService.Instance.SetPresenceAsync(
-                Availability.Online,
-                activityData
-            );
+                if (string.IsNullOrEmpty(code))
+                {
+                    Debug.LogWarning("Cannot invite: No active lobby or join code");
+                    return;
+                }
 
-            Debug.Log("Lobby advertised via presence.");
+                var invite = new InviteMessage { LobbyCode = code };
+
+                await FriendsService.Instance.MessageAsync(targetId, invite);
+
+                Debug.Log($"Invite sent to {targetId} with code {code}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Invite failed: {e.Message}");
+            }
         }
     }
 }

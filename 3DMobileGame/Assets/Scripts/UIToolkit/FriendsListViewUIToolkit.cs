@@ -10,6 +10,7 @@ namespace Unity.Services.Samples.Friends.UIToolkit
         public Action<string> onRemove { get; set; }
         public Action<string> onBlock { get; set; }
         public Action<string> onInvite { get; set; }
+        public Action<string> onKick { get; set; }
 
         const string k_FriendsListViewName = "friends-list";
 

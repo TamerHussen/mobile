@@ -1,3 +1,4 @@
+using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using GooglePlayGames.BasicApi.SavedGame;
 using System.Text;
@@ -7,26 +8,43 @@ public class SaveToCloudManager : MonoBehaviour
 {
     public void SaveToCloud()
     {
-        var savedGameClient = GooglePlayGames.PlayGamesPlatform.Instance.SavedGame;
-        savedGameClient.OpenWithAutomaticConflictResolution("savefile",
+        // Verify user is authenticated before attempting cloud save
+        if (!PlayGamesPlatform.Instance.IsAuthenticated())
+        {
+            Debug.LogWarning("Cannot save to cloud: User not authenticated.");
+            return;
+        }
+
+        var savedGameClient = PlayGamesPlatform.Instance.SavedGame;
+
+        savedGameClient.OpenWithAutomaticConflictResolution(
+            "savefile_01", // Unique filename
             DataSource.ReadCacheOrNetwork,
             ConflictResolutionStrategy.UseLongestPlaytime,
-            (status, game) =>
+            OnSavedGameOpened);
+    }
+
+    private void OnSavedGameOpened(SavedGameRequestStatus status, ISavedGameMetadata game)
+    {
+        if (status == SavedGameRequestStatus.Success)
+        {
+            // Serialize local data
+            string json = JsonUtility.ToJson(SaveManager.Instance.data);
+            byte[] data = Encoding.UTF8.GetBytes(json);
+
+            // Update metadata (optional description)
+            SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                .WithUpdatedDescription("Saved at " + System.DateTime.Now.ToString())
+                .Build();
+
+            PlayGamesPlatform.Instance.SavedGame.CommitUpdate(game, update, data, (commitStatus, _) =>
             {
-                if (status == SavedGameRequestStatus.Success)
-                {
-                    string json = JsonUtility.ToJson(SaveManager.Instance.data);
-                    byte[] data = Encoding.UTF8.GetBytes(json);
-                    SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder().Build();
-                    savedGameClient.CommitUpdate(game, update, data, (commitStatus, _) =>
-                    {
-                        Debug.Log("Saved to Cloud: " + (commitStatus == SavedGameRequestStatus.Success));
-                    });
-                }
-                else
-                {
-                    Debug.LogWarning("Failed to open saved game for cloud save.");
-                }
+                Debug.Log("Cloud Save Status: " + commitStatus);
             });
+        }
+        else
+        {
+            Debug.LogError("Failed to open cloud save: " + status);
+        }
     }
 }

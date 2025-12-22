@@ -55,8 +55,12 @@ public class UsernameChanger : MonoBehaviour
 
             var relationships = FindFirstObjectByType<RelationshipsManager>();
             relationships?.RefreshLocalPlayerName();
+            relationships?.RefreshFriends();
 
             LobbyInfo.Instance?.UpdateHostName(name);
+            LobbyInfo.Instance?.UpdatePlayerName(AuthenticationService.Instance.PlayerId, name);
+
+            LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
             feedbackText.text = "Name changed!";
             Debug.Log("Username changed to " + name);

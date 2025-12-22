@@ -23,7 +23,7 @@ public class LeaveLobbyButton : MonoBehaviour
         }
 
         await lobbyManager.LeaveLobby();
-        SceneManager.LoadScene("Lobby");
+        SceneManager.LoadScene(LobbySceneName);
     }
 
 

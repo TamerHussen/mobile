@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine.Scripting;
 
@@ -16,5 +17,9 @@ namespace Unity.Services.Samples.Friends
         [Preserve]
         [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
         public string Status { get; set; }
+
+        [Preserve]
+        [DataMember(Name = "properties", EmitDefaultValue = true)]
+        public Dictionary<string, string> Properties { get; set; }
     }
 }
