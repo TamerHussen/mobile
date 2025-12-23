@@ -141,6 +141,7 @@ public class UnityLobbyManager : MonoBehaviour
     public async Task JoinLobbyById(string lobbyId)
     {
         CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
+        pollTimer = 0;
         SyncLobbyToLocal();
         LobbyInfo.Instance.SubscribeToLobby(lobbyId);
 
@@ -189,6 +190,7 @@ public class UnityLobbyManager : MonoBehaviour
         }
 
         LobbyInfo.Instance?.SetPlayers(lobbyPlayers);
+        LobbyInfo.Instance.SetCurrentLobby(CurrentLobby);
         FindFirstObjectByType<FriendsViewUGUI>()?.Refresh();
     }
 
@@ -200,6 +202,8 @@ public class UnityLobbyManager : MonoBehaviour
 
         Debug.Log("Creating personal lobby...");
         await CreateLobby(3);
+        LobbyInfo.Instance.SubscribeToLobby(CurrentLobby.Id);
+        SyncLobbyToLocal();
     }
 
     // LEAVE lobby
@@ -207,19 +211,20 @@ public class UnityLobbyManager : MonoBehaviour
     {
         if (CurrentLobby == null) return;
 
+        string lobbyId= CurrentLobby.Id;
 
         try
         {
-            string lobbyId = CurrentLobby.Id;
-            CurrentLobby = null; 
-
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, AuthenticationService.Instance.PlayerId);
             Debug.Log("Left lobby.");
         }
-        catch (Exception e) { Debug.LogError(e.Message); }
+        catch
+        {
 
-        await EnsurePersonalLobby();
+        }
 
+        // make personal lobby for player before leaving
+        CurrentLobby = null;
     }
 
 }

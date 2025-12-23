@@ -9,8 +9,9 @@ using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public class LobbyInfo : MonoBehaviour
 {
@@ -51,9 +52,45 @@ public class LobbyInfo : MonoBehaviour
 
     void Start()
     {
+        SetLobbyPresence();
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Lobby")
+        {
+            RebindLobbyScene();
+        }
+    }
+
+    void RebindLobbyScene()
+    {
+        selectedLevelText = GameObject.Find("SelectedLevelText")
+            ?.GetComponent<TextMeshProUGUI>();
+
+        selectedCosmeticText = GameObject.Find("SelectedCosmeticText")
+            ?.GetComponent<TextMeshProUGUI>();
+
+        playerCountText = GameObject.Find("PlayerCountText")
+            ?.GetComponent<TextMeshProUGUI>();
+
+        var preview = GameObject.Find("PreviewSpawnPoint");
+        if (preview != null)
+            previewSpawnPoint = preview.transform;
+
         UpdateUI();
         ForceRespawn();
-        SetLobbyPresence();
     }
 
     async void SetLobbyPresence()
@@ -93,11 +130,26 @@ public class LobbyInfo : MonoBehaviour
         UpdateUI();
     }
 
+    public void SetCurrentLobby(Lobby lobby)
+    {
+        currentLobby = lobby;
+    }
+
+    public void SetPlayers(List<LobbyPlayer> newPlayers)
+    {
+        if (players.Count == newPlayers.Count &&
+            players.SequenceEqual(newPlayers, new LobbyPlayerComparer()))
+            return;
+
+        players = newPlayers;
+        UpdateUI();
+        ForceRespawn();
+    }
+
     bool HasHost()
     {
         return players != null && players.Count > 0;
     }
-
 
     void UpdatePreviewModel(string Cosmetic)
     {
@@ -125,7 +177,7 @@ public class LobbyInfo : MonoBehaviour
     {
         if (players.Count == 0) return;
 
-        players[0].PlayerID = NewName;
+        players[0].PlayerName = NewName;
         ForceRespawn();
         UpdateUI();
     }
@@ -150,17 +202,6 @@ public class LobbyInfo : MonoBehaviour
             Debug.LogError($"Failed to kick player: {e.Message}");
         }
     }
-
-    public void SetPlayers(List<LobbyPlayer> newPlayers)
-    {
-        if (players.Count == newPlayers.Count &&
-            players.SequenceEqual(newPlayers, new LobbyPlayerComparer()))
-            return;
-
-        players = newPlayers;
-        UpdateUI();
-        ForceRespawn();
-    }
     class LobbyPlayerComparer : IEqualityComparer<LobbyPlayer>
     {
         public bool Equals(LobbyPlayer a, LobbyPlayer b)
@@ -179,7 +220,7 @@ public class LobbyInfo : MonoBehaviour
         {
             if (p.PlayerID == playerId)
             {
-                p.PlayerID = newName;
+                p.PlayerName = newName;
                 break;
             }
         }
@@ -195,7 +236,12 @@ public class LobbyInfo : MonoBehaviour
             List<LobbyPlayer> updatedList = new List<LobbyPlayer>();
             foreach (var p in currentLobby.Players)
             {
-                updatedList.Add(new LobbyPlayer { PlayerID = p.Id });
+                updatedList.Add(new LobbyPlayer
+                {
+                    PlayerID = p.Id,
+                    PlayerName = p.Data["Name"].Value,
+                    Cosmetic = p.Data["Cosmetic"].Value
+                });
             }
 
             SetPlayers(updatedList);
@@ -205,6 +251,11 @@ public class LobbyInfo : MonoBehaviour
 
     public async void SubscribeToLobby(string lobbyId)
     {
+        if (UnityLobbyManager.Instance.CurrentLobby != null)
+        {
+            currentLobby = UnityLobbyManager.Instance.CurrentLobby;
+        }
+
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
         callbacks.PlayerJoined += (joinedPlayers) => RefreshLobbyData();

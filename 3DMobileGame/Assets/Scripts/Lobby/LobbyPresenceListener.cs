@@ -37,6 +37,7 @@ public class LobbyPresenceListener : MonoBehaviour
         Debug.Log("Auto-joining friend's lobby: " + lobbyId);
 
         await UnityLobbyManager.Instance.JoinLobbyById(lobbyId);
+        LobbyInfo.Instance.SubscribeToLobby(lobbyId);
         SceneManager.LoadScene("Lobby");
     }
 

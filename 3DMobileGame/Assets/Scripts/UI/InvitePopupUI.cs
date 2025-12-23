@@ -1,7 +1,10 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class InvitePopupUI : MonoBehaviour
@@ -34,21 +37,24 @@ public class InvitePopupUI : MonoBehaviour
     {
         try
         {
+            LobbyInfo.Instance.SetPlayers(new List<LobbyPlayer>());
+
             if (UnityLobbyManager.Instance.CurrentLobby != null)
             {
-                await LobbyService.Instance.RemovePlayerAsync(
-                    UnityLobbyManager.Instance.CurrentLobby.Id,
-                    AuthenticationService.Instance.PlayerId);
+                await UnityLobbyManager.Instance.LeaveLobby();
             }
 
-            // Join the lobby using the code received from the friend
-            await LobbyService.Instance.JoinLobbyByCodeAsync(currentJoinCode);
+            await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
+            LobbyInfo.Instance.SubscribeToLobby(UnityLobbyManager.Instance.CurrentLobby.Id);
+            UnityLobbyManager.Instance.SyncLobbyToLocal();
+
+            SceneManager.LoadScene("Lobby");
             Debug.Log("Joined lobby successfully!");
             gameObject.SetActive(false);
         }
         catch (LobbyServiceException e)
         {
-            Debug.LogError($"Failed to join lobby: {e.Reason} - {e.Message}");
+            Debug.LogError($"Failed to join lobby: {e.Message}");
         }
     }
 }

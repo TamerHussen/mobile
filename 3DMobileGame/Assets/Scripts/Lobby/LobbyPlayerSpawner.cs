@@ -17,11 +17,6 @@ public class LobbyPlayerSpawner : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
-    {
-        LobbyInfo.Instance?.ForceRespawn();
-    }
-
     public void SpawnPlayers()
     {
         foreach (var p in SpawnedPlayers) Destroy(p);
@@ -41,9 +36,6 @@ public class LobbyPlayerSpawner : MonoBehaviour
             PlayerNames nameTag = player.GetComponentInChildren<PlayerNames>();
             if (nameTag != null)
             {
-
-                string displayName = players[i].PlayerID;
-
                 nameTag.SetName(players[i].PlayerName);
             }
 
