@@ -8,6 +8,7 @@ public class PlayerView : MonoBehaviour
 
     public void Bind(LobbyPlayer data)
     {
+        if (data == null) return;
         if (nameTag != null) nameTag.SetName(data.PlayerName);
         if (cosmetic  != null) cosmetic.Apply(data.Cosmetic);
     }

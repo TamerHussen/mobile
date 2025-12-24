@@ -144,6 +144,7 @@ public class LobbyInfo : MonoBehaviour
 
         if (UnityLobbyManager.Instance != null && UnityLobbyManager.Instance.CurrentLobby != null)
         {
+            if(!isFullyJoined) return;
             await UnityLobbyManager.Instance.UpdatePlayerDataAsync(
                 SaveManager.Instance.data.playerName,
                 selectedCosmetic
@@ -167,6 +168,7 @@ public class LobbyInfo : MonoBehaviour
 
         if (UnityLobbyManager.Instance != null && UnityLobbyManager.Instance.CurrentLobby != null)
         {
+            if (!isFullyJoined) return;
             await UnityLobbyManager.Instance.UpdatePlayerDataAsync(
                 SaveManager.Instance.data.playerName,
                 CosmeticName

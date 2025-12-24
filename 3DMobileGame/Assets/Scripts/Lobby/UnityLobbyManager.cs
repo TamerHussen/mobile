@@ -173,7 +173,7 @@ public class UnityLobbyManager : MonoBehaviour
         LobbyInfo.Instance.SubscribeToLobby(CurrentLobby.Id);
         SyncLobbyToLocal();
 
-        // delay save sync until lobby is stable
+        LobbyInfo.Instance.MarkFullyJoined();
         _ = DelayedSyncAfterJoin();
     }
 
@@ -186,7 +186,7 @@ public class UnityLobbyManager : MonoBehaviour
 
     private Player GetLocalPlayerData()
     {
-        string playerName = "Unknown Player";
+        string playerName = name;
         string cosmetic = "Default";
 
         // Use saved player data if available
@@ -228,8 +228,8 @@ public class UnityLobbyManager : MonoBehaviour
         {
             Data = new Dictionary<string, PlayerDataObject>
             {
-                { "Name", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, name) },
-                { "Cosmetic", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, cosmetic) }
+                { "Name", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, finalName) },
+                { "Cosmetic", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, finalCosmetic) }
             }
         };
 
@@ -355,7 +355,7 @@ public class UnityLobbyManager : MonoBehaviour
         LobbyInfo.Instance?.ClearLocalLobby();
         SceneManager.LoadScene("Lobby");
 
-        if (!!willJoinAnother)
+        if (!willJoinAnother)
         {
             await EnsurePersonalLobby();
             isJoining = false;

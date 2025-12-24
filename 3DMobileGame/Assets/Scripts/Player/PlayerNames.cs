@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerNames : MonoBehaviour
 {
-    public TextMeshPro NameText;
+    [SerializeField] public TextMeshPro m_NameText = null;
     public Vector3 offset = new Vector3(0, 2, 0);
 
     Transform cam;
@@ -22,9 +22,9 @@ public class PlayerNames : MonoBehaviour
         transform.forward = cam.forward;
     }
 
-    public void SetName(string PlayerName)
+    public void SetName(string playerName)
     {
-        NameText.text = PlayerName;
+        m_NameText.text = playerName;
     }
 
     public void UpdatePlayerUI(Player player)
