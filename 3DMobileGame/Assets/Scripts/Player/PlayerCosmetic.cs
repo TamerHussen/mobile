@@ -1,19 +1,28 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerCosmetic : MonoBehaviour
 {
-    public Renderer BodyRenderer;
-    public Material[] CosmeticMaterial;
+    public List<GameObject> CosmeticModels;
 
     public void Apply(string CosmeticName)
     {
-        foreach (var mat in CosmeticMaterial)
+        bool found = false;
+
+        foreach (var model in CosmeticModels)
         {
-            if (mat.name == CosmeticName)
-            {
-                BodyRenderer.material = mat;
-                return;
-            }
+            if (model == null) continue;
+
+            // Enable the model if the name matches, disable otherwise
+            bool isMatch = model.name == CosmeticName;
+            model.SetActive(isMatch);
+
+            if (isMatch) found = true;
+        }
+
+        if (!found)
+        {
+            Debug.LogWarning($"Cosmetic '{CosmeticName}' not found in CosmeticModels list!");
         }
     }
 }

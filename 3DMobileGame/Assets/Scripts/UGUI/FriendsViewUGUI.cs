@@ -35,7 +35,7 @@ namespace Unity.Services.Samples.Friends.UGUI
             }
             m_FriendEntries.Clear();
 
-            var lobbyPlayers = LobbyInfo.Instance.GetPlayers();
+            var lobbyPlayers = LobbyInfo.Instance?.GetPlayers() ?? new List<LobbyPlayer>();
 
             foreach (var data in m_FriendsEntryDatas)
             {

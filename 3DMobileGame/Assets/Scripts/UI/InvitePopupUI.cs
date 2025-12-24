@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
@@ -18,8 +19,17 @@ public class InvitePopupUI : MonoBehaviour
 
     private string currentJoinCode;
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
     public void Show(string senderId, string joinCode)
     {
         currentJoinCode = joinCode;
@@ -37,20 +47,25 @@ public class InvitePopupUI : MonoBehaviour
     {
         try
         {
-            LobbyInfo.Instance.SetPlayers(new List<LobbyPlayer>());
-
             if (UnityLobbyManager.Instance.CurrentLobby != null)
             {
-                await UnityLobbyManager.Instance.LeaveLobby();
+                await LobbyService.Instance.RemovePlayerAsync(
+                    UnityLobbyManager.Instance.CurrentLobby.Id,
+                    AuthenticationService.Instance.PlayerId);
+
+                UnityLobbyManager.Instance.CurrentLobby = null;
+                LobbyInfo.Instance?.ClearLocalLobby();
             }
 
             await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
+
+            await Task.Delay(500);
+
             LobbyInfo.Instance.SubscribeToLobby(UnityLobbyManager.Instance.CurrentLobby.Id);
-            UnityLobbyManager.Instance.SyncLobbyToLocal();
 
             SceneManager.LoadScene("Lobby");
             Debug.Log("Joined lobby successfully!");
-            gameObject.SetActive(false);
+            VisualPanel.SetActive(false);
         }
         catch (LobbyServiceException e)
         {

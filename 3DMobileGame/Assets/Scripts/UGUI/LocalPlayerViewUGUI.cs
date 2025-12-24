@@ -53,5 +53,20 @@ namespace Unity.Services.Samples.Friends.UGUI
 
             m_Activity.text = activity;
         }
+
+
+        public async void OnPlayerSettingsChanged(string newName, string newCosmetic)
+        {
+            SaveManager.Instance.data.playerName = newName;
+            SaveManager.Instance.data.selectedCosmetic = newCosmetic;
+
+            SaveManager.Instance.Save();
+
+            if (UnityLobbyManager.Instance.CurrentLobby != null)
+            {
+                await UnityLobbyManager.Instance.SyncSaveDataToLobby();
+            }
+        }
     }
+
 }

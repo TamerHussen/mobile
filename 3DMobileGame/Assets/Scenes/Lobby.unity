@@ -970,7 +970,7 @@ GameObject:
   - component: {fileID: 100830033}
   - component: {fileID: 100830032}
   m_Layer: 5
-  m_Name: Costmetic (5)
+  m_Name: BadCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2152,7 +2152,7 @@ GameObject:
   - component: {fileID: 181693142}
   - component: {fileID: 181693141}
   m_Layer: 5
-  m_Name: Costmetic (3)
+  m_Name: HornCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2230,7 +2230,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Mat
+          m_StringArgument: Horn
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &181693142
@@ -2442,7 +2442,6 @@ RectTransform:
   - {fileID: 320611914}
   - {fileID: 1509363597}
   - {fileID: 1942647246}
-  - {fileID: 1754585363}
   m_Father: {fileID: 1440001847}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2994,7 +2993,7 @@ GameObject:
   - component: {fileID: 299664051}
   - component: {fileID: 299664050}
   m_Layer: 5
-  m_Name: Costmetic (6)
+  m_Name: GoodCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3072,7 +3071,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Mad
+          m_StringArgument: Good
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &299664051
@@ -5785,7 +5784,7 @@ GameObject:
   - component: {fileID: 711151102}
   - component: {fileID: 711151101}
   m_Layer: 5
-  m_Name: Costmetic
+  m_Name: DefaultCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5863,7 +5862,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: None
+          m_StringArgument: Default
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &711151102
@@ -6501,6 +6500,125 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 770542615}
   m_CullTransparentMesh: 1
+--- !u!1 &785506369
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 785506374}
+  - component: {fileID: 785506373}
+  - component: {fileID: 785506372}
+  - component: {fileID: 785506371}
+  - component: {fileID: 785506370}
+  m_Layer: 5
+  m_Name: popupCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &785506370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785506369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1266af532a2299145b020f158810f560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusText: {fileID: 1593409596}
+  acceptButton: {fileID: 165030129}
+  declineButton: {fileID: 1911788611}
+  VisualPanel: {fileID: 1425947775}
+--- !u!114 &785506371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785506369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &785506372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785506369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!223 &785506373
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785506369}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 1
+  m_Camera: {fileID: 757594124}
+  m_PlaneDistance: 1
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 100
+  m_TargetDisplay: 0
+--- !u!224 &785506374
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785506369}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 1
+  m_Children:
+  - {fileID: 1425947776}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
 --- !u!1 &786600512
 GameObject:
   m_ObjectHideFlags: 0
@@ -8089,7 +8207,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.1, y: 0.13788998}
   m_AnchorMax: {x: 0.75600004, y: 0.35877016}
-  m_AnchoredPosition: {x: 0, y: -1.081604}
+  m_AnchoredPosition: {x: 0, y: -1.081543}
   m_SizeDelta: {x: 0, y: 0.2968216}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1112709868
@@ -8600,7 +8718,7 @@ GameObject:
   - component: {fileID: 1221716713}
   - component: {fileID: 1221716712}
   m_Layer: 5
-  m_Name: Costmetic (4)
+  m_Name: MadCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8678,7 +8796,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Lad
+          m_StringArgument: Mad
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1221716713
@@ -9641,7 +9759,7 @@ RectTransform:
   m_Children:
   - {fileID: 1143856072}
   - {fileID: 574453337}
-  m_Father: {fileID: 1754585363}
+  m_Father: {fileID: 785506374}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -10542,6 +10660,9 @@ MonoBehaviour:
   data:
     coins: 0
     level: 1
+    playerName: Player
+    selectedCosmetic: Default
+    lastSelectedLevel: None
 --- !u!114 &1493766027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11579,7 +11700,7 @@ GameObject:
   - component: {fileID: 1626621540}
   - component: {fileID: 1626621539}
   m_Layer: 5
-  m_Name: Costmetic (7)
+  m_Name: LoudCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13093,68 +13214,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1752405522}
   m_CullTransparentMesh: 1
---- !u!1 &1754585362
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1754585363}
-  - component: {fileID: 1754585365}
-  - component: {fileID: 1754585364}
-  m_Layer: 5
-  m_Name: Popup
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1754585363
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1754585362}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 1
-  m_Children:
-  - {fileID: 1425947776}
-  m_Father: {fileID: 222955393}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -200}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1754585364
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1754585362}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1266af532a2299145b020f158810f560, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  statusText: {fileID: 1593409596}
-  acceptButton: {fileID: 165030129}
-  declineButton: {fileID: 1911788611}
-  VisualPanel: {fileID: 1425947775}
---- !u!222 &1754585365
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1754585362}
-  m_CullTransparentMesh: 1
 --- !u!1 &1800132090
 GameObject:
   m_ObjectHideFlags: 0
@@ -13460,7 +13519,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.0283125, y: 0.25669566}
   m_AnchorMax: {x: 0.97112507, y: 0.42600003}
-  m_AnchoredPosition: {x: 0, y: 3.100006}
+  m_AnchoredPosition: {x: 0, y: 3.0999756}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1821718342
@@ -13575,7 +13634,7 @@ GameObject:
   - component: {fileID: 1830947942}
   - component: {fileID: 1830947941}
   m_Layer: 5
-  m_Name: Costmetic (1)
+  m_Name: HatCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15978,7 +16037,7 @@ GameObject:
   - component: {fileID: 2137567294}
   - component: {fileID: 2137567293}
   m_Layer: 5
-  m_Name: Costmetic (2)
+  m_Name: CatCosmetic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16797,6 +16856,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 757594125}
   - {fileID: 786600514}
+  - {fileID: 785506374}
   - {fileID: 1223485008}
   - {fileID: 1876851972}
   - {fileID: 1493766024}

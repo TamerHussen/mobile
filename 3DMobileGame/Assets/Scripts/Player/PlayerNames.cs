@@ -29,7 +29,7 @@ public class PlayerNames : MonoBehaviour
 
     public void UpdatePlayerUI(Player player)
     {
-        if (player.Data.TryGetValue("DisplayName", out var nameData))
+        if (player.Data != null && player.Data.TryGetValue("Name", out var nameData))
         {
             SetName(nameData.Value);
         }

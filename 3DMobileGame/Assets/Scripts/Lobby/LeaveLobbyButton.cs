@@ -11,12 +11,9 @@ public class LeaveLobbyButton : MonoBehaviour
         var lobbyManager = UnityLobbyManager.Instance;
         if (lobbyManager == null) return;
 
-        var lobby = lobbyManager.CurrentLobby;
-        if (lobby == null) return;
+        bool isHost = lobbyManager.CurrentLobby.HostId == AuthenticationService.Instance.PlayerId;
 
-        bool isHost = lobby.HostId == AuthenticationService.Instance.PlayerId;
-
-        if (isHost && lobby.Players.Count == 1)
+        if (isHost && lobbyManager.CurrentLobby.Players.Count == 1)
         {
             Debug.Log("Already in personal lobby.");
             return;

@@ -19,29 +19,37 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
     public void SpawnPlayers()
     {
+        if (SpawnPoints == null || SpawnPoints.Length == 0) return;
+
         foreach (var p in SpawnedPlayers) Destroy(p);
 
         SpawnedPlayers.Clear();
 
         var players = LobbyInfo.Instance.GetPlayers();
 
-        int count = Mathf.Min(players.Count, SpawnPoints.Length);
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < players.Count && i < SpawnPoints.Length; i++)
         {
-            GameObject player = Instantiate(playerPrefab, SpawnPoints[i].position, SpawnPoints[i].rotation);
+            var lobbyPlayer = players[i];
+            var spawn = SpawnPoints[i];
+            if (spawn == null) continue;
 
-            player.GetComponent<PlayerCosmetic>().Apply(players[i].Cosmetic);
 
-            PlayerNames nameTag = player.GetComponentInChildren<PlayerNames>();
-            if (nameTag != null)
-            {
-                nameTag.SetName(players[i].PlayerName);
-            }
+            var GOplayer = Instantiate(playerPrefab, spawn.position, spawn.rotation);
 
-            SpawnedPlayers.Add(player);
+            var avatar = GOplayer.GetComponent<PlayerAvatar>();
+            if (avatar != null) avatar.PlayerID = lobbyPlayer.PlayerID;
+            
+            var view = GOplayer.GetComponent<PlayerView>();
+            if(view != null) view.Bind(lobbyPlayer);
+
+            SpawnedPlayers.Add(GOplayer);
         }
+    }
 
-
+    public void ClearAll()
+    {
+        foreach(var p in SpawnedPlayers) Destroy(p); 
+        SpawnedPlayers.Clear();
     }
 }

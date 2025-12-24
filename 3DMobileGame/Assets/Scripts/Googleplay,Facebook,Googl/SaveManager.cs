@@ -52,4 +52,20 @@ public class PlayerData
 {
     public int coins = 0;
     public int level = 1;
+    public string playerName = "Player";
+    public string selectedCosmetic = "Default";
+    public string lastSelectedLevel = "None";
+    
+    // Add any other player preferences you want to persist
+    
+    public PlayerData()
+    {
+        // Default constructor for deserialization
+    }
+    
+    public PlayerData(string name, string cosmetic = "Default")
+    {
+        playerName = name;
+        selectedCosmetic = cosmetic;
+    }
 }
