@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Unity.Services.Friends.Exceptions;
 using Unity.Services.Friends.Models;
 using Unity.Services.Friends.Notifications;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Unity.Services.Samples.Friends
 {
@@ -124,10 +126,42 @@ namespace Unity.Services.Samples.Friends
 
         }
 
+        // Replace the LogInAsync method in RelationshipsManager.cs with this:
+
         async Task LogInAsync()
         {
             var playerID = AuthenticationService.Instance.PlayerId;
-            var playerName = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+            // CRITICAL FIX: Use SaveManager name if available, otherwise use Auth name
+            string playerName;
+            if (SaveManager.Instance?.data != null && !string.IsNullOrEmpty(SaveManager.Instance.data.playerName))
+            {
+                playerName = SaveManager.Instance.data.playerName;
+                Debug.Log($"Using SaveManager player name: {playerName}");
+
+                // Sync to Unity Authentication
+                try
+                {
+                    await AuthenticationService.Instance.UpdatePlayerNameAsync(playerName);
+                    Debug.Log($"Synced name to Unity Authentication: {playerName}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Could not update Authentication name: {e.Message}");
+                }
+            }
+            else
+            {
+                playerName = await AuthenticationService.Instance.GetPlayerNameAsync();
+                Debug.Log($"Using Unity Authentication name: {playerName}");
+
+                if (SaveManager.Instance?.data != null)
+                {
+                    SaveManager.Instance.data.playerName = playerName;
+                    SaveManager.Instance.Save();
+                }
+            }
+
             m_LoggedPlayerProfile = new PlayerProfile(playerName, playerID);
 
             await SetPresence(Availability.Online, "In Friends Menu");
@@ -138,6 +172,7 @@ namespace Unity.Services.Samples.Friends
             RefreshAll();
             Debug.Log($"Logged in as {m_LoggedPlayerProfile}");
         }
+
         [System.Serializable]
         public class InviteMessage
         {
@@ -459,21 +494,6 @@ namespace Unity.Services.Samples.Friends
                 activity,
                 availability
             );
-        }
-
-
-        // DEBUG Add Fake Friend
-        void DebugAddFakeFriend()
-        {
-            m_FriendsEntryDatas.Add(new FriendsEntryData
-            {
-                Name = "TestFriend",
-                Id = "123",
-                Availability = Availability.Online,
-                Activity = "Testing UI"
-            });
-
-            m_RelationshipsView.RelationshipBarView.Refresh();
         }
 
         /// <summary>

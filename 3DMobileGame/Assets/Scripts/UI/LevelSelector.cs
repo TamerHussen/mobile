@@ -1,10 +1,28 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LevelSelector : MonoBehaviour
 {
+    [Header("Level Settings")]
+    public string levelName = "Level1";
 
-    public void SelectLevel(string levelName)
+    private Button button;
+
+    void Start()
     {
-        LobbyInfo.Instance.SetSelectedLevel(levelName);
+        button = GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.AddListener(() => SelectLevel(levelName));
+        }
+    }
+
+    public void SelectLevel(string level)
+    {
+        if (LobbyInfo.Instance != null)
+        {
+            LobbyInfo.Instance.SetSelectedLevel(level);
+            Debug.Log($"Selected level: {level}");
+        }
     }
 }

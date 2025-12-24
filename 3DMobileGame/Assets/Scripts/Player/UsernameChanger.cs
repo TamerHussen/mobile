@@ -14,8 +14,16 @@ public class UsernameChanger : MonoBehaviour
     const int MaxLength = 16;
 
     // Letters, numbers, underscore
-    static readonly Regex ValidNameRegex =
-        new Regex(@"^[A-Za-z0-9_]+$");
+    static readonly Regex ValidNameRegex = new Regex(@"^[A-Za-z0-9_]+$");
+
+    void OnEnable()
+    {
+        // Pre-fill with current name
+        if (SaveManager.Instance?.data != null)
+        {
+            input.text = SaveManager.Instance.data.playerName;
+        }
+    }
 
     public async void ChangeName()
     {
@@ -23,14 +31,13 @@ public class UsernameChanger : MonoBehaviour
 
         string name = input.text.Trim();
 
-        // Empty
+        // Validation
         if (string.IsNullOrEmpty(name))
         {
             feedbackText.text = "Name cannot be empty";
             return;
         }
 
-        // Length
         if (name.Length < MinLength)
         {
             feedbackText.text = $"Name must be at least {MinLength} characters";
@@ -51,32 +58,57 @@ public class UsernameChanger : MonoBehaviour
 
         try
         {
-            await AuthenticationService.Instance.UpdatePlayerNameAsync(name);
+            feedbackText.text = "Updating name...";
+
+            // CRITICAL FIX: Use PlayerNameSynchronizer to update everywhere
+            if (PlayerNameSynchronizer.Instance != null)
+            {
+                await PlayerNameSynchronizer.Instance.UpdatePlayerName(name);
+            }
+            else
+            {
+                // Fallback if synchronizer doesn't exist
+                await AuthenticationService.Instance.UpdatePlayerNameAsync(name);
+
+                if (SaveManager.Instance?.data != null)
+                {
+                    SaveManager.Instance.data.playerName = name;
+                    SaveManager.Instance.Save();
+                }
+
+                if (UnityLobbyManager.Instance?.CurrentLobby != null)
+                {
+                    await UnityLobbyManager.Instance.SyncSaveDataToLobby();
+                }
+            }
 
             var relationships = FindFirstObjectByType<RelationshipsManager>();
             relationships?.RefreshLocalPlayerName();
             relationships?.RefreshFriends();
 
-            LobbyInfo.Instance?.UpdateHostName(name);
-            LobbyInfo.Instance?.UpdatePlayerName(AuthenticationService.Instance.PlayerId, name);
+            if (LobbyInfo.Instance != null)
+            {
+                LobbyInfo.Instance.UpdateHostName(name);
+                LobbyInfo.Instance.UpdatePlayerName(AuthenticationService.Instance.PlayerId, name);
+            }
 
             LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
-            feedbackText.text = "Name changed!";
-            Debug.Log("Username changed to " + name);
+            feedbackText.text = "Name changed successfully!";
+            Debug.Log($"Username changed to: {name}");
 
-            Close();
+            Invoke(nameof(Close), 1f);
         }
         catch (AuthenticationException e)
         {
             feedbackText.text = "Name unavailable or invalid";
-            Debug.LogWarning(e);
+            Debug.LogWarning($"Name change failed: {e.Message}");
         }
     }
 
     public void Open()
     {
-        input.text = "";
+        input.text = SaveManager.Instance?.data?.playerName ?? "";
         feedbackText.text = "";
         rootPanel.SetActive(true);
     }

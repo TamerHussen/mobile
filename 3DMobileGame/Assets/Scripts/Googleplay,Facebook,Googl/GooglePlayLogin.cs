@@ -45,42 +45,29 @@ public class GooglePlayLogin : MonoBehaviour
         PlayGamesPlatform.Instance.ManuallyAuthenticate(ProcessAuthentication);
     }
 
+    // After successful Google Play login, sync with SaveManager
     void ProcessAuthentication(SignInStatus status)
     {
         if (status == SignInStatus.Success)
         {
-            // Get data from Google Play
             string name = PlayGamesPlatform.Instance.GetUserDisplayName();
             string id = PlayGamesPlatform.Instance.GetUserId();
 
-            // Update UI elements with retrieved information
+            // Update UI
             StatusText.text = "Signed In Successfully!";
             PlayerNameText.text = "Name: " + name;
             PlayerIdText.text = "ID: " + id;
 
-            // Show the panel that displays this info
-            if (PlayerInfoPanel != null)
+            // SYNC WITH SAVEMANAGER
+            if (SaveManager.Instance != null)
             {
+                SaveManager.Instance.data.playerName = name;
+                SaveManager.Instance.Save();
+                Debug.Log($"Synced Google Play name to SaveManager: {name}");
+            }
+
+            if (PlayerInfoPanel != null)
                 PlayerInfoPanel.SetActive(true);
-            }
-
-            // Optional: Fetch Profile Picture
-            // This requires using Unity's Image component and a separate async method.
-            // StartCoroutine(FetchProfilePicture(id)); 
-        }
-        else
-        {
-            StatusText.text = "Sign in Failed: " + status;
-            PlayerNameText.text = "";
-            PlayerIdText.text = "";
-
-            // Hide the panel if login failed
-            if (PlayerInfoPanel != null)
-            {
-                PlayerInfoPanel.SetActive(false);
-            }
         }
     }
-
-    // ... (You would need a coroutine here to fetch the profile picture from a URL)
 }

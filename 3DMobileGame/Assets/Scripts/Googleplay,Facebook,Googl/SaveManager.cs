@@ -15,6 +15,7 @@ public class SaveManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             savePath = Application.persistentDataPath + "/save.json";
             Load();
+            Debug.Log($"SaveManager initialized. Player: {data.playerName}, Cosmetic: {data.selectedCosmetic}");
         }
         else
         {

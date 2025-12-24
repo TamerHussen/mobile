@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
@@ -53,27 +53,36 @@ public class LobbyInfo : MonoBehaviour
     {
         SetLobbyPresence();
 
-        // Load saved player data if available
-        if (SaveManager.Instance != null && SaveManager.Instance.data != null)
+        // CRITICAL FIX: Wait for SaveManager to be ready
+        if (SaveManager.Instance == null)
         {
-            var data = SaveManager.Instance.data;
-            if (!string.IsNullOrEmpty(data.playerName))
-            {
-
-            }
-
-            // Set the selected cosmetic from saved data
-            if (!string.IsNullOrEmpty(data.selectedCosmetic))
-            {
-                _ = SetSelectedCosmetic(data.selectedCosmetic);
-            }
-
-            // Set the last selected level if available
-            if (!string.IsNullOrEmpty(data.lastSelectedLevel))
-            {
-                SetSelectedLevel(data.lastSelectedLevel);
-            }
+            Debug.LogWarning("SaveManager not found in LobbyInfo.Start()");
+            return;
         }
+
+        SaveManager.Instance.Load();
+
+        var data = SaveManager.Instance.data;
+
+        if (!string.IsNullOrEmpty(data.selectedCosmetic))
+        {
+            selectedCosmetic = data.selectedCosmetic;
+            Debug.Log($"LobbyInfo: Loaded cosmetic = {selectedCosmetic}");
+            _ = SetSelectedCosmetic(data.selectedCosmetic);
+        }
+        else
+        {
+            Debug.LogWarning("No saved cosmetic found, using default");
+            selectedCosmetic = "Default";
+        }
+
+        if (!string.IsNullOrEmpty(data.lastSelectedLevel))
+        {
+            selectedLevel = data.lastSelectedLevel;
+            Debug.Log($"LobbyInfo: Loaded level = {selectedLevel}");
+        }
+
+        UpdateUI();
     }
 
     private void OnEnable()
@@ -317,24 +326,60 @@ public class LobbyInfo : MonoBehaviour
         catch (LobbyServiceException e) { Debug.LogError(e); }
     }
 
+    // Replace your SubscribeToLobby method with this fixed version:
+
     public async void SubscribeToLobby(string lobbyId)
     {
-        if (m_LobbyEvents != null) return;
-        if (UnityLobbyManager.Instance.CurrentLobby != null)
+        if (string.IsNullOrEmpty(lobbyId))
         {
-            currentLobby = UnityLobbyManager.Instance.CurrentLobby;
+            Debug.LogError("Cannot subscribe to lobby: Lobby ID is null or empty!");
+            return;
         }
+
+        if (m_LobbyEvents != null)
+        {
+            Debug.LogWarning("Already subscribed to lobby events");
+            return;
+        }
+
+        if (UnityLobbyManager.Instance?.CurrentLobby == null)
+        {
+            Debug.LogError("Cannot subscribe: CurrentLobby is null!");
+            return;
+        }
+
+        if (UnityLobbyManager.Instance.CurrentLobby.Id != lobbyId)
+        {
+            Debug.LogWarning($"Lobby ID mismatch! Requested: {lobbyId}, Current: {UnityLobbyManager.Instance.CurrentLobby.Id}");
+            lobbyId = UnityLobbyManager.Instance.CurrentLobby.Id;
+        }
+
+        currentLobby = UnityLobbyManager.Instance.CurrentLobby;
 
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
-        callbacks.PlayerJoined += (joinedPlayers) => RefreshLobbyData();
-        callbacks.PlayerLeft += (leftPlayers) => RefreshLobbyData();
+        callbacks.PlayerJoined += (joinedPlayers) =>
+        {
+            Debug.Log($"Player joined event received. Count: {joinedPlayers.Count}");
+            RefreshLobbyData();
+        };
+        callbacks.PlayerLeft += (leftPlayers) =>
+        {
+            Debug.Log($"Player left event received. Count: {leftPlayers.Count}");
+            RefreshLobbyData();
+        };
 
         try
         {
+            Debug.Log($"Subscribing to lobby events for lobby: {lobbyId}");
             m_LobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyId, callbacks);
+            Debug.Log("✅ Successfully subscribed to lobby events!");
         }
-        catch (LobbyServiceException ex) { Debug.LogWarning(ex.Message); }
+        catch (LobbyServiceException ex)
+        {
+            Debug.LogError($"Failed to subscribe to lobby events: {ex.Message} (Code: {ex.Reason})");
+            m_LobbyEvents = null;
+        }
     }
 
     private void OnLobbyChanged(ILobbyChanges changes)

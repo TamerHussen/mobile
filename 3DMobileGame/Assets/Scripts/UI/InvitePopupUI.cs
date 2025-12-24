@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
@@ -30,6 +29,7 @@ public class InvitePopupUI : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+
     public void Show(string senderId, string joinCode)
     {
         currentJoinCode = joinCode;
@@ -40,36 +40,64 @@ public class InvitePopupUI : MonoBehaviour
         acceptButton.onClick.AddListener(AcceptInvite);
 
         declineButton.onClick.RemoveAllListeners();
-        declineButton.onClick.AddListener(() => gameObject.SetActive(false));
+        declineButton.onClick.AddListener(() => VisualPanel.SetActive(false));
     }
 
     async void AcceptInvite()
     {
+        if (SaveManager.Instance == null)
+        {
+            Debug.LogError("SaveManager is null when accepting invite!");
+            statusText.text = "Error: Game not ready";
+            return;
+        }
+
+        SaveManager.Instance.Load();
+        Debug.Log($"Loaded player data before joining: Name={SaveManager.Instance.data.playerName}, Cosmetic={SaveManager.Instance.data.selectedCosmetic}");
+
         try
         {
+            statusText.text = "Joining lobby...";
+            acceptButton.interactable = false;
+
             if (UnityLobbyManager.Instance.CurrentLobby != null)
             {
                 await LobbyService.Instance.RemovePlayerAsync(
                     UnityLobbyManager.Instance.CurrentLobby.Id,
                     AuthenticationService.Instance.PlayerId);
 
-                UnityLobbyManager.Instance.CurrentLobby = null;
                 LobbyInfo.Instance?.ClearLocalLobby();
             }
+
+            UnityLobbyManager.Instance.IsJoiningExternalLobby = true;
 
             await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
 
             await Task.Delay(500);
 
-            LobbyInfo.Instance.SubscribeToLobby(UnityLobbyManager.Instance.CurrentLobby.Id);
+            if (UnityLobbyManager.Instance.CurrentLobby == null)
+            {
+                Debug.LogError("Failed to join lobby - CurrentLobby is null!");
+                statusText.text = "Failed to join lobby";
+                acceptButton.interactable = true;
+                UnityLobbyManager.Instance.IsJoiningExternalLobby = false;
+                return;
+            }
+
+
+            Debug.Log($"Successfully joined lobby: {UnityLobbyManager.Instance.CurrentLobby.Id}");
 
             SceneManager.LoadScene("Lobby");
+
             Debug.Log("Joined lobby successfully!");
             VisualPanel.SetActive(false);
         }
         catch (LobbyServiceException e)
         {
             Debug.LogError($"Failed to join lobby: {e.Message}");
+            statusText.text = "Failed to join lobby";
+            acceptButton.interactable = true;
+            UnityLobbyManager.Instance.IsJoiningExternalLobby = false;
         }
     }
 }
