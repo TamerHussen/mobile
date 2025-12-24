@@ -32,7 +32,8 @@ public class LobbyInfo : MonoBehaviour
     private string selectedCosmetic = "None";
 
     private ILobbyEvents m_LobbyEvents;
-    private Lobby currentLobby;
+
+    public bool isFullyJoined {  get; private set; }
 
     private List<LobbyPlayer> players = new List<LobbyPlayer>();
 
@@ -144,7 +145,7 @@ public class LobbyInfo : MonoBehaviour
         if (UnityLobbyManager.Instance != null && UnityLobbyManager.Instance.CurrentLobby != null)
         {
             await UnityLobbyManager.Instance.UpdatePlayerDataAsync(
-                AuthenticationService.Instance.PlayerName,
+                SaveManager.Instance.data.playerName,
                 selectedCosmetic
             );
         }
@@ -175,7 +176,7 @@ public class LobbyInfo : MonoBehaviour
 
     public void SetCurrentLobby(Lobby lobby)
     {
-        currentLobby = lobby;
+        RefreshLobbyData();
     }
 
     public void SetPlayers(List<LobbyPlayer> newPlayers)
@@ -189,6 +190,16 @@ public class LobbyInfo : MonoBehaviour
             if (string.IsNullOrEmpty(p.Cosmetic)) p.Cosmetic = "Default";
         }
 
+        foreach (var incoming in newPlayers)
+        {
+            var existing = players.FirstOrDefault(p => p.PlayerID == incoming.PlayerID);
+            if (existing != null && incoming.PlayerName == "Unknown Player")
+            {
+                incoming.PlayerName = existing.PlayerName;
+                incoming.Cosmetic = existing.Cosmetic;
+            }
+        }
+
         players = newPlayers;
 
         foreach (var p in players)
@@ -196,7 +207,7 @@ public class LobbyInfo : MonoBehaviour
             p.IsLocal = p.PlayerID == AuthenticationService.Instance.PlayerId;
         }
 
-        if (newPlayers.Any(p => p.PlayerName == "Joining...")) return;
+        Debug.Log($"Save:{SaveManager.Instance.data.playerName} Auth:{AuthenticationService.Instance.PlayerName}");
 
         UpdateUI();
         StopAllCoroutines();
@@ -297,38 +308,30 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
     }
 
-    public async void RefreshLobbyData()
+    private void RefreshLobbyData()
     {
-        try
+        var lobby = UnityLobbyManager.Instance.CurrentLobby;
+        if (lobby == null) return;
+
+        if (playerCountText != null)
+            playerCountText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
+
+        // Get Level from Lobby Data
+        if (lobby.Data != null && lobby.Data.ContainsKey("SelectedLevel"))
         {
-            currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
-
-            List<LobbyPlayer> lobbyPlayers = new List<LobbyPlayer>();
-            foreach (var p in currentLobby.Players)
-            {
-                string pName = (p.Data != null && p.Data.ContainsKey("Name")) ? p.Data["Name"].Value : "Unknown";
-                string pCosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic")) ? p.Data["Cosmetic"].Value : "Default";
-                bool isLocal = p.Id == AuthenticationService.Instance.PlayerId;
-                lobbyPlayers.Add(new LobbyPlayer(p.Id, pName, pCosmetic, isLocal));
-            }
-
-            SetPlayers(lobbyPlayers);
+            selectedLevel = lobby.Data["SelectedLevel"].Value;
+            if (selectedLevelText != null) selectedLevelText.text = selectedLevel;
         }
-        catch (LobbyServiceException e) { Debug.LogError(e); }
     }
 
     public async void SubscribeToLobby(string lobbyId)
     {
         if (m_LobbyEvents != null) return;
-        if (UnityLobbyManager.Instance.CurrentLobby != null)
-        {
-            currentLobby = UnityLobbyManager.Instance.CurrentLobby;
-        }
 
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
-        callbacks.PlayerJoined += (joinedPlayers) => RefreshLobbyData();
-        callbacks.PlayerLeft += (leftPlayers) => RefreshLobbyData();
+        callbacks.PlayerJoined += (joinedPlayers) => UnityLobbyManager.Instance.SyncLobbyToLocal();
+        callbacks.PlayerLeft += (leftPlayers) => UnityLobbyManager.Instance.SyncLobbyToLocal();
 
         try
         {
@@ -344,21 +347,22 @@ public class LobbyInfo : MonoBehaviour
 
     private Task HandleLobbyChangeAsync(ILobbyChanges changes)
     {
-        if (currentLobby == null) return Task.CompletedTask;
 
-        bool stillInLobby = currentLobby.Players.Any(p => p.Id == AuthenticationService.Instance.PlayerId);
+        if (!isFullyJoined || UnityLobbyManager.Instance.CurrentLobby == null) return Task.CompletedTask;
+
+        changes.ApplyToLobby(UnityLobbyManager.Instance.CurrentLobby);
+
+        bool stillInLobby = UnityLobbyManager.Instance.CurrentLobby.Players.Any(p => p.Id == AuthenticationService.Instance.PlayerId);
         if (!stillInLobby)
         {
-            Debug.Log("Kicked");
+            Debug.LogWarning("Detected we are no longer in lobby via Events.");
             ClearLocalLobby();
 
             SceneManager.LoadScene("Lobby");
             return Task.CompletedTask;
         }
 
-        changes.ApplyToLobby(currentLobby);
-        RefreshLobbyData();
-
+        UnityLobbyManager.Instance.SyncLobbyToLocal();
         return Task.CompletedTask;
     }
 
@@ -383,7 +387,11 @@ public class LobbyInfo : MonoBehaviour
             m_LobbyEvents = null;
         }
 
-        currentLobby = null;
+    }
+
+    public void MarkFullyJoined()
+    {
+        isFullyJoined = true;
     }
 
     public List<LobbyPlayer> GetPlayers() => players;

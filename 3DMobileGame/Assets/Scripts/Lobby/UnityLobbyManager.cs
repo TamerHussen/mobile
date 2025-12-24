@@ -18,7 +18,6 @@ public class UnityLobbyManager : MonoBehaviour
     private const float PollInterval = 1.5f;
     private float pollTimer;
     private bool isJoining = false;
-    public bool IsJoiningExternalLobby;
     public Lobby CurrentLobby { get; set; }
 
 
@@ -74,7 +73,7 @@ public class UnityLobbyManager : MonoBehaviour
         }
         catch (LobbyServiceException e)
         {
-            if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+            if (!isJoining && e.Reason == LobbyExceptionReason.LobbyNotFound)
             {
                 Debug.LogWarning("Lobby closed");
 
@@ -127,28 +126,40 @@ public class UnityLobbyManager : MonoBehaviour
     // JOIN by invite
     public async Task JoinLobbyById(string lobbyId)
     {
+        if(isJoining) return;
         isJoining = true;
         try
         {
-            var options = new JoinLobbyByIdOptions { Player = GetLocalPlayerData() };
+            var localPlayer = GetLocalPlayerData();
+            var options = new JoinLobbyByIdOptions { Player = localPlayer };
             CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, options);
+
             await HandlePostJoin();
         }
-        catch (Exception e) { Debug.LogError($"Join ID failed: {e.Message}"); }
-        finally { isJoining = false; }
+        catch (Exception e)
+        {
+            Debug.LogError($"Join ID failed: {e.Message}");
+            isJoining = false;
+        }
     }
 
     public async Task JoinLobbyByCode(string code)
     {
+        if (isJoining) return;
         isJoining = true;
         try
         {
-            var options = new JoinLobbyByCodeOptions { Player = GetLocalPlayerData() };
+            var localPlayer = GetLocalPlayerData();
+            var options = new JoinLobbyByCodeOptions { Player = localPlayer };
             CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(code, options);
+
             await HandlePostJoin();
         }
-        catch (Exception e) { Debug.LogError($"Join Code failed: {e.Message}"); }
-        finally { isJoining = false; }
+        catch (Exception e) 
+        { 
+            Debug.LogError($"Join Code failed: {e.Message}");
+            isJoining = false;
+        }
     }
 
     // Shared logic to avoid repeating Task.Delay and Sync calls
@@ -159,10 +170,19 @@ public class UnityLobbyManager : MonoBehaviour
 
         pollTimer = PollInterval;
 
-        await SyncSaveDataToLobby();
         LobbyInfo.Instance.SubscribeToLobby(CurrentLobby.Id);
         SyncLobbyToLocal();
+
+        // delay save sync until lobby is stable
+        _ = DelayedSyncAfterJoin();
     }
+
+    private async Task DelayedSyncAfterJoin()
+    {
+        await Task.Delay(500);
+        await SyncSaveDataToLobby();
+    }
+
 
     private Player GetLocalPlayerData()
     {
@@ -193,29 +213,34 @@ public class UnityLobbyManager : MonoBehaviour
     {
         if (CurrentLobby == null) return;
 
-        try
+        var finalName = !string.IsNullOrEmpty(name)
+            ? name
+            : SaveManager.Instance?.data?.playerName;
+
+        var finalCosmetic = !string.IsNullOrEmpty(cosmetic)
+            ? cosmetic
+            : SaveManager.Instance?.data?.selectedCosmetic;
+
+        if (string.IsNullOrEmpty(finalName))
+            return;
+
+        UpdatePlayerOptions options = new UpdatePlayerOptions
         {
-            UpdatePlayerOptions options = new UpdatePlayerOptions
-            {
-                Data = new Dictionary<string, PlayerDataObject>
+            Data = new Dictionary<string, PlayerDataObject>
             {
                 { "Name", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, name) },
                 { "Cosmetic", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, cosmetic) }
             }
-            };
+        };
 
-            CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(
-                CurrentLobby.Id,
-                AuthenticationService.Instance.PlayerId,
-                options
-            );
+        CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(
+            CurrentLobby.Id,
+            AuthenticationService.Instance.PlayerId,
+            options
+        );
 
-            Debug.Log("Player data updated successfully.");
-        }
-        catch (LobbyServiceException e)
-        {
-            Debug.LogError($"Failed to update player data: {e.Message}");
-        }
+        Debug.Log("Player data updated successfully.");
+
     }
 
 
@@ -262,9 +287,9 @@ public class UnityLobbyManager : MonoBehaviour
 
         foreach (var p in CurrentLobby.Players)
         {
-            string displayName = (p.Data != null && p.Data.ContainsKey("Name"))
-                ? p.Data["Name"].Value
-                : "Joining...";
+            string displayName =(p.Data != null && p.Data.ContainsKey("Name") && !string.IsNullOrEmpty(p.Data["Name"].Value))
+                    ? p.Data["Name"].Value
+                    : "Unknown Player";
 
             string pCosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic"))
                 ? p.Data["Cosmetic"].Value
@@ -272,6 +297,9 @@ public class UnityLobbyManager : MonoBehaviour
 
             bool isLocal = p.Id == AuthenticationService.Instance.PlayerId;
             lobbyPlayers.Add(new LobbyPlayer(p.Id, displayName, pCosmetic, isLocal));
+
+            Debug.Log($"SYNC {p.Id} | Name={displayName} | Cosmetic={pCosmetic}");
+
         }
 
         LobbyInfo.Instance?.SetPlayers(lobbyPlayers);
@@ -295,12 +323,12 @@ public class UnityLobbyManager : MonoBehaviour
     }
 
     // LEAVE lobby
-    public async Task LeaveLobby()
+    public async Task LeaveLobby(bool willJoinAnother = false)
     {
+        isJoining = true;
+
         if (CurrentLobby == null) return;
         
-        IsJoiningExternalLobby = true;
-
         try
         {
             string playerId = AuthenticationService.Instance.PlayerId;
@@ -321,19 +349,17 @@ public class UnityLobbyManager : MonoBehaviour
             Debug.LogError($"Error leaving lobby: {e.Message}");
         }
 
-        // make personal lobby for player before leaving
+        await Task.Delay(200);
+
         CurrentLobby = null;
-
         LobbyInfo.Instance?.ClearLocalLobby();
-
         SceneManager.LoadScene("Lobby");
 
-        if (!IsJoiningExternalLobby)
+        if (!!willJoinAnother)
         {
             await EnsurePersonalLobby();
+            isJoining = false;
         }
-        IsJoiningExternalLobby = false;
-
     }
 
 }

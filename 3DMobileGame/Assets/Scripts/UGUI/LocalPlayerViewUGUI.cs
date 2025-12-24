@@ -59,12 +59,12 @@ namespace Unity.Services.Samples.Friends.UGUI
         {
             SaveManager.Instance.data.playerName = newName;
             SaveManager.Instance.data.selectedCosmetic = newCosmetic;
-
             SaveManager.Instance.Save();
 
             if (UnityLobbyManager.Instance.CurrentLobby != null)
             {
-                await UnityLobbyManager.Instance.SyncSaveDataToLobby();
+                // Use the specific Update method to push changes to Unity Services
+                await UnityLobbyManager.Instance.UpdatePlayerDataAsync(newName, newCosmetic);
             }
         }
     }

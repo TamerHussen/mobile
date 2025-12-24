@@ -47,29 +47,24 @@ public class InvitePopupUI : MonoBehaviour
     {
         try
         {
-            if (UnityLobbyManager.Instance.CurrentLobby != null)
-            {
-                await LobbyService.Instance.RemovePlayerAsync(
-                    UnityLobbyManager.Instance.CurrentLobby.Id,
-                    AuthenticationService.Instance.PlayerId);
+            // 1. Use the manager to leave cleanly (willJoinAnother: true stops personal lobby creation)
+            await UnityLobbyManager.Instance.LeaveLobby(willJoinAnother: true);
 
-                UnityLobbyManager.Instance.CurrentLobby = null;
-                LobbyInfo.Instance?.ClearLocalLobby();
-            }
-
+            // 2. Join the new lobby
+            // JoinLobbyByCode now handles GetLocalPlayerData inside it, 
+            // so the Host sees your name IMMEDIATELY.
             await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
 
-            await Task.Delay(500);
-
-            LobbyInfo.Instance.SubscribeToLobby(UnityLobbyManager.Instance.CurrentLobby.Id);
-
-            SceneManager.LoadScene("Lobby");
-            Debug.Log("Joined lobby successfully!");
+            // 3. Close UI and switch scenes
             VisualPanel.SetActive(false);
+            SceneManager.LoadScene("Lobby");
+
+            Debug.Log("Joined lobby successfully via invite!");
         }
-        catch (LobbyServiceException e)
+        catch (System.Exception e)
         {
-            Debug.LogError($"Failed to join lobby: {e.Message}");
+            Debug.LogError($"Failed to accept invite: {e.Message}");
         }
     }
+
 }

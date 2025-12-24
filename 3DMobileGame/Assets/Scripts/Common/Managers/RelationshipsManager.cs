@@ -462,20 +462,6 @@ namespace Unity.Services.Samples.Friends
         }
 
 
-        // DEBUG Add Fake Friend
-        void DebugAddFakeFriend()
-        {
-            m_FriendsEntryDatas.Add(new FriendsEntryData
-            {
-                Name = "TestFriend",
-                Id = "123",
-                Availability = Availability.Online,
-                Activity = "Testing UI"
-            });
-
-            m_RelationshipsView.RelationshipBarView.Refresh();
-        }
-
         /// <summary>
         /// Returns a list of members that are not blocked by the active user.
         /// </summary>
