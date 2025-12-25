@@ -1,21 +1,23 @@
-using UnityEngine;
+﻿using UnityEngine;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using TMPro;
-using UnityEngine.UI; // Required for Image components
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GooglePlayLogin : MonoBehaviour
 {
     public static GooglePlayLogin Instance;
 
-    // Assign these TextMeshProUGUI elements in the Unity Inspector
-    public TextMeshProUGUI StatusText;
-    public TextMeshProUGUI PlayerNameText;
-    public TextMeshProUGUI PlayerIdText;
-    public Image ProfilePictureImage; 
+    private TextMeshProUGUI StatusText;
+    private TextMeshProUGUI PlayerNameText;
+    private TextMeshProUGUI PlayerIdText;
+    private Image ProfilePictureImage;
+    private GameObject PlayerInfoPanel;
 
-    // Reference to the panel you want to show/hide
-    public GameObject PlayerInfoPanel;
+    private bool isAuthenticated = false;
+    private string cachedPlayerName = "";
+    private string cachedPlayerId = "";
 
     void Awake()
     {
@@ -30,9 +32,70 @@ public class GooglePlayLogin : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void Start()
     {
+        FindUIReferences();
         SignIn();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Re-find UI references after scene loads
+        FindUIReferences();
+
+        // Re-display cached data if already authenticated
+        if (isAuthenticated)
+        {
+            UpdateUIWithCachedData();
+        }
+    }
+
+    void FindUIReferences()
+    {
+        // Find UI elements by name (make sure these names match your scene)
+        var statusObj = GameObject.Find("GooglePlayStatusText");
+        if (statusObj != null) StatusText = statusObj.GetComponent<TextMeshProUGUI>();
+
+        var nameObj = GameObject.Find("GooglePlayPlayerNameText");
+        if (nameObj != null) PlayerNameText = nameObj.GetComponent<TextMeshProUGUI>();
+
+        var idObj = GameObject.Find("GooglePlayPlayerIdText");
+        if (idObj != null) PlayerIdText = idObj.GetComponent<TextMeshProUGUI>();
+
+        var picObj = GameObject.Find("GooglePlayProfilePicture");
+        if (picObj != null) ProfilePictureImage = picObj.GetComponent<Image>();
+
+        var panelObj = GameObject.Find("GooglePlayPlayerInfoPanel");
+        if (panelObj != null) PlayerInfoPanel = panelObj;
+
+        Debug.Log($"GooglePlayLogin UI references found: Status={StatusText != null}, Name={PlayerNameText != null}, ID={PlayerIdText != null}");
+    }
+
+    void UpdateUIWithCachedData()
+    {
+        if (StatusText != null)
+            StatusText.text = "Signed In Successfully!";
+
+        if (PlayerNameText != null)
+            PlayerNameText.text = "Name: " + cachedPlayerName;
+
+        if (PlayerIdText != null)
+            PlayerIdText.text = "ID: " + cachedPlayerId;
+
+        if (PlayerInfoPanel != null)
+            PlayerInfoPanel.SetActive(true);
+
+        Debug.Log("✅ Google Play UI updated with cached data");
     }
 
     public void SignIn()
@@ -45,7 +108,6 @@ public class GooglePlayLogin : MonoBehaviour
         PlayGamesPlatform.Instance.ManuallyAuthenticate(ProcessAuthentication);
     }
 
-    // After successful Google Play login, sync with SaveManager
     void ProcessAuthentication(SignInStatus status)
     {
         if (status == SignInStatus.Success)
@@ -53,10 +115,13 @@ public class GooglePlayLogin : MonoBehaviour
             string name = PlayGamesPlatform.Instance.GetUserDisplayName();
             string id = PlayGamesPlatform.Instance.GetUserId();
 
+            // Cache the data
+            isAuthenticated = true;
+            cachedPlayerName = name;
+            cachedPlayerId = id;
+
             // Update UI
-            StatusText.text = "Signed In Successfully!";
-            PlayerNameText.text = "Name: " + name;
-            PlayerIdText.text = "ID: " + id;
+            UpdateUIWithCachedData();
 
             // SYNC WITH SAVEMANAGER
             if (SaveManager.Instance != null)
@@ -65,9 +130,17 @@ public class GooglePlayLogin : MonoBehaviour
                 SaveManager.Instance.Save();
                 Debug.Log($"Synced Google Play name to SaveManager: {name}");
             }
+            else
+            {
+                Debug.LogWarning("SaveManager not found when trying to sync Google Play name");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Google Play authentication failed: {status}");
 
-            if (PlayerInfoPanel != null)
-                PlayerInfoPanel.SetActive(true);
+            if (StatusText != null)
+                StatusText.text = "Sign-In Failed: " + status;
         }
     }
 }

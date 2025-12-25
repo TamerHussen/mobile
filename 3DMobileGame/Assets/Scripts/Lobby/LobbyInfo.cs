@@ -103,13 +103,6 @@ public class LobbyInfo : MonoBehaviour
         {
             Debug.Log("Lobby scene loaded, rebinding...");
             RebindLobbyScene();
-
-            var relationshipsManager = FindFirstObjectByType<RelationshipsManager>();
-            if (relationshipsManager != null)
-            {
-                relationshipsManager.RefreshAll();
-                relationshipsManager.RefreshLocalPlayerName();
-            }
         }
     }
 

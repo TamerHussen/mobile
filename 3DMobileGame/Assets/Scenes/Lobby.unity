@@ -3467,7 +3467,6 @@ GameObject:
   - component: {fileID: 297417406}
   - component: {fileID: 297417405}
   - component: {fileID: 297417408}
-  - component: {fileID: 297417411}
   - component: {fileID: 297417410}
   - component: {fileID: 297417409}
   m_Layer: 0
@@ -3568,24 +3567,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2d1103cac535f04b9df43a44ffc6f12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StatusText: {fileID: 2098838743}
-  PlayerNameText: {fileID: 1652130312}
-  PlayerIdText: {fileID: 1821718342}
-  ProfilePictureImage: {fileID: 1076152608}
-  PlayerInfoPanel: {fileID: 1991824235}
---- !u!114 &297417411
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 297417403}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccfb7ac78d6755d4d84969716b7a2f54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_RelationshipsViewGameObject: {fileID: 746724306}
 --- !u!1 &299664048
 GameObject:
   m_ObjectHideFlags: 0
@@ -6970,11 +6951,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 741883779}
   m_CullTransparentMesh: 1
---- !u!1 &746724306 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5871286124081860781, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
-  m_PrefabInstance: {fileID: 968781043293372323}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &747404115
 GameObject:
   m_ObjectHideFlags: 0
@@ -18420,6 +18396,10 @@ PrefabInstance:
     - target: {fileID: 5449860495608752847, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5871286124081860781, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+      propertyPath: m_Name
+      value: RelationshipsView
       objectReference: {fileID: 0}
     - target: {fileID: 5906512079285997492, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
       propertyPath: m_Color.a
