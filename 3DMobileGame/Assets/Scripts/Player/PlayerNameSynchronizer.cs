@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Ensures SaveManager playerName is synced with Unity Authentication
-/// Attach to PersistentManagers in Main Menu
+/// Handles display names vs unique names (with # suffix)
 /// </summary>
 public class PlayerNameSynchronizer : MonoBehaviour
 {
@@ -40,24 +40,48 @@ public class PlayerNameSynchronizer : MonoBehaviour
             return;
         }
 
-        string savedName = SaveManager.Instance.data.playerName;
         string authName = await AuthenticationService.Instance.GetPlayerNameAsync();
+        string savedDisplayName = SaveManager.Instance.data.playerName;
+        string savedUniqueName = SaveManager.Instance.data.uniquePlayerName;
 
-        Debug.Log($"Syncing names - SaveManager: '{savedName}', Auth: '{authName}'");
+        Debug.Log($"Syncing names - Auth: '{authName}', SavedDisplay: '{savedDisplayName}', SavedUnique: '{savedUniqueName}'");
 
-        // Priority: Use SaveManager name (user's custom name)
-        if (!string.IsNullOrEmpty(savedName) && !savedName.Contains("#"))
+        // CRITICAL FIX: Handle name sync properly
+        if (string.IsNullOrEmpty(savedUniqueName) || savedUniqueName == "Player")
         {
-            // SaveManager has a valid custom name - use it
-            await UpdateAuthenticationName(savedName);
+            // First time setup - use auth name
+            if (authName.Contains("#"))
+            {
+                // Auth has unique name - split it
+                SaveManager.Instance.data.uniquePlayerName = authName;
+                SaveManager.Instance.data.playerName = authName.Split('#')[0];
+            }
+            else
+            {
+                // Generate unique name
+                string playerId = AuthenticationService.Instance.PlayerId;
+                string uniqueSuffix = playerId.Substring(playerId.Length - 4);
+                string uniqueName = $"{savedDisplayName}#{uniqueSuffix}";
+
+                SaveManager.Instance.data.uniquePlayerName = uniqueName;
+                SaveManager.Instance.data.playerName = savedDisplayName;
+
+                // Update auth
+                await UpdateAuthenticationName(uniqueName);
+            }
+
+            SaveManager.Instance.Save();
         }
         else
         {
-            // SaveManager has default/empty name - use Auth name
-            SaveManager.Instance.data.playerName = authName;
-            SaveManager.Instance.Save();
-            Debug.Log($"Saved Auth name to SaveManager: {authName}");
+            // Already have unique name - ensure auth matches
+            if (authName != savedUniqueName)
+            {
+                await UpdateAuthenticationName(savedUniqueName);
+            }
         }
+
+        Debug.Log($"✅ Name sync complete: Display='{SaveManager.Instance.data.playerName}', Unique='{SaveManager.Instance.data.uniquePlayerName}'");
     }
 
     private async Task UpdateAuthenticationName(string name)
@@ -65,7 +89,7 @@ public class PlayerNameSynchronizer : MonoBehaviour
         try
         {
             await AuthenticationService.Instance.UpdatePlayerNameAsync(name);
-            Debug.Log($"✅ Synced to Unity Authentication: {name}");
+            Debug.Log($"✅ Updated Unity Authentication to: {name}");
         }
         catch (AuthenticationException e)
         {
@@ -74,38 +98,74 @@ public class PlayerNameSynchronizer : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates both SaveManager and Unity Authentication with new name
+    /// Updates display name and generates new unique name
     /// </summary>
-    public async Task UpdatePlayerName(string newName)
+    public async Task UpdatePlayerName(string newDisplayName)
     {
-        if (string.IsNullOrEmpty(newName))
+        if (string.IsNullOrEmpty(newDisplayName))
         {
             Debug.LogError("Cannot update to empty name");
             return;
         }
 
+        // Generate unique name with # suffix
+        string playerId = AuthenticationService.Instance.PlayerId;
+        string uniqueSuffix = playerId.Substring(playerId.Length - 4);
+        string uniqueName = $"{newDisplayName}#{uniqueSuffix}";
+
         // Update SaveManager
         if (SaveManager.Instance?.data != null)
         {
-            SaveManager.Instance.data.playerName = newName;
+            SaveManager.Instance.data.playerName = newDisplayName; // Display name only
+            SaveManager.Instance.data.uniquePlayerName = uniqueName; // Full unique name
             SaveManager.Instance.Save();
-            Debug.Log($"Updated SaveManager: {newName}");
+            Debug.Log($"Updated SaveManager: Display='{newDisplayName}', Unique='{uniqueName}'");
         }
 
-        // Update Unity Authentication
-        await UpdateAuthenticationName(newName);
+        // Update Unity Authentication with unique name
+        await UpdateAuthenticationName(uniqueName);
 
-        // Sync to lobby if in one
+        // Sync to lobby with display name
         if (UnityLobbyManager.Instance?.CurrentLobby != null)
         {
-            await UnityLobbyManager.Instance.SyncSaveDataToLobby();
+            await UnityLobbyManager.Instance.UpdatePlayerDataAsync(newDisplayName, SaveManager.Instance.data.selectedCosmetic);
             Debug.Log("Synced name to lobby");
         }
 
         // Update LobbyInfo display
         if (LobbyInfo.Instance != null)
         {
-            LobbyInfo.Instance.UpdateHostName(newName);
+            LobbyInfo.Instance.UpdateHostName(newDisplayName);
         }
+    }
+
+    /// <summary>
+    /// Get the display name for UI (without # suffix)
+    /// </summary>
+    public string GetDisplayName()
+    {
+        if (SaveManager.Instance?.data == null)
+            return "Player";
+
+        string name = SaveManager.Instance.data.playerName;
+
+        // Remove # suffix if somehow it got saved
+        if (name.Contains("#"))
+        {
+            return name.Split('#')[0];
+        }
+
+        return name;
+    }
+
+    /// <summary>
+    /// Get the unique name for friends API (with # suffix)
+    /// </summary>
+    public string GetUniqueName()
+    {
+        if (SaveManager.Instance?.data == null)
+            return "";
+
+        return SaveManager.Instance.data.uniquePlayerName;
     }
 }

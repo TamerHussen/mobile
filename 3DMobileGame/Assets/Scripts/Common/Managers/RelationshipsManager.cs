@@ -126,24 +126,32 @@ namespace Unity.Services.Samples.Friends
 
         }
 
-        // Replace the LogInAsync method in RelationshipsManager.cs with this:
-
         async Task LogInAsync()
         {
             var playerID = AuthenticationService.Instance.PlayerId;
 
-            // CRITICAL FIX: Use SaveManager name if available, otherwise use Auth name
-            string playerName;
-            if (SaveManager.Instance?.data != null && !string.IsNullOrEmpty(SaveManager.Instance.data.playerName))
-            {
-                playerName = SaveManager.Instance.data.playerName;
-                Debug.Log($"Using SaveManager player name: {playerName}");
+            string displayName;
+            string uniqueName;
 
-                // Sync to Unity Authentication
+            if (SaveManager.Instance?.data != null)
+            {
+                displayName = SaveManager.Instance.data.playerName;
+                uniqueName = SaveManager.Instance.data.uniquePlayerName;
+
+                if (string.IsNullOrEmpty(uniqueName))
+                {
+                    string uniqueSuffix = playerID.Substring(playerID.Length - 4);
+                    uniqueName = $"{displayName}#{uniqueSuffix}";
+                    SaveManager.Instance.data.uniquePlayerName = uniqueName;
+                    SaveManager.Instance.Save();
+                }
+
+                Debug.Log($"Using SaveManager - Display: {displayName}, Unique: {uniqueName}");
+
                 try
                 {
-                    await AuthenticationService.Instance.UpdatePlayerNameAsync(playerName);
-                    Debug.Log($"Synced name to Unity Authentication: {playerName}");
+                    await AuthenticationService.Instance.UpdatePlayerNameAsync(uniqueName);
+                    Debug.Log($"Synced to Unity Authentication: {uniqueName}");
                 }
                 catch (Exception e)
                 {
@@ -152,25 +160,40 @@ namespace Unity.Services.Samples.Friends
             }
             else
             {
-                playerName = await AuthenticationService.Instance.GetPlayerNameAsync();
-                Debug.Log($"Using Unity Authentication name: {playerName}");
+                uniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+                if (uniqueName.Contains("#"))
+                {
+                    displayName = uniqueName.Split('#')[0];
+                }
+                else
+                {
+                    displayName = uniqueName;
+                    string uniqueSuffix = playerID.Substring(playerID.Length - 4);
+                    uniqueName = $"{displayName}#{uniqueSuffix}";
+                }
+
+                Debug.Log($"Using Auth name - Display: {displayName}, Unique: {uniqueName}");
 
                 if (SaveManager.Instance?.data != null)
                 {
-                    SaveManager.Instance.data.playerName = playerName;
+                    SaveManager.Instance.data.playerName = displayName;
+                    SaveManager.Instance.data.uniquePlayerName = uniqueName;
                     SaveManager.Instance.Save();
                 }
             }
 
-            m_LoggedPlayerProfile = new PlayerProfile(playerName, playerID);
+            m_LoggedPlayerProfile = new PlayerProfile(displayName, playerID);
 
             await SetPresence(Availability.Online, "In Friends Menu");
+
             m_LocalPlayerView.Refresh(
-                m_LoggedPlayerProfile.Name,
+                displayName,
                 "In Friends Menu",
                 Availability.Online);
+
             RefreshAll();
-            Debug.Log($"Logged in as {m_LoggedPlayerProfile}");
+            Debug.Log($"Logged in as {displayName} (unique: {uniqueName})");
         }
 
         [System.Serializable]
@@ -275,9 +298,15 @@ namespace Unity.Services.Samples.Friends
                         : friend.Presence.GetActivity<Activity>().Status;
                 }
 
+                string displayName = friend.Profile.Name;
+                if (displayName.Contains("#"))
+                {
+                    displayName = displayName.Split('#')[0];
+                }
+
                 var info = new FriendsEntryData
                 {
-                    Name = friend.Profile.Name,
+                    Name = displayName,
                     Id = friend.Id,
                     Availability = friend.Presence.Availability,
                     Activity = activityText
@@ -288,13 +317,22 @@ namespace Unity.Services.Samples.Friends
             m_RelationshipsView.RelationshipBarView.Refresh();
         }
 
+
         void RefreshRequests()
         {
             m_RequestsEntryDatas.Clear();
             var requests = GetRequests();
 
             foreach (var request in requests)
-                m_RequestsEntryDatas.Add(new PlayerProfile(request.Profile.Name, request.Id));
+            {
+                string displayName = request.Profile.Name;
+                if (displayName.Contains("#"))
+                {
+                    displayName = displayName.Split('#')[0];
+                }
+
+                m_RequestsEntryDatas.Add(new PlayerProfile(displayName, request.Id));
+            }
 
             m_RelationshipsView.RelationshipBarView.Refresh();
         }
@@ -304,11 +342,19 @@ namespace Unity.Services.Samples.Friends
             m_BlockEntryDatas.Clear();
 
             foreach (var block in FriendsService.Instance.Blocks)
-                m_BlockEntryDatas.Add(new PlayerProfile(block.Member.Profile.Name, block.Member.Id));
+            {
+                string displayName = block.Member.Profile.Name;
+                if (displayName.Contains("#"))
+                {
+                    displayName = displayName.Split('#')[0];
+                }
+
+                m_BlockEntryDatas.Add(new PlayerProfile(displayName, block.Member.Id));
+            }
 
             m_RelationshipsView.RelationshipBarView.Refresh();
         }
-        
+
         async Task<bool> SendFriendRequest(string playerName)
         {
             try

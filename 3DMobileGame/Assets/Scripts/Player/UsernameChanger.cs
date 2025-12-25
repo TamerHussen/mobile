@@ -18,10 +18,16 @@ public class UsernameChanger : MonoBehaviour
 
     void OnEnable()
     {
-        // Pre-fill with current name
+        // Pre-fill with current name (remove the # part if present)
         if (SaveManager.Instance?.data != null)
         {
-            input.text = SaveManager.Instance.data.playerName;
+            string currentName = SaveManager.Instance.data.playerName;
+            // Remove the #xxxx part to show only the display name
+            if (currentName.Contains("#"))
+            {
+                currentName = currentName.Split('#')[0];
+            }
+            input.text = currentName;
         }
     }
 
@@ -29,86 +35,117 @@ public class UsernameChanger : MonoBehaviour
     {
         feedbackText.text = "";
 
-        string name = input.text.Trim();
+        string displayName = input.text.Trim();
 
         // Validation
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(displayName))
         {
             feedbackText.text = "Name cannot be empty";
             return;
         }
 
-        if (name.Length < MinLength)
+        if (displayName.Length < MinLength)
         {
             feedbackText.text = $"Name must be at least {MinLength} characters";
             return;
         }
 
-        if (name.Length > MaxLength)
+        if (displayName.Length > MaxLength)
         {
             feedbackText.text = $"Name must be at most {MaxLength} characters";
             return;
         }
 
-        if (!ValidNameRegex.IsMatch(name))
+        if (!ValidNameRegex.IsMatch(displayName))
         {
             feedbackText.text = "Only letters, numbers, and _ are allowed";
             return;
         }
 
+        // CRITICAL FIX: Unity requires unique names with # suffix
+        // Generate a unique identifier
+        string playerId = AuthenticationService.Instance.PlayerId;
+        string uniqueSuffix = playerId.Substring(playerId.Length - 4); // Last 4 chars of player ID
+        string uniqueName = $"{displayName}#{uniqueSuffix}";
+
         try
         {
             feedbackText.text = "Updating name...";
 
-            // CRITICAL FIX: Use PlayerNameSynchronizer to update everywhere
-            if (PlayerNameSynchronizer.Instance != null)
-            {
-                await PlayerNameSynchronizer.Instance.UpdatePlayerName(name);
-            }
-            else
-            {
-                // Fallback if synchronizer doesn't exist
-                await AuthenticationService.Instance.UpdatePlayerNameAsync(name);
+            // Update Unity Authentication with unique name
+            await AuthenticationService.Instance.UpdatePlayerNameAsync(uniqueName);
+            Debug.Log($"Updated Unity Authentication to: {uniqueName}");
 
-                if (SaveManager.Instance?.data != null)
-                {
-                    SaveManager.Instance.data.playerName = name;
-                    SaveManager.Instance.Save();
-                }
-
-                if (UnityLobbyManager.Instance?.CurrentLobby != null)
-                {
-                    await UnityLobbyManager.Instance.SyncSaveDataToLobby();
-                }
+            // CRITICAL FIX: Save both display name and full unique name
+            if (SaveManager.Instance?.data != null)
+            {
+                SaveManager.Instance.data.playerName = displayName; // Store display name only
+                SaveManager.Instance.data.uniquePlayerName = uniqueName; // Store full name with #
+                SaveManager.Instance.Save();
             }
 
+            // Sync to lobby with display name
+            if (UnityLobbyManager.Instance?.CurrentLobby != null)
+            {
+                await UnityLobbyManager.Instance.UpdatePlayerDataAsync(displayName, SaveManager.Instance.data.selectedCosmetic);
+            }
+
+            // Update UI displays
             var relationships = FindFirstObjectByType<RelationshipsManager>();
             relationships?.RefreshLocalPlayerName();
             relationships?.RefreshFriends();
 
             if (LobbyInfo.Instance != null)
             {
-                LobbyInfo.Instance.UpdateHostName(name);
-                LobbyInfo.Instance.UpdatePlayerName(AuthenticationService.Instance.PlayerId, name);
+                LobbyInfo.Instance.UpdateHostName(displayName);
+                LobbyInfo.Instance.UpdatePlayerName(AuthenticationService.Instance.PlayerId, displayName);
             }
 
             LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
-            feedbackText.text = "Name changed successfully!";
-            Debug.Log($"Username changed to: {name}");
+            feedbackText.text = $"Name changed to: {displayName}";
+            Debug.Log($"Username changed to: {displayName} (auth: {uniqueName})");
 
+            // Close after 1 second
             Invoke(nameof(Close), 1f);
         }
         catch (AuthenticationException e)
         {
-            feedbackText.text = "Name unavailable or invalid";
-            Debug.LogWarning($"Name change failed: {e.Message}");
+            // Handle duplicate name error
+            // Check error code or message for name taken
+            if (e.ErrorCode == 10012 || e.Message.Contains("name") || e.Message.Contains("taken"))
+            {
+                feedbackText.text = "Name unavailable, try another";
+            }
+            else
+            {
+                feedbackText.text = "Failed to update name";
+            }
+            Debug.LogWarning($"Name change failed: Code={e.ErrorCode}, Message={e.Message}");
+        }
+        catch (System.Exception e)
+        {
+            feedbackText.text = "Failed to update name";
+            Debug.LogError($"Unexpected error: {e.Message}");
         }
     }
 
     public void Open()
     {
-        input.text = SaveManager.Instance?.data?.playerName ?? "";
+        if (SaveManager.Instance?.data != null)
+        {
+            string name = SaveManager.Instance.data.playerName;
+            if (name.Contains("#"))
+            {
+                name = name.Split('#')[0];
+            }
+            input.text = name;
+        }
+        else
+        {
+            input.text = "";
+        }
+
         feedbackText.text = "";
         rootPanel.SetActive(true);
     }

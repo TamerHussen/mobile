@@ -54,6 +54,7 @@ public class PlayerData
     public int coins = 0;
     public int level = 1;
     public string playerName = "Player";
+    public string uniquePlayerName = "";
     public string selectedCosmetic = "Default";
     public string lastSelectedLevel = "None";
     
