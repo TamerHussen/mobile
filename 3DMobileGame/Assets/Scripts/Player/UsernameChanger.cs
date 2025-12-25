@@ -1,6 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using TMPro;
 using Unity.Services.Authentication;
+using Unity.Services.Friends;
+using Unity.Services.Friends.Models;
 using Unity.Services.Samples.Friends;
 using UnityEngine;
 
@@ -71,7 +73,6 @@ public class UsernameChanger : MonoBehaviour
 
             Debug.Log($"Unity assigned unique name: {actualUniqueName}");
 
-            // Save both names
             if (SaveManager.Instance?.data != null)
             {
                 SaveManager.Instance.data.playerName = displayName;
@@ -79,16 +80,26 @@ public class UsernameChanger : MonoBehaviour
                 SaveManager.Instance.Save();
             }
 
-            // Sync to lobby with display name
+            // Sync to lobby
             if (UnityLobbyManager.Instance?.CurrentLobby != null)
             {
                 await UnityLobbyManager.Instance.UpdatePlayerDataAsync(displayName, SaveManager.Instance.data.selectedCosmetic);
             }
 
-            // Update UI displays
-            var relationships = FindFirstObjectByType<RelationshipsManager>();
-            relationships?.RefreshLocalPlayerName();
-            relationships?.RefreshFriends();
+            var relationshipsManager = FindFirstObjectByType<RelationshipsManager>();
+            if (relationshipsManager != null)
+            {
+                // Refresh local player name
+                relationshipsManager.RefreshLocalPlayerName();
+
+                await FriendsService.Instance.SetPresenceAsync(
+                    Availability.Online,
+                    new Activity { Status = "In Lobby" }
+                );
+
+                // Refresh friends list
+                relationshipsManager.RefreshFriends();
+            }
 
             if (LobbyInfo.Instance != null)
             {
@@ -99,7 +110,7 @@ public class UsernameChanger : MonoBehaviour
             LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
             feedbackText.text = $"Name changed to: {displayName}";
-            Debug.Log($"✅ Name changed - Display: {displayName}, Unique: {actualUniqueName}");
+            Debug.Log($"✅ Username changed - Display: '{displayName}', Unique: '{actualUniqueName}'");
 
             Invoke(nameof(Close), 1f);
         }

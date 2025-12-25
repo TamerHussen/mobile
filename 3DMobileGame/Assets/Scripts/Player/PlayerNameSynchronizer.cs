@@ -26,6 +26,7 @@ public class PlayerNameSynchronizer : MonoBehaviour
     /// <summary>
     /// Call this after authentication to sync names
     /// </summary>
+
     public async Task SyncPlayerName()
     {
         if (!AuthenticationService.Instance.IsSignedIn)
@@ -40,32 +41,20 @@ public class PlayerNameSynchronizer : MonoBehaviour
             return;
         }
 
-        // Get the actual unique name from Unity Authentication
+        // CRITICAL: Get the source of truth from Unity Authentication
         string authUniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
-        string savedDisplayName = SaveManager.Instance.data.playerName;
-        string savedUniqueName = SaveManager.Instance.data.uniquePlayerName;
 
-        Debug.Log($"Syncing - Auth: '{authUniqueName}', Display: '{savedDisplayName}', Saved Unique: '{savedUniqueName}'");
+        // Extract display name
+        string displayName = authUniqueName.Contains("#")
+            ? authUniqueName.Split('#')[0]
+            : authUniqueName;
 
-        // If this is the first time or names don't match
-        if (string.IsNullOrEmpty(savedUniqueName) || savedUniqueName != authUniqueName)
-        {
-            // Extract display name from the auth unique name
-            string displayName = authUniqueName.Contains("#")
-                ? authUniqueName.Split('#')[0]
-                : authUniqueName;
+        // Update SaveManager to match
+        SaveManager.Instance.data.playerName = displayName;
+        SaveManager.Instance.data.uniquePlayerName = authUniqueName;
+        SaveManager.Instance.Save();
 
-            // Update SaveManager with Unity's names
-            SaveManager.Instance.data.playerName = displayName;
-            SaveManager.Instance.data.uniquePlayerName = authUniqueName;
-            SaveManager.Instance.Save();
-
-            Debug.Log($"✅ Synced from Auth - Display: '{displayName}', Unique: '{authUniqueName}'");
-        }
-        else
-        {
-            Debug.Log("✅ Names already in sync");
-        }
+        Debug.Log($"✅ Name sync complete: Display='{displayName}', Unique='{authUniqueName}'");
     }
 
     private async Task UpdateAuthenticationName(string name)
@@ -94,37 +83,42 @@ public class PlayerNameSynchronizer : MonoBehaviour
 
         try
         {
-
             await AuthenticationService.Instance.UpdatePlayerNameAsync(newDisplayName);
 
+            // Get what Unity actually assigned
             string actualUniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
 
-            Debug.Log($"Unity assigned unique name: {actualUniqueName}");
+            Debug.Log($"Unity assigned: {actualUniqueName}");
 
+            // Update SaveManager
             if (SaveManager.Instance?.data != null)
             {
-                SaveManager.Instance.data.playerName = newDisplayName; // "player"
-                SaveManager.Instance.data.uniquePlayerName = actualUniqueName; // "player#1234"
+                SaveManager.Instance.data.playerName = newDisplayName;
+                SaveManager.Instance.data.uniquePlayerName = actualUniqueName;
                 SaveManager.Instance.Save();
+                Debug.Log($"Updated SaveManager: Display='{newDisplayName}', Unique='{actualUniqueName}'");
             }
 
+            // Sync to lobby with display name
             if (UnityLobbyManager.Instance?.CurrentLobby != null)
             {
                 await UnityLobbyManager.Instance.UpdatePlayerDataAsync(newDisplayName, SaveManager.Instance.data.selectedCosmetic);
+                Debug.Log("Synced name to lobby");
             }
 
+            // Update LobbyInfo display
             if (LobbyInfo.Instance != null)
             {
                 LobbyInfo.Instance.UpdateHostName(newDisplayName);
             }
-
-            Debug.Log($"✅ Name updated - Display: '{newDisplayName}', Unique: '{actualUniqueName}'");
         }
         catch (AuthenticationException e)
         {
             Debug.LogError($"Failed to update name: {e.Message}");
         }
     }
+
+
 
     /// <summary>
     /// Get the display name for UI (without # suffix)

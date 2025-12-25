@@ -1227,19 +1227,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 100672572}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 0
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &100672572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1290,7 +1278,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 0
+  levelName: 0
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &100830030
 GameObject:
   m_ObjectHideFlags: 0
@@ -1303,6 +1294,7 @@ GameObject:
   - component: {fileID: 100830034}
   - component: {fileID: 100830033}
   - component: {fileID: 100830032}
+  - component: {fileID: 100830035}
   m_Layer: 5
   m_Name: BadCosmetic
   m_TagString: Untagged
@@ -1372,19 +1364,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 100830033}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Bad
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &100830033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1423,6 +1403,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100830030}
   m_CullTransparentMesh: 1
+--- !u!114 &100830035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100830030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Bad
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &105176971
 GameObject:
   m_ObjectHideFlags: 0
@@ -2477,6 +2472,7 @@ GameObject:
   - component: {fileID: 181693143}
   - component: {fileID: 181693142}
   - component: {fileID: 181693141}
+  - component: {fileID: 181693144}
   m_Layer: 5
   m_Name: HornCosmetic
   m_TagString: Untagged
@@ -2546,19 +2542,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 181693142}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Horn
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &181693142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2597,6 +2581,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181693139}
   m_CullTransparentMesh: 1
+--- !u!114 &181693144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181693139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Horn
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!224 &192947972 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3435519519802606074, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
@@ -2889,19 +2888,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 216796552}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 3
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &216796552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2952,7 +2939,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 3
+  levelName: 3
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &222955392
 GameObject:
   m_ObjectHideFlags: 0
@@ -3469,6 +3459,7 @@ GameObject:
   - component: {fileID: 297417408}
   - component: {fileID: 297417410}
   - component: {fileID: 297417409}
+  - component: {fileID: 297417411}
   m_Layer: 0
   m_Name: Lobby
   m_TagString: Untagged
@@ -3567,6 +3558,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2d1103cac535f04b9df43a44ffc6f12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &297417411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 297417403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a774ee5dc2fd2df4c9ea6eb3b6262b66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &299664048
 GameObject:
   m_ObjectHideFlags: 0
@@ -3579,6 +3582,7 @@ GameObject:
   - component: {fileID: 299664052}
   - component: {fileID: 299664051}
   - component: {fileID: 299664050}
+  - component: {fileID: 299664053}
   m_Layer: 5
   m_Name: GoodCosmetic
   m_TagString: Untagged
@@ -3648,19 +3652,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 299664051}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Good
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &299664051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3699,6 +3691,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 299664048}
   m_CullTransparentMesh: 1
+--- !u!114 &299664053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 299664048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Good
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &305435013
 GameObject:
   m_ObjectHideFlags: 0
@@ -4070,19 +4077,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 357687842}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 4
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &357687842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4133,7 +4128,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 4
+  levelName: 4
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &361537407
 GameObject:
   m_ObjectHideFlags: 0
@@ -6124,19 +6122,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 603764582}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 6
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &603764582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6187,7 +6173,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 6
+  levelName: 6
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &623972556
 GameObject:
   m_ObjectHideFlags: 0
@@ -6279,7 +6268,7 @@ GameObject:
   - component: {fileID: 680723640}
   - component: {fileID: 680723639}
   m_Layer: 5
-  m_Name: MainMenu
+  m_Name: QuitBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6535,6 +6524,7 @@ GameObject:
   - component: {fileID: 711151103}
   - component: {fileID: 711151102}
   - component: {fileID: 711151101}
+  - component: {fileID: 711151104}
   m_Layer: 5
   m_Name: DefaultCosmetic
   m_TagString: Untagged
@@ -6604,19 +6594,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 711151102}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Default
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &711151102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6655,6 +6633,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 711151099}
   m_CullTransparentMesh: 1
+--- !u!114 &711151104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 711151099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Default
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &726209540
 GameObject:
   m_ObjectHideFlags: 0
@@ -9314,19 +9307,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1111559901}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 2
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1111559901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9377,7 +9358,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 2
+  levelName: 2
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1112709866
 GameObject:
   m_ObjectHideFlags: 0
@@ -10223,6 +10207,7 @@ GameObject:
   - component: {fileID: 1221716714}
   - component: {fileID: 1221716713}
   - component: {fileID: 1221716712}
+  - component: {fileID: 1221716715}
   m_Layer: 5
   m_Name: MadCosmetic
   m_TagString: Untagged
@@ -10292,19 +10277,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1221716713}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Mad
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1221716713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10343,6 +10316,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1221716710}
   m_CullTransparentMesh: 1
+--- !u!114 &1221716715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221716710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Mad
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1223485003
 GameObject:
   m_ObjectHideFlags: 0
@@ -10355,6 +10343,7 @@ GameObject:
   - component: {fileID: 1223485007}
   - component: {fileID: 1223485006}
   - component: {fileID: 1223485005}
+  - component: {fileID: 1223485009}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -10445,6 +10434,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1223485009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1223485003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b58cdcc217966a74da1377f99607016e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_LocalPlayerViewUGUI: {fileID: 105881063}
+  m_AddFriendViewUGUI: {fileID: 968781043293372324}
+  m_NavBarViewUGUI: {fileID: 968781043293372328}
+  m_FriendsViewUGUI: {fileID: 968781043293372327}
+  m_RequestsViewUGUI: {fileID: 968781043293372326}
+  m_BlocksViewUGUI: {fileID: 968781043293372325}
 --- !u!1 &1258775244
 GameObject:
   m_ObjectHideFlags: 0
@@ -10800,19 +10807,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1280338196}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 1
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1280338196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10863,7 +10858,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 1
+  levelName: 1
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1291701433
 GameObject:
   m_ObjectHideFlags: 0
@@ -11664,9 +11662,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'MainMenu
-
-'
+  m_text: Quit
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -12816,19 +12812,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1577818036}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Test
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1577818036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12880,6 +12864,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Test
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1589693460
 GameObject:
   m_ObjectHideFlags: 0
@@ -13336,6 +13323,7 @@ GameObject:
   - component: {fileID: 1626621541}
   - component: {fileID: 1626621540}
   - component: {fileID: 1626621539}
+  - component: {fileID: 1626621542}
   m_Layer: 5
   m_Name: LoudCosmetic
   m_TagString: Untagged
@@ -13405,19 +13393,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1626621540}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Loud
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1626621540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13456,6 +13432,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1626621537}
   m_CullTransparentMesh: 1
+--- !u!114 &1626621542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1626621537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Loud
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1637554232
 GameObject:
   m_ObjectHideFlags: 0
@@ -15198,19 +15189,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1812122197}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedLevel
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 5
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1812122197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15261,7 +15240,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39134b05f9b33024a93ade4937b674c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelName: Level 5
+  levelName: 5
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1821718340
 GameObject:
   m_ObjectHideFlags: 0
@@ -15446,6 +15428,7 @@ GameObject:
   - component: {fileID: 1830947943}
   - component: {fileID: 1830947942}
   - component: {fileID: 1830947941}
+  - component: {fileID: 1830947944}
   m_Layer: 5
   m_Name: HatCosmetic
   m_TagString: Untagged
@@ -15515,19 +15498,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1830947942}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Hat
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1830947942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15566,6 +15537,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1830947939}
   m_CullTransparentMesh: 1
+--- !u!114 &1830947944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830947939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Hat
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1831061345
 GameObject:
   m_ObjectHideFlags: 0
@@ -17869,6 +17855,7 @@ GameObject:
   - component: {fileID: 2137567295}
   - component: {fileID: 2137567294}
   - component: {fileID: 2137567293}
+  - component: {fileID: 2137567296}
   m_Layer: 5
   m_Name: CatCosmetic
   m_TagString: Untagged
@@ -17938,19 +17925,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2137567294}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 297417405}
-        m_TargetAssemblyTypeName: LobbyInfo, Assembly-CSharp
-        m_MethodName: SetSelectedCosmetic
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Cat
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &2137567294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17989,6 +17964,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2137567291}
   m_CullTransparentMesh: 1
+--- !u!114 &2137567296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137567291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9723fe91756534eaf2a1a5109c9ebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cosmeticName: Cat
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &968781043293372323
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18041,6 +18031,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1533453103710046628, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+      propertyPath: friendsPanel
+      value: 
+      objectReference: {fileID: 1509363596}
     - target: {fileID: 1533453103710046628, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
       propertyPath: m_LocalPlayerViewUGUI
       value: 
@@ -18519,11 +18513,67 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 728205052472669723, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+    - {fileID: 1533453103710046628, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
     m_RemovedGameObjects:
     - {fileID: 8745509976135237396, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+--- !u!114 &968781043293372324 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3143117965588975026, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+  m_PrefabInstance: {fileID: 968781043293372323}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61ed4c20e74f5a142b9aad277950f606, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &968781043293372325 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3982692579352353673, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+  m_PrefabInstance: {fileID: 968781043293372323}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45f264daa592b954b85b1f9c0c999c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &968781043293372326 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5764854842345240605, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+  m_PrefabInstance: {fileID: 968781043293372323}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5b5e5757b1a85141b4b21536958d28c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &968781043293372327 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4743860456382257730, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+  m_PrefabInstance: {fileID: 968781043293372323}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8313cb8691182be4687a565631e931a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &968781043293372328 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3715574178568888511, guid: eaa01711116a5cf4f9301a78256b6d25, type: 3}
+  m_PrefabInstance: {fileID: 968781043293372323}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de98a72e786638f4a99dcb7aaec919ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1560272203197799918 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4541501824100526436, guid: f616e626beab74b4eb0e10024cd0de39, type: 3}

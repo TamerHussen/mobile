@@ -18,7 +18,7 @@ public class UnityLobbyManager : MonoBehaviour
 
     private float heartbeatTimer;
     private const float HeartbeatInterval = 15f;
-    private const float PollInterval = 1.5f;
+    private const float PollInterval = 2.0f;
     private float pollTimer;
     private bool isJoining = false;
     public bool IsJoiningExternalLobby;
@@ -94,16 +94,23 @@ public class UnityLobbyManager : MonoBehaviour
             Player hostPlayer = GetLocalPlayerData();
             string lobbyName = hostPlayer.Data["Name"].Value + "'s Lobby";
 
+            // Get initial level from SaveManager
+            string initialLevel = SaveManager.Instance?.data?.lastSelectedLevel ?? "None";
+
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 IsPrivate = false,
-                Player = hostPlayer
+                Player = hostPlayer,
+                Data = new Dictionary<string, DataObject>
+            {
+                { "SelectedLevel", new DataObject(DataObject.VisibilityOptions.Public, initialLevel) }
+            }
             };
 
             CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
             pollTimer = PollInterval;
 
-            Debug.Log($"Lobby Created: {CurrentLobby.LobbyCode} with player data - Name: {hostPlayer.Data["Name"].Value}, Cosmetic: {hostPlayer.Data["Cosmetic"].Value}");
+            Debug.Log($"Lobby Created: {CurrentLobby.LobbyCode} with level: {initialLevel}");
         }
         catch (Exception e)
         {
@@ -231,9 +238,8 @@ public class UnityLobbyManager : MonoBehaviour
 
     private async Task HandlePostJoin()
     {
-        await Task.Delay(150);
+        await Task.Delay(200);
 
-        // Refresh lobby data
         CurrentLobby = await LobbyService.Instance.GetLobbyAsync(CurrentLobby.Id);
 
         if (CurrentLobby == null)
@@ -252,11 +258,18 @@ public class UnityLobbyManager : MonoBehaviour
         // Sync lobby to local view
         SyncLobbyToLocal();
 
+        // Update presence
         await UpdatePresenceAfterJoin();
+
+        await Task.Delay(300);
 
         if (LobbyInfo.Instance != null)
         {
             LobbyInfo.Instance.SubscribeToLobby(CurrentLobby.Id);
+        }
+        else
+        {
+            Debug.LogError("LobbyInfo.Instance is null during HandlePostJoin!");
         }
 
         // Refresh Friends UI
@@ -408,6 +421,44 @@ public class UnityLobbyManager : MonoBehaviour
         }
     }
 
+    public async Task UpdateLobbyLevel(string levelName)
+    {
+        if (CurrentLobby == null)
+        {
+            Debug.LogWarning("Cannot update level: No active lobby");
+            return;
+        }
+
+        // Only host can update lobby-wide data
+        if (!IsHost())
+        {
+            Debug.LogWarning("Only host can change level");
+            return;
+        }
+
+        try
+        {
+            UpdateLobbyOptions options = new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject>
+            {
+                { "SelectedLevel", new DataObject(DataObject.VisibilityOptions.Public, levelName) }
+            }
+            };
+
+            CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, options);
+
+            Debug.Log($"✅ Updated lobby level to: {levelName}");
+
+            // Sync to local
+            SyncLobbyToLocal();
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"Failed to update lobby level: {e.Message}");
+        }
+    }
+
     public void SyncLobbyToLocal()
     {
         if (CurrentLobby == null || LobbyInfo.Instance == null)
@@ -432,6 +483,13 @@ public class UnityLobbyManager : MonoBehaviour
 
         LobbyInfo.Instance?.SetPlayers(lobbyPlayers);
         LobbyInfo.Instance.SetCurrentLobby(CurrentLobby);
+
+        if (CurrentLobby.Data != null && CurrentLobby.Data.ContainsKey("SelectedLevel"))
+        {
+            string selectedLevel = CurrentLobby.Data["SelectedLevel"].Value;
+            LobbyInfo.Instance.SetSelectedLevelFromLobby(selectedLevel);
+        }
+
         FindFirstObjectByType<FriendsViewUGUI>()?.Refresh();
     }
 
@@ -468,42 +526,64 @@ public class UnityLobbyManager : MonoBehaviour
 
     public async Task LeaveLobby()
     {
-        if (CurrentLobby == null) return;
+        if (CurrentLobby == null)
+        {
+            Debug.LogWarning("Cannot leave lobby: CurrentLobby is null");
+            return;
+        }
+
+        Debug.Log("Leaving lobby...");
 
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Save();
         }
 
-        IsJoiningExternalLobby = true;
+        // Store lobby info before clearing
+        string lobbyId = CurrentLobby.Id;
+        bool wasHost = IsHost();
+        int playerCount = CurrentLobby.Players.Count;
+
+        // Unsubscribe from events FIRST
+        LobbyInfo.Instance?.UnsubscribeFromLobby();
 
         try
         {
             string playerId = AuthenticationService.Instance.PlayerId;
-            if (IsHost() && CurrentLobby.Players.Count <= 1)
+
+            if (wasHost && playerCount <= 1)
             {
-                await LobbyService.Instance.DeleteLobbyAsync(CurrentLobby.Id);
+                // Last player - delete the lobby
+                await LobbyService.Instance.DeleteLobbyAsync(lobbyId);
+                Debug.Log("Deleted empty lobby");
             }
             else
             {
-                await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id, playerId);
+                // Remove player from lobby
+                await LobbyService.Instance.RemovePlayerAsync(lobbyId, playerId);
+                Debug.Log("Removed player from lobby");
             }
-            Debug.Log("Left or deleted lobby.");
         }
         catch (LobbyServiceException e)
         {
             Debug.LogError($"Error leaving lobby: {e.Message}");
         }
 
+        // Clear local state
         CurrentLobby = null;
         LobbyInfo.Instance?.ClearLocalLobby();
 
+        // Wait before creating new lobby
+        await Task.Delay(300);
+
+        // Create new personal lobby if not joining another one
         if (!IsJoiningExternalLobby)
         {
-            SceneManager.LoadScene("Lobby");
+            Debug.Log("Creating new personal lobby after leaving...");
             await EnsurePersonalLobby();
         }
 
         IsJoiningExternalLobby = false;
+        Debug.Log("✅ Left lobby successfully");
     }
 }

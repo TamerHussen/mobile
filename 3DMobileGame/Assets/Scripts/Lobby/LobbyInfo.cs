@@ -23,7 +23,7 @@ public class LobbyInfo : MonoBehaviour
     public TextMeshProUGUI playerCountText;
 
     // Preview
-    public Transform previewSpawnPoint;  // for cosmetics
+    public Transform previewSpawnPoint;
     public GameObject currentPreviewModel;
 
     // Lobby Settings
@@ -54,7 +54,6 @@ public class LobbyInfo : MonoBehaviour
     {
         SetLobbyPresence();
 
-        // CRITICAL FIX: Wait for SaveManager to be ready
         if (SaveManager.Instance == null)
         {
             Debug.LogWarning("SaveManager not found in LobbyInfo.Start()");
@@ -94,7 +93,6 @@ public class LobbyInfo : MonoBehaviour
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -127,45 +125,95 @@ public class LobbyInfo : MonoBehaviour
 
     async void SetLobbyPresence()
     {
-        await FriendsService.Instance.SetPresenceAsync(
-            Availability.Online,
-            new Activity { Status = "In Lobby" }
-        );
+        try
+        {
+            await FriendsService.Instance.SetPresenceAsync(
+                Availability.Online,
+                new Activity { Status = "In Lobby" }
+            );
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Failed to set lobby presence: {e.Message}");
+        }
     }
 
     void UpdateUI()
     {
-        selectedLevelText.text = "Level: " + selectedLevel;
-        selectedCosmeticText.text = "Cosmetic: " + selectedCosmetic;
-        playerCountText.text = players.Count + "/" + MaxPlayers;
+        if (selectedLevelText != null)
+            selectedLevelText.text = "Level: " + selectedLevel;
+
+        if (selectedCosmeticText != null)
+            selectedCosmeticText.text = "Cosmetic: " + selectedCosmetic;
+
+        if (playerCountText != null)
+            playerCountText.text = players.Count + "/" + MaxPlayers;
     }
 
     public async void SetSelectedLevel(string levelName)
     {
+        // Only host can change level
+        if (UnityLobbyManager.Instance?.CurrentLobby != null)
+        {
+            string localPlayerId = AuthenticationService.Instance.PlayerId;
+            bool isHost = UnityLobbyManager.Instance.CurrentLobby.HostId == localPlayerId;
+
+            if (!isHost)
+            {
+                Debug.LogWarning("Only the host can change the level");
+                return;
+            }
+        }
+
         selectedLevel = levelName;
         UpdateUI();
 
-        // Save the selected level
+        // Save locally
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.data.lastSelectedLevel = levelName;
             SaveManager.Instance.Save();
         }
 
-        if (UnityLobbyManager.Instance != null && UnityLobbyManager.Instance.CurrentLobby != null)
+        // Update lobby data
+        if (UnityLobbyManager.Instance != null)
         {
-            await UnityLobbyManager.Instance.UpdatePlayerDataAsync(
-                AuthenticationService.Instance.PlayerName,
-                selectedCosmetic
-            );
+            await UnityLobbyManager.Instance.UpdateLobbyLevel(levelName);
         }
+    }
+
+    public void SetSelectedLevelFromLobby(string levelName)
+    {
+        if (selectedLevel == levelName)
+            return;
+
+        Debug.Log($"Syncing level from lobby: {levelName}");
+
+        selectedLevel = levelName;
+        UpdateUI();
+
+        // Update button visual states
+        UpdateLevelButtonVisuals();
+    }
+
+    void UpdateLevelButtonVisuals()
+    {
+        var levelButtons = FindObjectsByType<LevelSelector>(FindObjectsSortMode.None);
+        foreach (var levelButton in levelButtons)
+        {
+            levelButton.UpdateVisual();
+        }
+    }
+
+    public void SetSelectedCosmeticSync(string cosmeticName)
+    {
+        _ = SetSelectedCosmetic(cosmeticName);
     }
 
     public async Task SetSelectedCosmetic(string CosmeticName)
     {
         selectedCosmetic = CosmeticName;
 
-        // Save the selected cosmetic
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.data.selectedCosmetic = CosmeticName;
@@ -220,11 +268,6 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
     }
 
-    bool HasHost()
-    {
-        return players != null && players.Count > 0;
-    }
-
     void UpdatePreviewModel(string Cosmetic)
     {
         if (currentPreviewModel == null) return;
@@ -265,17 +308,31 @@ public class LobbyInfo : MonoBehaviour
 
     public async void KickPlayer(string targetPlayerId)
     {
+        if (UnityLobbyManager.Instance?.CurrentLobby == null)
+        {
+            Debug.LogError("Cannot kick: No active lobby");
+            return;
+        }
+
+        string localPlayerId = AuthenticationService.Instance.PlayerId;
+        if (UnityLobbyManager.Instance.CurrentLobby.HostId != localPlayerId)
+        {
+            Debug.LogError("Cannot kick: Not the host");
+            return;
+        }
+
         try
         {
-            // Get the current lobby ID (assuming it is stored in UnityLobbyManager)
             string lobbyId = UnityLobbyManager.Instance.CurrentLobby.Id;
 
-            // The host uses this API to remove someone else
+            Debug.Log($"Host kicking player: {targetPlayerId} from lobby: {lobbyId}");
+
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, targetPlayerId);
 
-            Debug.Log($"Successfully kicked player: {targetPlayerId}");
+            Debug.Log($"✅ Successfully kicked player: {targetPlayerId}");
 
-            // Refresh local UI
+            await Task.Delay(1000);
+
             ForceRespawn();
         }
         catch (LobbyServiceException e)
@@ -283,18 +340,7 @@ public class LobbyInfo : MonoBehaviour
             Debug.LogError($"Failed to kick player: {e.Message}");
         }
     }
-    class LobbyPlayerComparer : IEqualityComparer<LobbyPlayer>
-    {
-        public bool Equals(LobbyPlayer a, LobbyPlayer b)
-        {
-            return a.PlayerID == b.PlayerID && a.Cosmetic == b.Cosmetic;
-        }
 
-        public int GetHashCode(LobbyPlayer obj)
-        {
-            return obj.PlayerID.GetHashCode();
-        }
-    }
     public void UpdatePlayerName(string playerId, string newName)
     {
         foreach (var p in players)
@@ -308,28 +354,6 @@ public class LobbyInfo : MonoBehaviour
         ForceRespawn();
     }
 
-    public async void RefreshLobbyData()
-    {
-        try
-        {
-            currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
-
-            List<LobbyPlayer> lobbyPlayers = new List<LobbyPlayer>();
-            foreach (var p in currentLobby.Players)
-            {
-                string pName = (p.Data != null && p.Data.ContainsKey("Name")) ? p.Data["Name"].Value : "Unknown";
-                string pCosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic")) ? p.Data["Cosmetic"].Value : "Default";
-                bool isLocal = p.Id == AuthenticationService.Instance.PlayerId;
-                lobbyPlayers.Add(new LobbyPlayer(p.Id, pName, pCosmetic, isLocal));
-            }
-
-            SetPlayers(lobbyPlayers);
-        }
-        catch (LobbyServiceException e) { Debug.LogError(e); }
-    }
-
-    // Replace your SubscribeToLobby method with this fixed version:
-
     public async void SubscribeToLobby(string lobbyId)
     {
         if (string.IsNullOrEmpty(lobbyId))
@@ -340,8 +364,9 @@ public class LobbyInfo : MonoBehaviour
 
         if (m_LobbyEvents != null)
         {
-            Debug.LogWarning("Already subscribed to lobby events");
-            return;
+            Debug.LogWarning("Already subscribed to lobby events, unsubscribing first...");
+            UnsubscribeFromLobby();
+            await Task.Delay(200);
         }
 
         if (UnityLobbyManager.Instance?.CurrentLobby == null)
@@ -360,15 +385,27 @@ public class LobbyInfo : MonoBehaviour
 
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
+
         callbacks.PlayerJoined += (joinedPlayers) =>
         {
-            Debug.Log($"Player joined event received. Count: {joinedPlayers.Count}");
-            RefreshLobbyData();
+            Debug.Log($"Player joined event - Count: {joinedPlayers.Count}");
         };
+
         callbacks.PlayerLeft += (leftPlayers) =>
         {
-            Debug.Log($"Player left event received. Count: {leftPlayers.Count}");
-            RefreshLobbyData();
+            Debug.Log($"Player left event - Count: {leftPlayers.Count}");
+        };
+
+        callbacks.KickedFromLobby += () =>
+        {
+            Debug.Log("Kicked from lobby callback triggered!");
+            HandleLocalPlayerRemoved();
+        };
+
+        callbacks.LobbyDeleted += () =>
+        {
+            Debug.Log("Lobby deleted callback triggered!");
+            HandleLocalPlayerRemoved();
         };
 
         try
@@ -384,29 +421,118 @@ public class LobbyInfo : MonoBehaviour
         }
     }
 
+    private async void HandleLocalPlayerRemoved()
+    {
+        Debug.Log("Handling local player removal from lobby...");
+
+        UnsubscribeFromLobby();
+
+        ClearLocalLobby();
+
+        if (UnityLobbyManager.Instance != null)
+        {
+            UnityLobbyManager.Instance.CurrentLobby = null;
+        }
+
+        await Task.Delay(500);
+
+        Debug.Log("Creating new personal lobby after being removed...");
+
+        if (UnityLobbyManager.Instance != null)
+        {
+            await UnityLobbyManager.Instance.EnsurePersonalLobby();
+        }
+
+        Debug.Log("✅ Rejoined personal lobby after being kicked");
+    }
+
+    public async Task RefreshLobbyDataAsync()
+    {
+        if (currentLobby == null && UnityLobbyManager.Instance?.CurrentLobby != null)
+        {
+            currentLobby = UnityLobbyManager.Instance.CurrentLobby;
+        }
+
+        if (currentLobby == null)
+        {
+            Debug.LogWarning("Cannot refresh: currentLobby is null (probably left lobby)");
+            return;
+        }
+
+        try
+        {
+            currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
+
+            List<LobbyPlayer> lobbyPlayers = new List<LobbyPlayer>();
+            foreach (var p in currentLobby.Players)
+            {
+                string pName = (p.Data != null && p.Data.ContainsKey("Name")) ? p.Data["Name"].Value : "Unknown";
+                string pCosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic")) ? p.Data["Cosmetic"].Value : "Default";
+                bool isLocal = p.Id == AuthenticationService.Instance.PlayerId;
+                lobbyPlayers.Add(new LobbyPlayer(p.Id, pName, pCosmetic, isLocal));
+            }
+
+            SetPlayers(lobbyPlayers);
+        }
+        catch (LobbyServiceException e)
+        {
+            if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+            {
+                Debug.LogWarning("Lobby not found during refresh - handling removal");
+                HandleLocalPlayerRemoved();
+            }
+            else if (e.Reason == LobbyExceptionReason.RateLimited)
+            {
+                Debug.LogWarning("Rate limited - will retry on next poll");
+            }
+            else
+            {
+                Debug.LogError($"Failed to refresh lobby: {e.Message}");
+            }
+        }
+    }
+
+    public async void RefreshLobbyData()
+    {
+        await RefreshLobbyDataAsync();
+    }
+
     private void OnLobbyChanged(ILobbyChanges changes)
     {
         _ = HandleLobbyChangeAsync(changes);
     }
 
-    private Task HandleLobbyChangeAsync(ILobbyChanges changes)
+    private async Task HandleLobbyChangeAsync(ILobbyChanges changes)
     {
-        if (currentLobby == null) return Task.CompletedTask;
+        if (currentLobby == null) return;
 
-        bool stillInLobby = currentLobby.Players.Any(p => p.Id == AuthenticationService.Instance.PlayerId);
-        if (!stillInLobby)
-        {
-            Debug.Log("Kicked");
-            ClearLocalLobby();
-
-            SceneManager.LoadScene("Lobby");
-            return Task.CompletedTask;
-        }
+        string localPlayerId = AuthenticationService.Instance.PlayerId;
 
         changes.ApplyToLobby(currentLobby);
-        RefreshLobbyData();
 
-        return Task.CompletedTask;
+        bool stillInLobby = currentLobby.Players.Any(p => p.Id == localPlayerId);
+
+        if (!stillInLobby)
+        {
+            Debug.Log("Local player no longer in lobby after changes - was kicked!");
+            HandleLocalPlayerRemoved();
+            return;
+        }
+
+        if (changes.Data.Changed && currentLobby.Data != null)
+        {
+            if (currentLobby.Data.ContainsKey("SelectedLevel"))
+            {
+                string newLevel = currentLobby.Data["SelectedLevel"].Value;
+                if (selectedLevel != newLevel)
+                {
+                    Debug.Log($"Level changed from '{selectedLevel}' to '{newLevel}'");
+                    SetSelectedLevelFromLobby(newLevel);
+                }
+            }
+        }
+
+        await RefreshLobbyDataAsync();
     }
 
     public LobbyPlayer GetLocalPlayer()
@@ -450,4 +576,17 @@ public class LobbyInfo : MonoBehaviour
     }
 
     public List<LobbyPlayer> GetPlayers() => players;
+
+    class LobbyPlayerComparer : IEqualityComparer<LobbyPlayer>
+    {
+        public bool Equals(LobbyPlayer a, LobbyPlayer b)
+        {
+            return a.PlayerID == b.PlayerID && a.Cosmetic == b.Cosmetic;
+        }
+
+        public int GetHashCode(LobbyPlayer obj)
+        {
+            return obj.PlayerID.GetHashCode();
+        }
+    }
 }

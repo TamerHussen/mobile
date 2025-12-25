@@ -143,21 +143,21 @@ namespace Unity.Services.Samples.Friends
         {
             Debug.Log("Initializing UI...");
 
-            var viewObjects = FindObjectsByType<RelationshipsView>(FindObjectsSortMode.None);
+            // IMPORTANT: Include inactive objects since panels are hidden by default
+            var viewObjects = FindObjectsByType<RelationshipsView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-            Debug.Log($"Found {viewObjects.Length} RelationshipsView components in scene");
-
-            if (viewObjects.Length > 0)
-            {
-                Debug.Log($"RelationshipsView found on GameObject: '{viewObjects[0].gameObject.name}' at path: {GetGameObjectPath(viewObjects[0].gameObject)}");
-            }
+            Debug.Log($"Found {viewObjects.Length} RelationshipsView components (including inactive)");
 
             if (viewObjects.Length == 0)
             {
-                Debug.LogWarning($"RelationshipsView not found in current scene.");
+                Debug.LogWarning($"RelationshipsView not found in current scene. This is normal if the scene doesn't have friends UI.");
                 return;
             }
 
+            if (viewObjects.Length > 1)
+            {
+                Debug.LogWarning($"Multiple RelationshipsView objects found ({viewObjects.Length}). Using the first one.");
+            }
 
             m_RelationshipsViewGameObject = viewObjects[0].gameObject;
             m_RelationshipsView = viewObjects[0];
@@ -168,9 +168,14 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
+            // No need to activate the panel - just initialize the component
             m_RelationshipsView.Init();
             BindUIReferences();
+
+            Debug.Log("✅ UI initialized (panel remains inactive until button press)");
         }
+
+
         string GetGameObjectPath(GameObject obj)
         {
             string path = obj.name;
@@ -293,9 +298,12 @@ namespace Unity.Services.Samples.Friends
 
         void RebindUI()
         {
-            Debug.Log("Rebinding UI after scene reload...");
+            Debug.Log("=== REBINDING UI ===");
+            Debug.Log($"Current scene: {SceneManager.GetActiveScene().name}");
 
-            var viewObjects = FindObjectsByType<RelationshipsView>(FindObjectsSortMode.None);
+            var viewObjects = FindObjectsByType<RelationshipsView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            Debug.Log($"RelationshipsView objects found (including inactive): {viewObjects.Length}");
 
             if (viewObjects.Length == 0)
             {
@@ -303,6 +311,8 @@ namespace Unity.Services.Samples.Friends
                 ClearUIReferences();
                 return;
             }
+
+            Debug.Log($"✅ Found RelationshipsView on GameObject: {viewObjects[0].gameObject.name}");
 
             m_RelationshipsViewGameObject = viewObjects[0].gameObject;
             m_RelationshipsView = viewObjects[0];
@@ -322,16 +332,43 @@ namespace Unity.Services.Samples.Friends
             // Refresh all data to repopulate UI
             RefreshAll();
 
-            // Refresh local player display
-            if (m_LocalPlayerView != null && m_LoggedPlayerProfile != null)
-            {
-                if (m_LocalPlayerView is LocalPlayerViewUGUI localPlayerView)
-                {
-                    localPlayerView.RefreshFromSaveManager();
-                }
-            }
+            UpdateLocalPlayerViewAfterRebind();
 
             Debug.Log("✅ RelationshipsManager UI re-bound after scene reload");
+        }
+
+        void UpdateLocalPlayerViewAfterRebind()
+        {
+            if (m_LocalPlayerView == null || m_LoggedPlayerProfile == null)
+            {
+                Debug.LogWarning("Cannot update local player view: references are null");
+                return;
+            }
+
+            // Get current scene to set appropriate activity
+            string currentScene = SceneManager.GetActiveScene().name;
+            string activity = currentScene == "Lobby" ? "In Lobby" : "In Friends Menu";
+
+            // Refresh the local player view with current data
+            if (m_LocalPlayerView is LocalPlayerViewUGUI localPlayerView)
+            {
+                localPlayerView.RefreshFromSaveManager();
+            }
+
+            // Update presence to Online with appropriate activity
+            _ = SetPresence(Availability.Online, activity);
+
+            // Force refresh the UI to show current state
+            if (m_LocalPlayerView != null)
+            {
+                m_LocalPlayerView.Refresh(
+                    m_LoggedPlayerProfile.Name,
+                    activity,
+                    Availability.Online
+                );
+            }
+
+            Debug.Log($"✅ Local player view updated - Activity: {activity}");
         }
 
         async Task LogInAsync()
@@ -341,54 +378,29 @@ namespace Unity.Services.Samples.Friends
             string displayName;
             string uniqueName;
 
-            if (SaveManager.Instance?.data != null)
+            uniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+            Debug.Log($"Unity Authentication Name: {uniqueName}");
+
+            // Extract display name from unique name
+            if (uniqueName.Contains("#"))
             {
-                displayName = SaveManager.Instance.data.playerName;
-                uniqueName = SaveManager.Instance.data.uniquePlayerName;
-
-                if (string.IsNullOrEmpty(uniqueName))
-                {
-                    uniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
-                    displayName = uniqueName.Contains("#") ? uniqueName.Split('#')[0] : uniqueName;
-
-                    SaveManager.Instance.data.playerName = displayName;
-                    SaveManager.Instance.data.uniquePlayerName = uniqueName;
-                    SaveManager.Instance.Save();
-                }
-
-                Debug.Log($"Using SaveManager - Display: {displayName}, Unique: {uniqueName}");
-
-                try
-                {
-                    await AuthenticationService.Instance.UpdatePlayerNameAsync(uniqueName);
-                    Debug.Log($"Synced to Unity Authentication: {uniqueName}");
-                }
-                catch (Exception e)
-                {
-                    Debug.LogWarning($"Could not update Authentication name: {e.Message}");
-                }
+                displayName = uniqueName.Split('#')[0];
             }
             else
             {
-                uniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
+                displayName = uniqueName;
+            }
 
-                if (uniqueName.Contains("#"))
-                {
-                    displayName = uniqueName.Split('#')[0];
-                }
-                else
-                {
-                    displayName = uniqueName;
-                }
+            Debug.Log($"Extracted Display Name: {displayName}");
 
-                Debug.Log($"Using Auth name - Display: {displayName}, Unique: {uniqueName}");
-
-                if (SaveManager.Instance?.data != null)
-                {
-                    SaveManager.Instance.data.playerName = displayName;
-                    SaveManager.Instance.data.uniquePlayerName = uniqueName;
-                    SaveManager.Instance.Save();
-                }
+            // Sync to SaveManager
+            if (SaveManager.Instance?.data != null)
+            {
+                SaveManager.Instance.data.playerName = displayName;
+                SaveManager.Instance.data.uniquePlayerName = uniqueName;
+                SaveManager.Instance.Save();
+                Debug.Log($"Saved to SaveManager - Display: '{displayName}', Unique: '{uniqueName}'");
             }
 
             m_LoggedPlayerProfile = new PlayerProfile(displayName, playerID);
@@ -404,7 +416,7 @@ namespace Unity.Services.Samples.Friends
             }
 
             RefreshAll();
-            Debug.Log($"Logged in as {displayName} (unique: {uniqueName})");
+            Debug.Log($"✅ Logged in as '{displayName}' (unique: '{uniqueName}')");
         }
 
         [System.Serializable]
