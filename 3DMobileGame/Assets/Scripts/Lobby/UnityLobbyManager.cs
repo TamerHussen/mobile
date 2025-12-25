@@ -1,10 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
+using Unity.Services.Friends;
+using Unity.Services.Friends.Models;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Samples.Friends;
 using Unity.Services.Samples.Friends.UGUI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -115,8 +118,31 @@ public class UnityLobbyManager : MonoBehaviour
         {
             await EnsureSaveManagerExists();
 
+            if (CurrentLobby != null)
+            {
+                Debug.Log("Leaving current lobby before joining new one...");
+
+                LobbyInfo.Instance?.UnsubscribeFromLobby();
+
+                try
+                {
+                    await LobbyService.Instance.RemovePlayerAsync(
+                        CurrentLobby.Id,
+                        AuthenticationService.Instance.PlayerId
+                    );
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Error leaving old lobby: {e.Message}");
+                }
+
+                CurrentLobby = null;
+                LobbyInfo.Instance?.ClearLocalLobby();
+            }
+
             var options = new JoinLobbyByIdOptions { Player = GetLocalPlayerData() };
             CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, options);
+
             await HandlePostJoin();
         }
         catch (Exception e)
@@ -126,6 +152,7 @@ public class UnityLobbyManager : MonoBehaviour
         finally
         {
             isJoining = false;
+            IsJoiningExternalLobby = false;
         }
     }
 
@@ -136,8 +163,31 @@ public class UnityLobbyManager : MonoBehaviour
         {
             await EnsureSaveManagerExists();
 
+            if (CurrentLobby != null)
+            {
+                Debug.Log("Leaving current lobby before joining new one...");
+
+                LobbyInfo.Instance?.UnsubscribeFromLobby();
+
+                try
+                {
+                    await LobbyService.Instance.RemovePlayerAsync(
+                        CurrentLobby.Id,
+                        AuthenticationService.Instance.PlayerId
+                    );
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Error leaving old lobby: {e.Message}");
+                }
+
+                CurrentLobby = null;
+                LobbyInfo.Instance?.ClearLocalLobby();
+            }
+
             var options = new JoinLobbyByCodeOptions { Player = GetLocalPlayerData() };
             CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(code, options);
+
             await HandlePostJoin();
         }
         catch (Exception e)
@@ -147,6 +197,7 @@ public class UnityLobbyManager : MonoBehaviour
         finally
         {
             isJoining = false;
+            IsJoiningExternalLobby = false;
         }
     }
 
@@ -182,7 +233,7 @@ public class UnityLobbyManager : MonoBehaviour
     {
         await Task.Delay(150);
 
-        // CRITICAL FIX: Refresh lobby data FIRST
+        // Refresh lobby data
         CurrentLobby = await LobbyService.Instance.GetLobbyAsync(CurrentLobby.Id);
 
         if (CurrentLobby == null)
@@ -201,17 +252,39 @@ public class UnityLobbyManager : MonoBehaviour
         // Sync lobby to local view
         SyncLobbyToLocal();
 
-        // CRITICAL FIX: Subscribe AFTER everything is set up
+        await UpdatePresenceAfterJoin();
+
         if (LobbyInfo.Instance != null)
         {
             LobbyInfo.Instance.SubscribeToLobby(CurrentLobby.Id);
         }
-        else
+
+        // Refresh Friends UI
+        var relationshipsManager = FindFirstObjectByType<RelationshipsManager>();
+        if (relationshipsManager != null)
         {
-            Debug.LogError("LobbyInfo.Instance is null during HandlePostJoin!");
+            await relationshipsManager.EnsureFriendsConnection();
+            relationshipsManager.RefreshAll();
+            relationshipsManager.RefreshLocalPlayerName();
         }
 
-        Debug.Log($"Post-join complete. Player data synced.");
+        Debug.Log($"✅ Post-join complete. Player data synced and Friends refreshed.");
+    }
+
+    private async Task UpdatePresenceAfterJoin()
+    {
+        try
+        {
+            await FriendsService.Instance.SetPresenceAsync(
+                Availability.Online,
+                new Activity { Status = "In Lobby" }
+            );
+            Debug.Log("✅ Presence updated to 'In Lobby'");
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Failed to update presence: {e.Message}");
+        }
     }
 
     private Player GetLocalPlayerData()

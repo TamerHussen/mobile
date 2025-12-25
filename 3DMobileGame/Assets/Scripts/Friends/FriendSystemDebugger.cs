@@ -95,20 +95,19 @@ public class FriendSystemDebugger : MonoBehaviour
         }
     }
 
-    public void DebugAddFriend(string inputName)
+    public void DebugFriendRequest(string inputName)
     {
-        Debug.Log($"=== ATTEMPTING TO ADD FRIEND ===");
+        Debug.Log($"=== FRIEND REQUEST DEBUG ===");
         Debug.Log($"Input name: '{inputName}'");
-        Debug.Log($"Has #: {inputName.Contains("#")}");
-        Debug.Log($"Name length: {inputName.Length}");
+        Debug.Log($"My Auth Name: '{AuthenticationService.Instance.PlayerName}'");
+        Debug.Log($"My Unique Name: '{SaveManager.Instance.data.uniquePlayerName}'");
+        Debug.Log($"Has # in input: {inputName.Contains("#")}");
 
-        if (!inputName.Contains("#"))
+        if (inputName.Contains("#"))
         {
-            Debug.LogError("❌ Missing # in friend name! This will fail.");
-        }
-        else
-        {
-            Debug.Log($"✅ Name has # - attempting to add '{inputName}'");
+            var parts = inputName.Split('#');
+            Debug.Log($"Display part: '{parts[0]}'");
+            Debug.Log($"Suffix part: '{parts[1]}'");
         }
     }
 }

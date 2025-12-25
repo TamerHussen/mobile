@@ -14,7 +14,8 @@ namespace Unity.Services.Samples.Friends.UGUI
 
         public void Init(string playerName)
         {
-            m_NameText.text = playerName;
+            string displayName = playerName.Contains("#") ? playerName.Split('#')[0] : playerName;
+            m_NameText.text = displayName;
         }
     }
 }

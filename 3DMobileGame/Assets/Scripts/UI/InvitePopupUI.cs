@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Authentication;
@@ -53,7 +53,7 @@ public class InvitePopupUI : MonoBehaviour
         }
 
         SaveManager.Instance.Load();
-        Debug.Log($"Loaded player data before joining: Name={SaveManager.Instance.data.playerName}, Cosmetic={SaveManager.Instance.data.selectedCosmetic}");
+        Debug.Log($"Loaded player data: Name={SaveManager.Instance.data.playerName}, Cosmetic={SaveManager.Instance.data.selectedCosmetic}");
 
         try
         {
@@ -62,15 +62,28 @@ public class InvitePopupUI : MonoBehaviour
 
             if (UnityLobbyManager.Instance.CurrentLobby != null)
             {
+                Debug.Log("Leaving current lobby...");
+
+                // Unsubscribe from events
+                LobbyInfo.Instance?.UnsubscribeFromLobby();
+
+                // Remove from lobby
                 await LobbyService.Instance.RemovePlayerAsync(
                     UnityLobbyManager.Instance.CurrentLobby.Id,
-                    AuthenticationService.Instance.PlayerId);
+                    AuthenticationService.Instance.PlayerId
+                );
 
+                // Clear local state
+                UnityLobbyManager.Instance.CurrentLobby = null;
                 LobbyInfo.Instance?.ClearLocalLobby();
+
+                await Task.Delay(300);
             }
 
+            // Set flag before joining
             UnityLobbyManager.Instance.IsJoiningExternalLobby = true;
 
+            // Join new lobby
             await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
 
             await Task.Delay(500);
@@ -84,12 +97,12 @@ public class InvitePopupUI : MonoBehaviour
                 return;
             }
 
-
             Debug.Log($"Successfully joined lobby: {UnityLobbyManager.Instance.CurrentLobby.Id}");
 
+            // Load lobby scene
             SceneManager.LoadScene("Lobby");
 
-            Debug.Log("Joined lobby successfully!");
+            Debug.Log("✅ Joined lobby successfully!");
             VisualPanel.SetActive(false);
         }
         catch (LobbyServiceException e)

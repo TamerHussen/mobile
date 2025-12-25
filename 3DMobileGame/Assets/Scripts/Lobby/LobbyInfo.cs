@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Friends;
 using Unity.Services.Friends.Models;
-using Unity.Services.Samples.Friends;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using UnityEngine.SceneManagement;
+using Unity.Services.Samples.Friends;
 using UnityEngine;
-using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class LobbyInfo : MonoBehaviour
 {
@@ -100,7 +101,15 @@ public class LobbyInfo : MonoBehaviour
     {
         if (scene.name == "Lobby")
         {
+            Debug.Log("Lobby scene loaded, rebinding...");
             RebindLobbyScene();
+
+            var relationshipsManager = FindFirstObjectByType<RelationshipsManager>();
+            if (relationshipsManager != null)
+            {
+                relationshipsManager.RefreshAll();
+                relationshipsManager.RefreshLocalPlayerName();
+            }
         }
     }
 
@@ -412,8 +421,28 @@ public class LobbyInfo : MonoBehaviour
         return players.Find(p => p.PlayerID == AuthenticationService.Instance.PlayerId);
     }
 
+    public void UnsubscribeFromLobby()
+    {
+        if (m_LobbyEvents != null)
+        {
+            try
+            {
+                _ = m_LobbyEvents.UnsubscribeAsync();
+                Debug.Log("✅ Unsubscribed from lobby events");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Error unsubscribing from lobby: {e.Message}");
+            }
+
+            m_LobbyEvents = null;
+        }
+    }
+
     public void ClearLocalLobby()
     {
+        UnsubscribeFromLobby();
+
         if (LobbyPlayerSpawner.Instance != null)
         {
             LobbyPlayerSpawner.Instance.ClearAll();
@@ -422,13 +451,9 @@ public class LobbyInfo : MonoBehaviour
         players.Clear();
         UpdateUI();
 
-        if (m_LobbyEvents != null)
-        {
-            _ = m_LobbyEvents.UnsubscribeAsync();
-            m_LobbyEvents = null;
-        }
-
         currentLobby = null;
+
+        Debug.Log("✅ Local lobby cleared");
     }
 
     public List<LobbyPlayer> GetPlayers() => players;

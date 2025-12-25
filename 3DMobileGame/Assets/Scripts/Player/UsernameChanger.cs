@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Samples.Friends;
@@ -18,7 +18,6 @@ public class UsernameChanger : MonoBehaviour
 
     void OnEnable()
     {
-        // Pre-fill with current name (remove the # part if present)
         if (SaveManager.Instance?.data != null)
         {
             string currentName = SaveManager.Instance.data.playerName;
@@ -62,25 +61,21 @@ public class UsernameChanger : MonoBehaviour
             return;
         }
 
-        // CRITICAL FIX: Unity requires unique names with # suffix
-        // Generate a unique identifier
-        string playerId = AuthenticationService.Instance.PlayerId;
-        string uniqueSuffix = playerId.Substring(playerId.Length - 4); // Last 4 chars of player ID
-        string uniqueName = $"{displayName}#{uniqueSuffix}";
-
         try
         {
             feedbackText.text = "Updating name...";
 
-            // Update Unity Authentication with unique name
-            await AuthenticationService.Instance.UpdatePlayerNameAsync(uniqueName);
-            Debug.Log($"Updated Unity Authentication to: {uniqueName}");
+            await AuthenticationService.Instance.UpdatePlayerNameAsync(displayName);
 
-            // CRITICAL FIX: Save both display name and full unique name
+            string actualUniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+            Debug.Log($"Unity assigned unique name: {actualUniqueName}");
+
+            // Save both names
             if (SaveManager.Instance?.data != null)
             {
-                SaveManager.Instance.data.playerName = displayName; // Store display name only
-                SaveManager.Instance.data.uniquePlayerName = uniqueName; // Store full name with #
+                SaveManager.Instance.data.playerName = displayName;
+                SaveManager.Instance.data.uniquePlayerName = actualUniqueName;
                 SaveManager.Instance.Save();
             }
 
@@ -104,15 +99,12 @@ public class UsernameChanger : MonoBehaviour
             LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
             feedbackText.text = $"Name changed to: {displayName}";
-            Debug.Log($"Username changed to: {displayName} (auth: {uniqueName})");
+            Debug.Log($"✅ Name changed - Display: {displayName}, Unique: {actualUniqueName}");
 
-            // Close after 1 second
             Invoke(nameof(Close), 1f);
         }
         catch (AuthenticationException e)
         {
-            // Handle duplicate name error
-            // Check error code or message for name taken
             if (e.ErrorCode == 10012 || e.Message.Contains("name") || e.Message.Contains("taken"))
             {
                 feedbackText.text = "Name unavailable, try another";
@@ -122,11 +114,6 @@ public class UsernameChanger : MonoBehaviour
                 feedbackText.text = "Failed to update name";
             }
             Debug.LogWarning($"Name change failed: Code={e.ErrorCode}, Message={e.Message}");
-        }
-        catch (System.Exception e)
-        {
-            feedbackText.text = "Failed to update name";
-            Debug.LogError($"Unexpected error: {e.Message}");
         }
     }
 

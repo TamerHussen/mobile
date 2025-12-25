@@ -9,6 +9,8 @@ namespace Unity.Services.Samples.Friends
 
         void Refresh(string name, string activity,
             Availability presenceAvailabilityOptions);
+
+        void RefreshFromSaveManager();
     }
 
 }

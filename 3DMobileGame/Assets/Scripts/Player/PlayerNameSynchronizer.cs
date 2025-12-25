@@ -40,48 +40,32 @@ public class PlayerNameSynchronizer : MonoBehaviour
             return;
         }
 
-        string authName = await AuthenticationService.Instance.GetPlayerNameAsync();
+        // Get the actual unique name from Unity Authentication
+        string authUniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
         string savedDisplayName = SaveManager.Instance.data.playerName;
         string savedUniqueName = SaveManager.Instance.data.uniquePlayerName;
 
-        Debug.Log($"Syncing names - Auth: '{authName}', SavedDisplay: '{savedDisplayName}', SavedUnique: '{savedUniqueName}'");
+        Debug.Log($"Syncing - Auth: '{authUniqueName}', Display: '{savedDisplayName}', Saved Unique: '{savedUniqueName}'");
 
-        // CRITICAL FIX: Handle name sync properly
-        if (string.IsNullOrEmpty(savedUniqueName) || savedUniqueName == "Player")
+        // If this is the first time or names don't match
+        if (string.IsNullOrEmpty(savedUniqueName) || savedUniqueName != authUniqueName)
         {
-            // First time setup - use auth name
-            if (authName.Contains("#"))
-            {
-                // Auth has unique name - split it
-                SaveManager.Instance.data.uniquePlayerName = authName;
-                SaveManager.Instance.data.playerName = authName.Split('#')[0];
-            }
-            else
-            {
-                // Generate unique name
-                string playerId = AuthenticationService.Instance.PlayerId;
-                string uniqueSuffix = playerId.Substring(playerId.Length - 4);
-                string uniqueName = $"{savedDisplayName}#{uniqueSuffix}";
+            // Extract display name from the auth unique name
+            string displayName = authUniqueName.Contains("#")
+                ? authUniqueName.Split('#')[0]
+                : authUniqueName;
 
-                SaveManager.Instance.data.uniquePlayerName = uniqueName;
-                SaveManager.Instance.data.playerName = savedDisplayName;
-
-                // Update auth
-                await UpdateAuthenticationName(uniqueName);
-            }
-
+            // Update SaveManager with Unity's names
+            SaveManager.Instance.data.playerName = displayName;
+            SaveManager.Instance.data.uniquePlayerName = authUniqueName;
             SaveManager.Instance.Save();
+
+            Debug.Log($"✅ Synced from Auth - Display: '{displayName}', Unique: '{authUniqueName}'");
         }
         else
         {
-            // Already have unique name - ensure auth matches
-            if (authName != savedUniqueName)
-            {
-                await UpdateAuthenticationName(savedUniqueName);
-            }
+            Debug.Log("✅ Names already in sync");
         }
-
-        Debug.Log($"✅ Name sync complete: Display='{SaveManager.Instance.data.playerName}', Unique='{SaveManager.Instance.data.uniquePlayerName}'");
     }
 
     private async Task UpdateAuthenticationName(string name)
@@ -108,34 +92,37 @@ public class PlayerNameSynchronizer : MonoBehaviour
             return;
         }
 
-        // Generate unique name with # suffix
-        string playerId = AuthenticationService.Instance.PlayerId;
-        string uniqueSuffix = playerId.Substring(playerId.Length - 4);
-        string uniqueName = $"{newDisplayName}#{uniqueSuffix}";
-
-        // Update SaveManager
-        if (SaveManager.Instance?.data != null)
+        try
         {
-            SaveManager.Instance.data.playerName = newDisplayName; // Display name only
-            SaveManager.Instance.data.uniquePlayerName = uniqueName; // Full unique name
-            SaveManager.Instance.Save();
-            Debug.Log($"Updated SaveManager: Display='{newDisplayName}', Unique='{uniqueName}'");
+
+            await AuthenticationService.Instance.UpdatePlayerNameAsync(newDisplayName);
+
+            string actualUniqueName = await AuthenticationService.Instance.GetPlayerNameAsync();
+
+            Debug.Log($"Unity assigned unique name: {actualUniqueName}");
+
+            if (SaveManager.Instance?.data != null)
+            {
+                SaveManager.Instance.data.playerName = newDisplayName; // "player"
+                SaveManager.Instance.data.uniquePlayerName = actualUniqueName; // "player#1234"
+                SaveManager.Instance.Save();
+            }
+
+            if (UnityLobbyManager.Instance?.CurrentLobby != null)
+            {
+                await UnityLobbyManager.Instance.UpdatePlayerDataAsync(newDisplayName, SaveManager.Instance.data.selectedCosmetic);
+            }
+
+            if (LobbyInfo.Instance != null)
+            {
+                LobbyInfo.Instance.UpdateHostName(newDisplayName);
+            }
+
+            Debug.Log($"✅ Name updated - Display: '{newDisplayName}', Unique: '{actualUniqueName}'");
         }
-
-        // Update Unity Authentication with unique name
-        await UpdateAuthenticationName(uniqueName);
-
-        // Sync to lobby with display name
-        if (UnityLobbyManager.Instance?.CurrentLobby != null)
+        catch (AuthenticationException e)
         {
-            await UnityLobbyManager.Instance.UpdatePlayerDataAsync(newDisplayName, SaveManager.Instance.data.selectedCosmetic);
-            Debug.Log("Synced name to lobby");
-        }
-
-        // Update LobbyInfo display
-        if (LobbyInfo.Instance != null)
-        {
-            LobbyInfo.Instance.UpdateHostName(newDisplayName);
+            Debug.LogError($"Failed to update name: {e.Message}");
         }
     }
 
