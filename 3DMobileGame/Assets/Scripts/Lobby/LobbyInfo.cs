@@ -37,6 +37,8 @@ public class LobbyInfo : MonoBehaviour
 
     private List<LobbyPlayer> players = new List<LobbyPlayer>();
 
+    private bool isHandlingRemoval = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -152,7 +154,6 @@ public class LobbyInfo : MonoBehaviour
 
     public async void SetSelectedLevel(string levelName)
     {
-        // Only host can change level
         if (UnityLobbyManager.Instance?.CurrentLobby != null)
         {
             string localPlayerId = AuthenticationService.Instance.PlayerId;
@@ -168,14 +169,12 @@ public class LobbyInfo : MonoBehaviour
         selectedLevel = levelName;
         UpdateUI();
 
-        // Save locally
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.data.lastSelectedLevel = levelName;
             SaveManager.Instance.Save();
         }
 
-        // Update lobby data
         if (UnityLobbyManager.Instance != null)
         {
             await UnityLobbyManager.Instance.UpdateLobbyLevel(levelName);
@@ -192,7 +191,6 @@ public class LobbyInfo : MonoBehaviour
         selectedLevel = levelName;
         UpdateUI();
 
-        // Update button visual states
         UpdateLevelButtonVisuals();
     }
 
@@ -212,6 +210,8 @@ public class LobbyInfo : MonoBehaviour
 
     public async Task SetSelectedCosmetic(string CosmeticName)
     {
+        Debug.Log($"Setting cosmetic to: {CosmeticName}");
+
         selectedCosmetic = CosmeticName;
 
         if (SaveManager.Instance != null)
@@ -225,10 +225,16 @@ public class LobbyInfo : MonoBehaviour
 
         if (UnityLobbyManager.Instance != null && UnityLobbyManager.Instance.CurrentLobby != null)
         {
-            await UnityLobbyManager.Instance.UpdatePlayerDataAsync(
-                SaveManager.Instance.data.playerName,
-                CosmeticName
-            );
+            string displayName = SaveManager.Instance?.data?.playerName ?? "Player";
+
+            Debug.Log($"Updating player data in lobby - Name: {displayName}, Cosmetic: {CosmeticName}");
+
+            await Task.Delay(200);
+
+            await UnityLobbyManager.Instance.UpdatePlayerDataAsync(displayName, CosmeticName);
+
+            // Force immediate refresh after update
+            await RefreshLobbyDataAsync();
         }
     }
 
@@ -239,27 +245,82 @@ public class LobbyInfo : MonoBehaviour
 
     public void SetPlayers(List<LobbyPlayer> newPlayers)
     {
-        if (players.Count == newPlayers.Count &&
-            players.SequenceEqual(newPlayers, new LobbyPlayerComparer()))
-            return;
+        Debug.Log($"SetPlayers called with {newPlayers.Count} players");
 
-        foreach (var p in newPlayers)
+        bool playerCountChanged = players.Count != newPlayers.Count;
+
+        if (playerCountChanged)
         {
-            if (string.IsNullOrEmpty(p.Cosmetic)) p.Cosmetic = "Default";
+            Debug.Log($"Player count changed: {players.Count} -> {newPlayers.Count}");
         }
 
+        // Check if any player data changed (including cosmetics!)
+        bool playerDataChanged = false;
+        if (!playerCountChanged && players.Count == newPlayers.Count)
+        {
+            for (int i = 0; i < players.Count; i++)
+            {
+                var oldPlayer = players[i];
+                var newPlayer = newPlayers.FirstOrDefault(p => p.PlayerID == oldPlayer.PlayerID);
+
+                if (newPlayer != null)
+                {
+                    if (oldPlayer.PlayerName != newPlayer.PlayerName ||
+                        oldPlayer.Cosmetic != newPlayer.Cosmetic)
+                    {
+                        Debug.Log($"Player data changed for {newPlayer.PlayerName}: " +
+                                  $"Name: {oldPlayer.PlayerName}->{newPlayer.PlayerName}, " +
+                                  $"Cosmetic: {oldPlayer.Cosmetic}->{newPlayer.Cosmetic}");
+                        playerDataChanged = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!playerCountChanged && !playerDataChanged)
+        {
+            Debug.Log("No changes detected, skipping update");
+            return;
+        }
+
+        // Ensure cosmetics are set
+        foreach (var p in newPlayers)
+        {
+            if (string.IsNullOrEmpty(p.Cosmetic))
+            {
+                Debug.LogWarning($"Player {p.PlayerName} has no cosmetic, setting to Default");
+                p.Cosmetic = "Default";
+            }
+        }
+
+        // Update player list
         players = newPlayers;
 
+        // Mark local player
         foreach (var p in players)
         {
             p.IsLocal = p.PlayerID == AuthenticationService.Instance.PlayerId;
         }
 
-        if (newPlayers.Any(p => p.PlayerName == "Joining...")) return;
+        // Skip if players are still joining
+        if (newPlayers.Any(p => p.PlayerName == "Joining..."))
+        {
+            Debug.Log("Some players still joining, skipping spawn");
+            return;
+        }
 
+        // Update UI
         UpdateUI();
-        StopAllCoroutines();
-        StartCoroutine(DelayedSpawn());
+
+        if (LobbyPlayerSpawner.Instance != null)
+        {
+            Debug.Log("Cosmetic update detected, respawning players...");
+            LobbyPlayerSpawner.Instance.ClearAll();
+
+            StopAllCoroutines();
+            StartCoroutine(DelayedSpawn());
+        }
     }
 
     IEnumerator DelayedSpawn()
@@ -366,7 +427,7 @@ public class LobbyInfo : MonoBehaviour
         {
             Debug.LogWarning("Already subscribed to lobby events, unsubscribing first...");
             UnsubscribeFromLobby();
-            await Task.Delay(200);
+            await Task.Delay(300);
         }
 
         if (UnityLobbyManager.Instance?.CurrentLobby == null)
@@ -382,6 +443,7 @@ public class LobbyInfo : MonoBehaviour
         }
 
         currentLobby = UnityLobbyManager.Instance.CurrentLobby;
+        isHandlingRemoval = false;
 
         var callbacks = new LobbyEventCallbacks();
         callbacks.LobbyChanged += OnLobbyChanged;
@@ -412,42 +474,80 @@ public class LobbyInfo : MonoBehaviour
         {
             Debug.Log($"Subscribing to lobby events for lobby: {lobbyId}");
             m_LobbyEvents = await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyId, callbacks);
+
+            UnityLobbyManager.Instance?.EnableLobbyEvents();
+
             Debug.Log("✅ Successfully subscribed to lobby events!");
         }
         catch (LobbyServiceException ex)
         {
             Debug.LogError($"Failed to subscribe to lobby events: {ex.Message} (Code: {ex.Reason})");
             m_LobbyEvents = null;
+
+            UnityLobbyManager.Instance?.DisableLobbyEvents();
         }
     }
 
     private async void HandleLocalPlayerRemoved()
     {
-        Debug.Log("Handling local player removal from lobby...");
+        if (isHandlingRemoval)
+        {
+            Debug.Log("Already handling removal, skipping");
+            return;
+        }
+
+        isHandlingRemoval = true;
+
+        Debug.Log("=== HANDLING LOCAL PLAYER REMOVAL ===");
 
         UnsubscribeFromLobby();
 
-        ClearLocalLobby();
+        if (LobbyPlayerSpawner.Instance != null)
+        {
+            LobbyPlayerSpawner.Instance.ClearAll();
+        }
+
+        players.Clear();
+        UpdateUI();
+
+        currentLobby = null;
 
         if (UnityLobbyManager.Instance != null)
         {
             UnityLobbyManager.Instance.CurrentLobby = null;
         }
 
-        await Task.Delay(500);
+        Debug.Log("Local state cleared, creating new lobby...");
+
+        await Task.Delay(1000);
 
         Debug.Log("Creating new personal lobby after being removed...");
 
         if (UnityLobbyManager.Instance != null)
         {
             await UnityLobbyManager.Instance.EnsurePersonalLobby();
+
+            if (SceneManager.GetActiveScene().name == "Lobby")
+            {
+                await Task.Delay(500);
+
+                ForceRespawn();
+            }
         }
+
+        isHandlingRemoval = false;
 
         Debug.Log("✅ Rejoined personal lobby after being kicked");
     }
 
     public async Task RefreshLobbyDataAsync()
     {
+        if (isHandlingRemoval)
+        {
+            Debug.Log("Skipping refresh - handling removal");
+            return;
+        }
+
         if (currentLobby == null && UnityLobbyManager.Instance?.CurrentLobby != null)
         {
             currentLobby = UnityLobbyManager.Instance.CurrentLobby;
@@ -455,7 +555,7 @@ public class LobbyInfo : MonoBehaviour
 
         if (currentLobby == null)
         {
-            Debug.LogWarning("Cannot refresh: currentLobby is null (probably left lobby)");
+            Debug.LogWarning("Cannot refresh: currentLobby is null");
             return;
         }
 
@@ -463,12 +563,25 @@ public class LobbyInfo : MonoBehaviour
         {
             currentLobby = await LobbyService.Instance.GetLobbyAsync(currentLobby.Id);
 
+            string localPlayerId = AuthenticationService.Instance.PlayerId;
+            bool stillInLobby = currentLobby.Players.Any(p => p.Id == localPlayerId);
+
+            if (!stillInLobby)
+            {
+                Debug.LogWarning("Local player not found in lobby during refresh - handling removal");
+                HandleLocalPlayerRemoved();
+                return;
+            }
+
             List<LobbyPlayer> lobbyPlayers = new List<LobbyPlayer>();
             foreach (var p in currentLobby.Players)
             {
                 string pName = (p.Data != null && p.Data.ContainsKey("Name")) ? p.Data["Name"].Value : "Unknown";
                 string pCosmetic = (p.Data != null && p.Data.ContainsKey("Cosmetic")) ? p.Data["Cosmetic"].Value : "Default";
-                bool isLocal = p.Id == AuthenticationService.Instance.PlayerId;
+                bool isLocal = p.Id == localPlayerId;
+
+                Debug.Log($"Refresh found player: {pName} with cosmetic: {pCosmetic}");
+
                 lobbyPlayers.Add(new LobbyPlayer(p.Id, pName, pCosmetic, isLocal));
             }
 
@@ -483,7 +596,7 @@ public class LobbyInfo : MonoBehaviour
             }
             else if (e.Reason == LobbyExceptionReason.RateLimited)
             {
-                Debug.LogWarning("Rate limited - will retry on next poll");
+                // Silently skip this refresh
             }
             else
             {
@@ -504,6 +617,12 @@ public class LobbyInfo : MonoBehaviour
 
     private async Task HandleLobbyChangeAsync(ILobbyChanges changes)
     {
+        if (isHandlingRemoval)
+        {
+            Debug.Log("Skipping lobby change - handling removal");
+            return;
+        }
+
         if (currentLobby == null) return;
 
         string localPlayerId = AuthenticationService.Instance.PlayerId;
@@ -532,6 +651,7 @@ public class LobbyInfo : MonoBehaviour
             }
         }
 
+        // Always refresh after lobby changes to catch cosmetic updates
         await RefreshLobbyDataAsync();
     }
 
@@ -555,11 +675,15 @@ public class LobbyInfo : MonoBehaviour
             }
 
             m_LobbyEvents = null;
+
+            UnityLobbyManager.Instance?.DisableLobbyEvents();
         }
     }
 
     public void ClearLocalLobby()
     {
+        Debug.Log("ClearLocalLobby called");
+
         UnsubscribeFromLobby();
 
         if (LobbyPlayerSpawner.Instance != null)
@@ -572,21 +696,10 @@ public class LobbyInfo : MonoBehaviour
 
         currentLobby = null;
 
+        isHandlingRemoval = false;
+
         Debug.Log("✅ Local lobby cleared");
     }
 
     public List<LobbyPlayer> GetPlayers() => players;
-
-    class LobbyPlayerComparer : IEqualityComparer<LobbyPlayer>
-    {
-        public bool Equals(LobbyPlayer a, LobbyPlayer b)
-        {
-            return a.PlayerID == b.PlayerID && a.Cosmetic == b.Cosmetic;
-        }
-
-        public int GetHashCode(LobbyPlayer obj)
-        {
-            return obj.PlayerID.GetHashCode();
-        }
-    }
 }

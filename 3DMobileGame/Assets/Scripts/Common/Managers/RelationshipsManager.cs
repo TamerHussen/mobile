@@ -42,6 +42,9 @@ namespace Unity.Services.Samples.Friends
         // Track which scenes should have friends UI
         private readonly string[] scenesWithFriendsUI = { "MainMenu", "Lobby" };
 
+        private float friendRefreshTimer = 0f;
+        private const float FriendRefreshInterval = 30f;
+
         void Awake()
         {
             // Ensure only one instance exists
@@ -53,6 +56,19 @@ namespace Unity.Services.Samples.Friends
             }
 
             DontDestroyOnLoad(gameObject);
+        }
+
+        void Update()
+        {
+            friendRefreshTimer += Time.deltaTime;
+            if (friendRefreshTimer >= FriendRefreshInterval)
+            {
+                friendRefreshTimer = 0f;
+                if (m_IsInitialized && m_FriendsListView != null)
+                {
+                    RefreshFriends();
+                }
+            }
         }
 
         void OnEnable()
@@ -727,21 +743,30 @@ namespace Unity.Services.Samples.Friends
                     RefreshFriends();
                     Debug.Log($"create {e.Relationship} EventReceived");
                 };
+
                 FriendsService.Instance.MessageReceived += e =>
                 {
                     RefreshRequests();
                     Debug.Log("MessageReceived EventReceived");
                 };
+
                 FriendsService.Instance.PresenceUpdated += e =>
                 {
+                    Debug.Log($"PresenceUpdated EventReceived for user: {e.ID}");
                     RefreshFriends();
-                    Debug.Log("PresenceUpdated EventReceived");
+
+                    if (e.ID == AuthenticationService.Instance.PlayerId)
+                    {
+                        RefreshLocalPlayerName();
+                    }
                 };
+
                 FriendsService.Instance.RelationshipDeleted += e =>
                 {
                     RefreshFriends();
                     Debug.Log($"Delete {e.Relationship} EventReceived");
                 };
+
                 FriendsService.Instance.NotificationsConnectivityChanged += e =>
                 {
                     if (m_current_state == FriendsEventConnectionState.Subscribed && m_current_state != e.State)
@@ -758,6 +783,9 @@ namespace Unity.Services.Samples.Friends
                         e.State == FriendsEventConnectionState.Subscribed)
                     {
                         SetPresenceAsync((Availability.Online, "Back Online"));
+
+                        // Refresh all data when reconnecting
+                        RefreshAll();
                     }
                     Debug.Log($"Change of state in notification system from {m_current_state} to {e.State}");
                     m_current_state = e.State;

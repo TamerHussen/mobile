@@ -1,6 +1,7 @@
 ﻿using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class LeaveLobbyButton : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class LeaveLobbyButton : MonoBehaviour
 
     public async void Leave()
     {
+        Debug.Log("=== LEAVE BUTTON CLICKED ===");
+
         var lobbyManager = UnityLobbyManager.Instance;
         if (lobbyManager == null)
         {
@@ -29,13 +32,23 @@ public class LeaveLobbyButton : MonoBehaviour
         // Check if already in personal lobby alone
         if (isHost && playerCount == 1)
         {
-            Debug.Log("Already in personal lobby alone, nothing to do");
+            Debug.Log("Already in personal lobby alone");
             return;
+        }
+
+        if (LobbyInfo.Instance != null)
+        {
+            LobbyInfo.Instance.UnsubscribeFromLobby();
+
+            if (LobbyPlayerSpawner.Instance != null)
+            {
+                LobbyPlayerSpawner.Instance.ClearAll();
+            }
         }
 
         // Leave the lobby
         await lobbyManager.LeaveLobby();
 
-        Debug.Log("✅ Left lobby, new personal lobby created");
+        Debug.Log("✅ Left lobby successfully");
     }
 }

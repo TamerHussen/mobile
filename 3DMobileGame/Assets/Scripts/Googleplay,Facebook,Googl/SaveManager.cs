@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
 
 public class SaveManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class SaveManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             savePath = Application.persistentDataPath + "/save.json";
             Load();
-            Debug.Log($"SaveManager initialized. Player: {data.playerName}, Cosmetic: {data.selectedCosmetic}");
+            Debug.Log($"SaveManager initialized. Player: {data.playerName}, Cosmetic: {data.selectedCosmetic}, Coins: {data.coins}");
         }
         else
         {
@@ -57,17 +58,29 @@ public class PlayerData
     public string uniquePlayerName = "";
     public string selectedCosmetic = "Default";
     public string lastSelectedLevel = "None";
-    
-    // Add any other player preferences you want to persist
-    
+    public List<string> unlockedCosmetics = new List<string> { "Default" };
+
     public PlayerData()
     {
         // Default constructor for deserialization
     }
-    
+
     public PlayerData(string name, string cosmetic = "Default")
     {
         playerName = name;
         selectedCosmetic = cosmetic;
+    }
+
+    public bool HasCosmetic(string cosmeticName)
+    {
+        return unlockedCosmetics.Contains(cosmeticName);
+    }
+
+    public void UnlockCosmetic(string cosmeticName)
+    {
+        if (!unlockedCosmetics.Contains(cosmeticName))
+        {
+            unlockedCosmetics.Add(cosmeticName);
+        }
     }
 }
