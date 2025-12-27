@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+
 public class WatchAdButton : MonoBehaviour
 {
     [Header("Components")]
@@ -10,8 +11,11 @@ public class WatchAdButton : MonoBehaviour
 
     [Header("Settings")]
     public float checkInterval = 1f;
+    public int rewardAmount = 50;
 
     private float checkTimer = 0f;
+    private int adsWatchedThisSession = 0;
+    private const int MAX_ADS_PER_SESSION = 5;
 
     void Start()
     {
@@ -19,13 +23,12 @@ public class WatchAdButton : MonoBehaviour
             button = GetComponent<Button>();
 
         button.onClick.AddListener(OnWatchAdClicked);
-
+        LoadAdWatchCount();
         UpdateButtonState();
     }
 
     void Update()
     {
-        // Periodically check if ad is ready
         checkTimer += Time.deltaTime;
         if (checkTimer >= checkInterval)
         {
@@ -36,23 +39,49 @@ public class WatchAdButton : MonoBehaviour
 
     void OnWatchAdClicked()
     {
-        if (GoogleAdsManager.Instance != null)
+        if (adsWatchedThisSession >= MAX_ADS_PER_SESSION)
         {
-            if (GoogleAdsManager.Instance)
-            {
-            }
-            else
-            {
-                Debug.Log("Ad not ready, loading...");
+            Debug.Log("Max ads reached for this session");
+            if (buttonText != null)
+                buttonText.text = "Max Ads Reached";
+            return;
+        }
 
-                if (buttonText != null)
-                    buttonText.text = "Loading Ad...";
-            }
+        if (GoogleAdsManager.Instance != null && GoogleAdsManager.Instance.IsRewardedAdReady())
+        {
+            GoogleAdsManager.Instance.ShowRewardedAd(OnAdRewarded, OnAdFailed);
+
+            if (buttonText != null)
+                buttonText.text = "Loading Ad...";
         }
         else
         {
-            Debug.LogError("GoogleAdsManager not found!");
+            Debug.Log("Ad not ready, loading...");
+            if (buttonText != null)
+                buttonText.text = "Loading Ad...";
+
+            GoogleAdsManager.Instance?.LoadRewardedAd();
         }
+    }
+
+    void OnAdRewarded()
+    {
+        adsWatchedThisSession++;
+        SaveAdWatchCount();
+
+        if (CoinsManager.Instance != null)
+        {
+            CoinsManager.Instance.AddCoins(rewardAmount);
+            Debug.Log($"✅ Rewarded {rewardAmount} coins! ({adsWatchedThisSession}/{MAX_ADS_PER_SESSION} ads watched)");
+        }
+
+        UpdateButtonState();
+    }
+
+    void OnAdFailed()
+    {
+        Debug.LogWarning("Ad failed to load or was closed");
+        UpdateButtonState();
     }
 
     void UpdateButtonState()
@@ -65,7 +94,17 @@ public class WatchAdButton : MonoBehaviour
             return;
         }
 
-        bool isReady = GoogleAdsManager.Instance;
+        if (adsWatchedThisSession >= MAX_ADS_PER_SESSION)
+        {
+            button.interactable = false;
+            if (buttonText != null)
+                buttonText.text = $"Max Ads ({MAX_ADS_PER_SESSION}/{MAX_ADS_PER_SESSION})";
+            if (rewardText != null)
+                rewardText.text = "Come back later!";
+            return;
+        }
+
+        bool isReady = GoogleAdsManager.Instance.IsRewardedAdReady();
         button.interactable = isReady;
 
         if (buttonText != null)
@@ -75,7 +114,26 @@ public class WatchAdButton : MonoBehaviour
 
         if (rewardText != null && isReady)
         {
-            rewardText.text = $"+Coins";
+            int remaining = MAX_ADS_PER_SESSION - adsWatchedThisSession;
+            rewardText.text = $"+{rewardAmount} Coins ({remaining} left)";
         }
+    }
+
+    void LoadAdWatchCount()
+    {
+        adsWatchedThisSession = PlayerPrefs.GetInt("AdsWatchedThisSession", 0);
+    }
+
+    void SaveAdWatchCount()
+    {
+        PlayerPrefs.SetInt("AdsWatchedThisSession", adsWatchedThisSession);
+        PlayerPrefs.Save();
+    }
+
+    void OnApplicationQuit()
+    {
+        // Reset ad counter when game closes
+        PlayerPrefs.SetInt("AdsWatchedThisSession", 0);
+        PlayerPrefs.Save();
     }
 }

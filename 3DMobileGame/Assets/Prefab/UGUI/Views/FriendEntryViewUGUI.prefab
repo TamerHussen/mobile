@@ -1033,6 +1033,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: InviteButton
       objectReference: {fileID: 0}
+    - target: {fileID: 6868811679899157517, guid: 6fae7973509ec7c4f8c2f8053de5051d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1321,7 +1325,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6868811679899157517, guid: 6fae7973509ec7c4f8c2f8053de5051d, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

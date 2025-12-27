@@ -53,7 +53,7 @@ public class LobbyPlayerSpawner : MonoBehaviour
             var playerObj = Instantiate(playerPrefab, spawn.position, spawn.rotation);
             playerObj.name = $"Player_{lobbyPlayer.PlayerName}";
 
-            var avatar = playerObj.GetComponent<PlayerAvatar>();
+            var avatar = playerObj.GetComponent<PlayerView>();
             if (avatar != null)
             {
                 avatar.PlayerID = lobbyPlayer.PlayerID;

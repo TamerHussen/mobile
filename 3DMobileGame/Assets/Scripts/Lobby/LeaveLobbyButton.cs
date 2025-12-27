@@ -51,4 +51,20 @@ public class LeaveLobbyButton : MonoBehaviour
 
         Debug.Log("✅ Left lobby successfully");
     }
+    public void OnQuitButton()
+    {
+        Debug.Log("Quitting game...");
+
+        // Save before quitting
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.Save();
+        }
+
+        Application.Quit();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+    }
 }

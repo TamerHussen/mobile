@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyProximityHaptics : MonoBehaviour
 {
     public Transform player;
-    public EnemyMovement enemy;
+    public EnemyBehaviorSystem enemy;
 
     public float maxDistance = 10f; // Distance at which vibration starts
     public float minInterval = 0.2f; // Fastest heartbeat vibration

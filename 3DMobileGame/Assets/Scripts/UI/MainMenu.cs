@@ -27,11 +27,9 @@ public class MainMenu : MonoBehaviour
         if (startButton != null)
             startButton.interactable = true;
 
-        // CRITICAL FIX: Ensure SaveManager exists from the start
         EnsureSaveManagerExists();
     }
 
-    // NEW METHOD: Create SaveManager if it doesn't exist
     private void EnsureSaveManagerExists()
     {
         if (SaveManager.Instance == null)

@@ -1,42 +1,111 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Rigidbody _rigidbody;
-    [SerializeField] private FixedJoystick _joystick; // Move joystick
-    [SerializeField] private FixedJoystick _lookJoystick; // Look joystick
-    [SerializeField] private Animator _animator;
-
+    [Header("Player Settings")]
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _jumpForce = 7f;
-    [SerializeField] private float _jumpAccelThreshold = 1.5f; // Adjust to control jump sensitivity
+    [SerializeField] private float _jumpAccelThreshold = 1.5f;
 
-    //Walls
-    [SerializeField] Transform NorthWall;
-    [SerializeField] Transform SouthWall;
-    [SerializeField] Transform EastWall;
-    [SerializeField] Transform WestWall;
+    // ✅ AUTO-FOUND AT RUNTIME (not serialized)
+    private Rigidbody _rigidbody;
+    private FixedJoystick _joystick; // Move joystick
+    private FixedJoystick _lookJoystick; // Look joystick
+    private Animator _animator;
 
-    bool teleported;
+    private Transform NorthWall;
+    private Transform SouthWall;
+    private Transform EastWall;
+    private Transform WestWall;
 
-    private float currentYaw = 0f; // track player yaw
-
+    private bool teleported;
+    private float currentYaw = 0f;
     private bool _isGrounded = true;
-
-    // Dodge fields
     private Vector3 _dodgeVelocity = Vector3.zero;
     private float _dodgeTimeRemaining = 0f;
 
     private void Awake()
     {
+        // Get Rigidbody
+        _rigidbody = GetComponent<Rigidbody>();
         if (_rigidbody == null)
-            _rigidbody = GetComponent<Rigidbody>();
+        {
+            Debug.LogError("Rigidbody not found on player!");
+            return;
+        }
 
         _rigidbody.constraints |= RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-
         _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // Get Animator (optional)
+        _animator = GetComponentInChildren<Animator>();
+    }
+
+    void Start()
+    {
+        // ✅ AUTO-FIND JOYSTICKS BY NAME
+        FindJoysticks();
+
+        // ✅ AUTO-FIND PORTAL WALLS BY TAG
+        FindPortalWalls();
+    }
+
+    void FindJoysticks()
+    {
+        // Find joysticks in scene by name
+        var moveJoystickObj = GameObject.Find("Fixed Joystick");
+        var lookJoystickObj = GameObject.Find("Rotation Joystick");
+
+        if (moveJoystickObj != null)
+        {
+            _joystick = moveJoystickObj.GetComponent<FixedJoystick>();
+            if (_joystick != null)
+                Debug.Log("✅ Move joystick auto-assigned");
+            else
+                Debug.LogWarning("⚠️ 'Fixed Joystick' found but no FixedJoystick component!");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Move joystick not found! Looking for 'Fixed Joystick' GameObject.");
+        }
+
+        if (lookJoystickObj != null)
+        {
+            _lookJoystick = lookJoystickObj.GetComponent<FixedJoystick>();
+            if (_lookJoystick != null)
+                Debug.Log("✅ Look joystick auto-assigned");
+            else
+                Debug.LogWarning("⚠️ 'Rotation Joystick' found but no FixedJoystick component!");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Look joystick not found! Looking for 'Rotation Joystick' GameObject.");
+        }
+    }
+
+    void FindPortalWalls()
+    {
+        // Find walls by tag
+        var northWallObj = GameObject.FindGameObjectWithTag("NorthWall");
+        var southWallObj = GameObject.FindGameObjectWithTag("SouthWall");
+        var eastWallObj = GameObject.FindGameObjectWithTag("EastWall");
+        var westWallObj = GameObject.FindGameObjectWithTag("WestWall");
+
+        if (northWallObj != null) NorthWall = northWallObj.transform;
+        if (southWallObj != null) SouthWall = southWallObj.transform;
+        if (eastWallObj != null) EastWall = eastWallObj.transform;
+        if (westWallObj != null) WestWall = westWallObj.transform;
+
+        if (NorthWall == null || SouthWall == null || EastWall == null || WestWall == null)
+        {
+            Debug.LogWarning("⚠️ Portal walls not found! Make sure walls are tagged correctly.");
+        }
+        else
+        {
+            Debug.Log("✅ Portal walls auto-assigned");
+        }
     }
 
     private void FixedUpdate()
@@ -74,7 +143,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             Vector3 moveDir = (Vector3.forward * input.z + Vector3.right * input.x).normalized;
-            moveDir = Quaternion.Euler(0f, currentYaw, 0f) * moveDir; // apply facing direction to movement
+            moveDir = Quaternion.Euler(0f, currentYaw, 0f) * moveDir;
             Vector3 baseMove = moveDir * _moveSpeed;
             horizontalVelocity = new Vector3(baseMove.x, 0f, baseMove.z);
         }
@@ -127,53 +196,57 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.contacts.Length > 0 && collision.contacts[0].normal.y > 0.7f)
         {
-            Debug.Log($"Player collided with {collision.collider.name} - contact normal: {collision.contacts[0].normal}");
-
             _isGrounded = true;
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == 7)
+        // ✅ Check by TAG instead of layer (more reliable)
+        if (!teleported)
         {
-            if (!teleported && other.gameObject.CompareTag("NorthWall"))
+            if (other.CompareTag("NorthWall") && SouthWall != null)
             {
                 teleported = true;
-                transform.position = SouthWall.transform.position;
+                transform.position = SouthWall.position;
+                Debug.Log("Teleported: North → South");
             }
-            if (!teleported && other.gameObject.CompareTag("SouthWall"))
+            else if (other.CompareTag("SouthWall") && NorthWall != null)
             {
                 teleported = true;
-                transform.position = NorthWall.transform.position;
+                transform.position = NorthWall.position;
+                Debug.Log("Teleported: South → North");
             }
-            if (!teleported && other.gameObject.CompareTag("EastWall"))
+            else if (other.CompareTag("EastWall") && WestWall != null)
             {
                 teleported = true;
-                transform.position = WestWall.transform.position;
+                transform.position = WestWall.position;
+                Debug.Log("Teleported: East → West");
             }
-            if (!teleported && other.gameObject.CompareTag("WestWall"))
+            else if (other.CompareTag("WestWall") && EastWall != null)
             {
                 teleported = true;
-                transform.position = EastWall.transform.position;
+                transform.position = EastWall.position;
+                Debug.Log("Teleported: West → East");
             }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer == 7)
+        // Reset cooldown when leaving any portal wall
+        if (other.CompareTag("NorthWall") || other.CompareTag("SouthWall") ||
+            other.CompareTag("EastWall") || other.CompareTag("WestWall"))
         {
-            Invoke("setTeleportCooldownOFF", 1f);
+            Invoke("ResetTeleportCooldown", 1f);
         }
     }
 
-    void setTeleportCooldownOFF()
+    void ResetTeleportCooldown()
     {
         teleported = false;
     }
 
-    // allow enemy to call vibration
     public void Vibrate()
     {
 #if UNITY_ANDROID || UNITY_IOS
