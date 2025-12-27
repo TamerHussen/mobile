@@ -45,10 +45,8 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        // ✅ AUTO-FIND JOYSTICKS BY NAME
         FindJoysticks();
 
-        // ✅ AUTO-FIND PORTAL WALLS BY TAG
         FindPortalWalls();
     }
 
