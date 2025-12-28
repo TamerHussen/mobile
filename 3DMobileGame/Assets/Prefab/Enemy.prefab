@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 5794692543375493759}
   - component: {fileID: 34877214499340529}
   - component: {fileID: 5404813192485845083}
-  - component: {fileID: 3465313040059676578}
   m_Layer: 0
   m_Name: AngryFaceEnemy
   m_TagString: Untagged
@@ -87,29 +86,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &3465313040059676578
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551045182338495208}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3210780214834801425
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,7 +97,6 @@ GameObject:
   - component: {fileID: 1154969532289661149}
   - component: {fileID: 4724067301239502125}
   - component: {fileID: 4896279989249940678}
-  - component: {fileID: 5998018284766607566}
   m_Layer: 0
   m_Name: HappyFaceEnemy
   m_TagString: Untagged
@@ -197,29 +172,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &5998018284766607566
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3210780214834801425}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4089917989901568972
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,7 +183,6 @@ GameObject:
   - component: {fileID: 3348759967567899579}
   - component: {fileID: 1942164860522025567}
   - component: {fileID: 7587719056031511526}
-  - component: {fileID: 3164891735768981707}
   m_Layer: 0
   m_Name: StaticFaceEnemy
   m_TagString: Untagged
@@ -307,29 +258,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &3164891735768981707
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4089917989901568972}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6078303587226326785
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,11 +267,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 217631530192881604}
-  - component: {fileID: 8078809546614075281}
-  - component: {fileID: 4153667243875206862}
   - component: {fileID: 7747063173188918902}
   - component: {fileID: -5729547411480786144}
   - component: {fileID: 7782863935665584073}
+  - component: {fileID: 5669346974063858162}
+  - component: {fileID: 5056154292407412606}
+  - component: {fileID: 5535994767745214252}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -351,15 +280,16 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &217631530192881604
-RectTransform:
+--- !u!4 &217631530192881604
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6078303587226326785}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1.79}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -368,70 +298,6 @@ RectTransform:
   - {fileID: 3348759967567899579}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 1}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &8078809546614075281
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6078303587226326785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 701cad2984f9c3a4799d66464e541874, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  angryFace: {fileID: 1551045182338495208}
-  happyFace: {fileID: 3210780214834801425}
-  staticFace: {fileID: 4089917989901568972}
-  behaviorSwitchInterval: 30
-  startingMode: 0
-  angryChaseSpeed: 5
-  happyChaseSpeed: 3
-  staticChaseSpeed: 3.5
-  angryJumpscares:
-  - name: AngryTest
-    image: {fileID: 1430519738, guid: 22a4fce25404e9d4a902a4b7709a307a, type: 3}
-    audio: {fileID: 8300000, guid: f23a6ab09e9d3ee4ca529435c16f1c25, type: 3}
-  happyJumpscares:
-  - name: happyTest
-    image: {fileID: 1793695207, guid: d84aa7def9610634a83dc44755e801e7, type: 3}
-    audio: {fileID: 8300000, guid: 08474bf12cfa02845915adbd108ab108, type: 3}
-  staticJumpscares:
-  - name: StaticTest
-    image: {fileID: -400161915, guid: eea216eb151d15846890f71a3844b3bc, type: 3}
-    audio: {fileID: 8300000, guid: d549a65e0bd048a4b82b2b3506628258, type: 3}
-  agent: {fileID: 7747063173188918902}
-  player: {fileID: 0}
-  audioSource: {fileID: 7782863935665584073}
-  jumpScareManager: {fileID: 0}
-  patrolRange: 15
-  centrePoint: {fileID: 0}
-  detectionRange: 8
-  losePlayerTime: 3
-  stunDuration: 3
-  retreatDistance: 10
---- !u!114 &4153667243875206862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6078303587226326785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7df93b893f92304286e599bb042056c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  enemy: {fileID: 8078809546614075281}
-  maxDistance: 10
-  minInterval: 0.2
-  maxInterval: 1
 --- !u!195 &7747063173188918902
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -452,7 +318,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 1
   m_ObstacleAvoidanceType: 4
 --- !u!54 &-5729547411480786144
 Rigidbody:
@@ -480,7 +346,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!82 &7782863935665584073
 AudioSource:
   m_ObjectHideFlags: 0
@@ -578,3 +444,87 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!136 &5669346974063858162
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6078303587226326785}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5056154292407412606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6078303587226326785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 701cad2984f9c3a4799d66464e541874, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  angryFace: {fileID: 1551045182338495208}
+  happyFace: {fileID: 3210780214834801425}
+  staticFace: {fileID: 4089917989901568972}
+  behaviorSwitchInterval: 30
+  startingMode: 0
+  angryChaseSpeed: 5
+  happyChaseSpeed: 3
+  staticChaseSpeed: 3.5
+  patrolSpeed: 1.5
+  angryJumpscares:
+  - name: AngryTest
+    image: {fileID: 1430519738, guid: 22a4fce25404e9d4a902a4b7709a307a, type: 3}
+    audio: {fileID: 8300000, guid: f23a6ab09e9d3ee4ca529435c16f1c25, type: 3}
+  happyJumpscares:
+  - name: happyTest
+    image: {fileID: 1793695207, guid: d84aa7def9610634a83dc44755e801e7, type: 3}
+    audio: {fileID: 8300000, guid: 08474bf12cfa02845915adbd108ab108, type: 3}
+  staticJumpscares:
+  - name: StaticTest
+    image: {fileID: -400161915, guid: eea216eb151d15846890f71a3844b3bc, type: 3}
+    audio: {fileID: 8300000, guid: d549a65e0bd048a4b82b2b3506628258, type: 3}
+  agent: {fileID: 7747063173188918902}
+  player: {fileID: 0}
+  audioSource: {fileID: 7782863935665584073}
+  jumpScareManager: {fileID: 0}
+  animator: {fileID: 0}
+  patrolRange: 15
+  centrePoint: {fileID: 0}
+  detectionRange: 8
+  losePlayerTime: 3
+  stunDuration: 3
+  retreatDistance: 10
+--- !u!114 &5535994767745214252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6078303587226326785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7df93b893f92304286e599bb042056c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  enemy: {fileID: 5056154292407412606}
+  maxDistance: 10
+  minInterval: 0.2
+  maxInterval: 1

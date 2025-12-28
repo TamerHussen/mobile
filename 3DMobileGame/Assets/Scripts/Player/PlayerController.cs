@@ -8,7 +8,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _jumpForce = 7f;
     [SerializeField] private float _jumpAccelThreshold = 1.5f;
 
-    // ✅ AUTO-FOUND AT RUNTIME (not serialized)
     private Rigidbody _rigidbody;
     private FixedJoystick _joystick; // Move joystick
     private FixedJoystick _lookJoystick; // Look joystick
@@ -27,7 +26,6 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        // Get Rigidbody
         _rigidbody = GetComponent<Rigidbody>();
         if (_rigidbody == null)
         {
@@ -39,7 +37,6 @@ public class PlayerController : MonoBehaviour
         _rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // Get Animator (optional)
         _animator = GetComponentInChildren<Animator>();
     }
 
@@ -52,7 +49,6 @@ public class PlayerController : MonoBehaviour
 
     void FindJoysticks()
     {
-        // Find joysticks in scene by name
         var moveJoystickObj = GameObject.Find("Fixed Joystick");
         var lookJoystickObj = GameObject.Find("Rotation Joystick");
 
@@ -60,32 +56,31 @@ public class PlayerController : MonoBehaviour
         {
             _joystick = moveJoystickObj.GetComponent<FixedJoystick>();
             if (_joystick != null)
-                Debug.Log("✅ Move joystick auto-assigned");
+                Debug.Log(" Move joystick auto-assigned");
             else
-                Debug.LogWarning("⚠️ 'Fixed Joystick' found but no FixedJoystick component!");
+                Debug.LogWarning(" 'Fixed Joystick' found but no FixedJoystick component!");
         }
         else
         {
-            Debug.LogWarning("⚠️ Move joystick not found! Looking for 'Fixed Joystick' GameObject.");
+            Debug.LogWarning(" Move joystick not found! Looking for 'Fixed Joystick' GameObject.");
         }
 
         if (lookJoystickObj != null)
         {
             _lookJoystick = lookJoystickObj.GetComponent<FixedJoystick>();
             if (_lookJoystick != null)
-                Debug.Log("✅ Look joystick auto-assigned");
+                Debug.Log(" Look joystick auto-assigned");
             else
-                Debug.LogWarning("⚠️ 'Rotation Joystick' found but no FixedJoystick component!");
+                Debug.LogWarning(" 'Rotation Joystick' found but no FixedJoystick component!");
         }
         else
         {
-            Debug.LogWarning("⚠️ Look joystick not found! Looking for 'Rotation Joystick' GameObject.");
+            Debug.LogWarning(" Look joystick not found! Looking for 'Rotation Joystick' GameObject.");
         }
     }
 
     void FindPortalWalls()
     {
-        // Find walls by tag
         var northWallObj = GameObject.FindGameObjectWithTag("NorthWall");
         var southWallObj = GameObject.FindGameObjectWithTag("SouthWall");
         var eastWallObj = GameObject.FindGameObjectWithTag("EastWall");
@@ -98,11 +93,11 @@ public class PlayerController : MonoBehaviour
 
         if (NorthWall == null || SouthWall == null || EastWall == null || WestWall == null)
         {
-            Debug.LogWarning("⚠️ Portal walls not found! Make sure walls are tagged correctly.");
+            Debug.LogWarning(" Portal walls not found! Make sure walls are tagged correctly.");
         }
         else
         {
-            Debug.Log("✅ Portal walls auto-assigned");
+            Debug.Log(" Portal walls auto-assigned");
         }
     }
 
@@ -200,7 +195,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // ✅ Check by TAG instead of layer (more reliable)
         if (!teleported)
         {
             if (other.CompareTag("NorthWall") && SouthWall != null)
@@ -232,7 +226,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Reset cooldown when leaving any portal wall
         if (other.CompareTag("NorthWall") || other.CompareTag("SouthWall") ||
             other.CompareTag("EastWall") || other.CompareTag("WestWall"))
         {

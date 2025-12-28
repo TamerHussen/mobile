@@ -50,10 +50,8 @@ public class GooglePlayLogin : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Re-find UI references after scene loads
         FindUIReferences();
 
-        // Re-display cached data if already authenticated
         if (isAuthenticated)
         {
             UpdateUIWithCachedData();
@@ -62,7 +60,6 @@ public class GooglePlayLogin : MonoBehaviour
 
     void FindUIReferences()
     {
-        // Find UI elements by name (make sure these names match your scene)
         var statusObj = GameObject.Find("GooglePlayStatusText");
         if (statusObj != null) StatusText = statusObj.GetComponent<TextMeshProUGUI>();
 
@@ -95,7 +92,7 @@ public class GooglePlayLogin : MonoBehaviour
         if (PlayerInfoPanel != null)
             PlayerInfoPanel.SetActive(true);
 
-        Debug.Log("✅ Google Play UI updated with cached data");
+        Debug.Log(" Google Play UI updated with cached data");
     }
 
     public void SignIn()
@@ -115,15 +112,12 @@ public class GooglePlayLogin : MonoBehaviour
             string name = PlayGamesPlatform.Instance.GetUserDisplayName();
             string id = PlayGamesPlatform.Instance.GetUserId();
 
-            // Cache the data
             isAuthenticated = true;
             cachedPlayerName = name;
             cachedPlayerId = id;
 
-            // Update UI
             UpdateUIWithCachedData();
 
-            // SYNC WITH SAVEMANAGER
             if (SaveManager.Instance != null)
             {
                 SaveManager.Instance.data.playerName = name;

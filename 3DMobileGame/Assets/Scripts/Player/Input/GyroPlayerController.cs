@@ -40,7 +40,7 @@ public class GyroPlayerController : MonoBehaviour
     private System.Collections.IEnumerator InitGyro()
     {
         Input.gyro.enabled = true;
-        yield return new WaitForSeconds(0.3f); // wait for gyro to initialize
+        yield return new WaitForSeconds(0.3f);
         CalibrateGyro();
         gyroReady = true;
     }
@@ -49,7 +49,6 @@ public class GyroPlayerController : MonoBehaviour
     {
         if (focus && enableGyro && SystemInfo.supportsGyroscope)
         {
-            // Recalibrate when returning to app
             StartCoroutine(InitGyro());
         }
     }

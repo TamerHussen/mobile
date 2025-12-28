@@ -18,7 +18,6 @@ public class PlayerNames : MonoBehaviour
     {
         if (cam == null) return;
 
-        // face camera
         transform.forward = cam.forward;
     }
 

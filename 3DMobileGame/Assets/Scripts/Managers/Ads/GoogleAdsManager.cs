@@ -40,10 +40,8 @@ public class GoogleAdsManager : MonoBehaviour
     private bool isLoadingInterstitialAd = false;
     private bool isInitialized = false;
 
-    // ✅ FIX: Track if reward was already given
     private bool rewardAlreadyGiven = false;
 
-    // Store callbacks for rewarded ads
     private Action onRewardedSuccess;
     private Action onRewardedFailed;
 
@@ -57,6 +55,8 @@ public class GoogleAdsManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        Screen.orientation = ScreenOrientation.LandscapeRight;
+
     }
 
     void Start()
@@ -83,7 +83,7 @@ public class GoogleAdsManager : MonoBehaviour
             }
 
             isInitialized = true;
-            Debug.Log("✅ Google Mobile Ads initialized successfully");
+            Debug.Log(" Google Mobile Ads initialized successfully");
 
             LoadRewardedAd();
             LoadInterstitialAd();
@@ -113,7 +113,7 @@ public class GoogleAdsManager : MonoBehaviour
 
         isLoadingRewardedAd = true;
         isRewardedAdLoaded = false;
-        rewardAlreadyGiven = false; // ✅ Reset reward flag
+        rewardAlreadyGiven = false; 
 
         Debug.Log("Loading rewarded ad...");
 
@@ -130,7 +130,7 @@ public class GoogleAdsManager : MonoBehaviour
                 return;
             }
 
-            Debug.Log("✅ Rewarded ad loaded successfully");
+            Debug.Log(" Rewarded ad loaded successfully");
             rewardedAd = ad;
             isRewardedAdLoaded = true;
 
@@ -142,7 +142,7 @@ public class GoogleAdsManager : MonoBehaviour
     {
         onRewardedSuccess = onSuccess;
         onRewardedFailed = onFail;
-        rewardAlreadyGiven = false; // Reset before showing
+        rewardAlreadyGiven = false;
 
         if (rewardedAd != null && rewardedAd.CanShowAd())
         {
@@ -154,12 +154,12 @@ public class GoogleAdsManager : MonoBehaviour
                 {
                     rewardAlreadyGiven = true;
 
-                    Debug.Log($"✅ User earned reward: {reward.Amount} {reward.Type}");
+                    Debug.Log($" User earned reward: {reward.Amount} {reward.Type}");
 
                     if (CoinsManager.Instance != null)
                     {
                         CoinsManager.Instance.AddCoins(coinsPerAd);
-                        Debug.Log($"✅ Awarded {coinsPerAd} coins via GoogleAdsManager!");
+                        Debug.Log($" Awarded {coinsPerAd} coins via GoogleAdsManager!");
                     }
                     else
                     {
@@ -170,7 +170,7 @@ public class GoogleAdsManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("⚠️ Reward already given for this ad!");
+                    Debug.LogWarning(" Reward already given for this ad!");
                 }
             });
         }
@@ -280,7 +280,7 @@ public class GoogleAdsManager : MonoBehaviour
                 return;
             }
 
-            Debug.Log("✅ Interstitial ad loaded successfully");
+            Debug.Log(" Interstitial ad loaded successfully");
             interstitialAd = ad;
             isInterstitialAdLoaded = true;
 
@@ -395,7 +395,7 @@ public class GoogleAdsManager : MonoBehaviour
     {
         bannerView.OnBannerAdLoaded += () =>
         {
-            Debug.Log("✅ Banner ad loaded");
+            Debug.Log(" Banner ad loaded");
             isBannerAdLoaded = true;
             ShowBannerAd();
         };

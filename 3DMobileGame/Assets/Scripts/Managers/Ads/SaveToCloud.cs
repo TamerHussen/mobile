@@ -10,7 +10,7 @@ public class SaveToCloudManager : MonoBehaviour
 
     [Header("Settings")]
     public bool autoSyncOnSave = true;
-    public float autoSyncInterval = 300f; // Every 5 minutes
+    public float autoSyncInterval = 300f;
 
     private float syncTimer = 0f;
 
@@ -75,9 +75,9 @@ public class SaveToCloudManager : MonoBehaviour
             PlayGamesPlatform.Instance.SavedGame.CommitUpdate(game, update, data, (commitStatus, _) =>
             {
                 if (commitStatus == SavedGameRequestStatus.Success)
-                    Debug.Log("✅ Cloud save successful!");
+                    Debug.Log(" Cloud save successful!");
                 else
-                    Debug.LogError("❌ Cloud save failed: " + commitStatus);
+                    Debug.LogError(" Cloud save failed: " + commitStatus);
             });
         }
         else
@@ -86,7 +86,6 @@ public class SaveToCloudManager : MonoBehaviour
         }
     }
 
-    // Load from cloud
     public void LoadFromCloud()
     {
         if (!PlayGamesPlatform.Instance.IsAuthenticated())
@@ -113,11 +112,11 @@ public class SaveToCloudManager : MonoBehaviour
                 {
                     string json = Encoding.UTF8.GetString(data);
                     SaveManager.Instance.data = JsonUtility.FromJson<PlayerData>(json);
-                    Debug.Log("✅ Cloud load successful!");
+                    Debug.Log(" Cloud load successful!");
                 }
                 else
                 {
-                    Debug.LogError("❌ Failed to read cloud data: " + readStatus);
+                    Debug.LogError(" Failed to read cloud data: " + readStatus);
                 }
             });
         }

@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
 using TMPro;
 
-/// <summary>
-/// Player scoring system with singleton access
-/// Attach to: Player Prefab
-/// </summary>
 public class PlayerScore : MonoBehaviour
 {
-    public static PlayerScore Instance; // ✅ Added singleton
+    public static PlayerScore Instance;
 
     [Header("Score Settings")]
     public int Score = 0;
@@ -33,7 +29,6 @@ public class PlayerScore : MonoBehaviour
 
     void Awake()
     {
-        // ✅ Singleton setup
         if (Instance == null)
         {
             Instance = this;
@@ -46,7 +41,6 @@ public class PlayerScore : MonoBehaviour
 
     void Start()
     {
-        // Auto-find UI if not already assigned
         if (ScoreText == null)
             ScoreText = GameObject.Find("ScoreText")?.GetComponent<TextMeshProUGUI>();
 
@@ -56,11 +50,9 @@ public class PlayerScore : MonoBehaviour
         if (CoinsEarnedText == null)
             CoinsEarnedText = GameObject.Find("CoinsEarnedText")?.GetComponent<TextMeshProUGUI>();
 
-        // Find collectibles
         GameObject[] collectibles = GameObject.FindGameObjectsWithTag("Collectible");
         MaxCollectibles = collectibles.Length;
 
-        // Scale collectibles in multiplayer
         if (GameSessionData.Instance != null && GameSessionData.Instance.players != null)
         {
             int playerCount = GameSessionData.Instance.players.Count;
@@ -68,7 +60,6 @@ public class PlayerScore : MonoBehaviour
             {
                 int additionalCollectibles = (playerCount - 1) * 5;
                 MaxCollectibles += additionalCollectibles;
-                Debug.Log($"Multiplayer: Added {additionalCollectibles} collectibles for {playerCount} players");
             }
         }
 
@@ -85,24 +76,23 @@ public class PlayerScore : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    public void AddCollectible()
     {
-        if (other.CompareTag("Collectible"))
+        Collected++;
+        UpdateCollectedUI();
+
+        if (Collected >= MaxCollectibles)
         {
-            Score += pointsPerCollectible;
-            Collected++;
-
-            UpdateScoreUI();
-            UpdateCollectedUI();
-
-            Destroy(other.gameObject);
-
-            if (Collected >= MaxCollectibles)
-            {
-                CompleteLevel();
-            }
+            CompleteLevel();
         }
     }
+
+    public void AddScore(int amount)
+    {
+        Score += amount;
+        UpdateScoreUI();
+    }
+
 
     void UpdateScoreUI()
     {
@@ -135,7 +125,6 @@ public class PlayerScore : MonoBehaviour
         {
             int playerCount = GameSessionData.Instance.players.Count;
             coinsEarned = Mathf.FloorToInt(coinsEarned / (float)playerCount);
-            Debug.Log($"Multiplayer: Splitting {coinsEarned} coins among {playerCount} players");
         }
 
         if (CoinsManager.Instance != null)
@@ -153,7 +142,7 @@ public class PlayerScore : MonoBehaviour
             AdFrequencyManager.Instance.OnLevelComplete();
         }
 
-        Debug.Log($"✅ Level Complete! Score: {Score}, Time Bonus: {finalTimeBonus}, Coins Earned: {coinsEarned}");
+        Debug.Log($"Level Complete! Score: {Score}, Coins: {coinsEarned}");
 
         if (CoinsEarnedText != null)
         {

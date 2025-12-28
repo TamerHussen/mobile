@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Manages ad frequency to prevent spamming players with too many ads.
-/// Optional helper class - attach to your GameManager or similar.
-/// </summary>
 public class AdFrequencyManager : MonoBehaviour
 {
     public static AdFrequencyManager Instance;
 
     [Header("Interstitial Ad Settings")]
     [Tooltip("Minimum seconds between interstitial ads")]
-    public float minTimeBetweenInterstitials = 180f; // 3 minutes
+    public float minTimeBetweenInterstitials = 180f;
 
     [Tooltip("Show interstitial every X deaths")]
     public int deathsPerInterstitial = 3;
@@ -36,9 +32,6 @@ public class AdFrequencyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Call this when player dies
-    /// </summary>
     public void OnPlayerDeath()
     {
         deathCount++;
@@ -50,9 +43,6 @@ public class AdFrequencyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Call this when player completes a level
-    /// </summary>
     public void OnLevelComplete()
     {
         levelCompletionCount++;
@@ -64,17 +54,11 @@ public class AdFrequencyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Check if enough time has passed since last interstitial
-    /// </summary>
     bool EnoughTimePassed()
     {
         return (Time.time - lastInterstitialTime) >= minTimeBetweenInterstitials;
     }
 
-    /// <summary>
-    /// Should we show an interstitial after this death?
-    /// </summary>
     bool ShouldShowInterstitialAfterDeath()
     {
         if (!EnoughTimePassed())
@@ -92,9 +76,6 @@ public class AdFrequencyManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Should we show an interstitial after this level?
-    /// </summary>
     bool ShouldShowInterstitialAfterLevel()
     {
         if (!EnoughTimePassed())
@@ -112,9 +93,6 @@ public class AdFrequencyManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Show interstitial ad with timing tracking
-    /// </summary>
     void ShowInterstitialAd()
     {
         if (GoogleAdsManager.Instance == null)
@@ -127,7 +105,7 @@ public class AdFrequencyManager : MonoBehaviour
         {
             GoogleAdsManager.Instance.ShowInterstitialAd();
             lastInterstitialTime = Time.time;
-            Debug.Log($"✅ Showed interstitial ad. Next possible in {minTimeBetweenInterstitials}s");
+            Debug.Log($" Showed interstitial ad. Next possible in {minTimeBetweenInterstitials}s");
         }
         else
         {
@@ -135,10 +113,6 @@ public class AdFrequencyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Force show an interstitial (ignores time limit)
-    /// Use sparingly - only for guaranteed natural breaks
-    /// </summary>
     public void ForceShowInterstitial()
     {
         if (GoogleAdsManager.Instance != null)
@@ -148,9 +122,6 @@ public class AdFrequencyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Reset all counters (call on app launch or after ads are disabled)
-    /// </summary>
     public void ResetCounters()
     {
         deathCount = 0;
@@ -159,19 +130,12 @@ public class AdFrequencyManager : MonoBehaviour
         Debug.Log("Ad frequency counters reset");
     }
 
-    /// <summary>
-    /// Get time remaining until next interstitial is allowed
-    /// </summary>
     public float TimeUntilNextInterstitial()
     {
         float elapsed = Time.time - lastInterstitialTime;
         float remaining = Mathf.Max(0, minTimeBetweenInterstitials - elapsed);
         return remaining;
     }
-
-    /// <summary>
-    /// Check if we can show an interstitial right now (time-wise)
-    /// </summary>
     public bool CanShowInterstitialNow()
     {
         return EnoughTimePassed();

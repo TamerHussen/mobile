@@ -17,11 +17,7 @@ namespace Unity.Services.Samples.Friends
 {
     public class RelationshipsManager : MonoBehaviour
     {
-        // REMOVED: No longer using Inspector reference
-        // [Tooltip("Reference a GameObject that has a component extending from IRelationshipsUIController."), SerializeField]
-        // GameObject m_RelationshipsViewGameObject;
-
-        GameObject m_RelationshipsViewGameObject; // Found dynamically
+        GameObject m_RelationshipsViewGameObject; 
         IRelationshipsView m_RelationshipsView;
 
         List<FriendsEntryData> m_FriendsEntryDatas = new List<FriendsEntryData>();
@@ -39,7 +35,6 @@ namespace Unity.Services.Samples.Friends
         private FriendsEventConnectionState m_current_state;
         private bool m_IsInitialized = false;
 
-        // Track which scenes should have friends UI
         private readonly string[] scenesWithFriendsUI = { "MainMenu", "Lobby" };
 
         private float friendRefreshTimer = 0f;
@@ -47,7 +42,6 @@ namespace Unity.Services.Samples.Friends
 
         void Awake()
         {
-            // Ensure only one instance exists
             var existing = FindObjectsByType<RelationshipsManager>(FindObjectsSortMode.None);
             if (existing.Length > 1)
             {
@@ -117,7 +111,7 @@ namespace Unity.Services.Samples.Friends
         IEnumerator DelayedRebindUI()
         {
             yield return new WaitForEndOfFrame();
-            yield return null; // Wait one more frame to be safe
+            yield return null;
 
             RebindUI();
         }
@@ -152,14 +146,13 @@ namespace Unity.Services.Samples.Friends
             RefreshAll();
 
             m_IsInitialized = true;
-            Debug.Log("✅ RelationshipsManager initialized");
+            Debug.Log(" RelationshipsManager initialized");
         }
 
         void UIInit()
         {
             Debug.Log("Initializing UI...");
 
-            // IMPORTANT: Include inactive objects since panels are hidden by default
             var viewObjects = FindObjectsByType<RelationshipsView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
             Debug.Log($"Found {viewObjects.Length} RelationshipsView components (including inactive)");
@@ -184,11 +177,10 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
-            // No need to activate the panel - just initialize the component
             m_RelationshipsView.Init();
             BindUIReferences();
 
-            Debug.Log("✅ UI initialized (panel remains inactive until button press)");
+            Debug.Log(" UI initialized (panel remains inactive until button press)");
         }
 
 
@@ -216,7 +208,6 @@ namespace Unity.Services.Samples.Friends
             m_LocalPlayerView = m_RelationshipsView.LocalPlayerView;
             m_AddFriendView = m_RelationshipsView.AddFriendView;
 
-            // Bind Lists
             m_FriendsListView = m_RelationshipsView.FriendsListView;
             m_FriendsListView?.BindList(m_FriendsEntryDatas);
 
@@ -226,10 +217,8 @@ namespace Unity.Services.Samples.Friends
             m_BlockListView = m_RelationshipsView.BlockListView;
             m_BlockListView?.BindList(m_BlockEntryDatas);
 
-            // Unbind old callbacks to prevent duplicates
             UnbindCallbacks();
 
-            // Bind Friends SDK Callbacks
             if (m_AddFriendView != null)
                 m_AddFriendView.onFriendRequestSent += AddFriendAsync;
 
@@ -269,7 +258,7 @@ namespace Unity.Services.Samples.Friends
             if (m_LocalPlayerView != null)
                 m_LocalPlayerView.onPresenceChanged += SetPresenceAsync;
 
-            Debug.Log("✅ UI references bound");
+            Debug.Log(" UI references bound");
         }
 
         void UnbindCallbacks()
@@ -328,7 +317,7 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
-            Debug.Log($"✅ Found RelationshipsView on GameObject: {viewObjects[0].gameObject.name}");
+            Debug.Log($" Found RelationshipsView on GameObject: {viewObjects[0].gameObject.name}");
 
             m_RelationshipsViewGameObject = viewObjects[0].gameObject;
             m_RelationshipsView = viewObjects[0];
@@ -339,18 +328,15 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
-            // Re-initialize the view
             m_RelationshipsView.Init();
 
-            // Re-bind all references
             BindUIReferences();
 
-            // Refresh all data to repopulate UI
             RefreshAll();
 
             UpdateLocalPlayerViewAfterRebind();
 
-            Debug.Log("✅ RelationshipsManager UI re-bound after scene reload");
+            Debug.Log(" RelationshipsManager UI re-bound after scene reload");
         }
 
         void UpdateLocalPlayerViewAfterRebind()
@@ -361,20 +347,16 @@ namespace Unity.Services.Samples.Friends
                 return;
             }
 
-            // Get current scene to set appropriate activity
             string currentScene = SceneManager.GetActiveScene().name;
             string activity = currentScene == "Lobby" ? "In Lobby" : "In Friends Menu";
 
-            // Refresh the local player view with current data
             if (m_LocalPlayerView is LocalPlayerViewUGUI localPlayerView)
             {
                 localPlayerView.RefreshFromSaveManager();
             }
 
-            // Update presence to Online with appropriate activity
             _ = SetPresence(Availability.Online, activity);
 
-            // Force refresh the UI to show current state
             if (m_LocalPlayerView != null)
             {
                 m_LocalPlayerView.Refresh(
@@ -384,7 +366,7 @@ namespace Unity.Services.Samples.Friends
                 );
             }
 
-            Debug.Log($"✅ Local player view updated - Activity: {activity}");
+            Debug.Log($" Local player view updated - Activity: {activity}");
         }
 
         async Task LogInAsync()
@@ -398,7 +380,6 @@ namespace Unity.Services.Samples.Friends
 
             Debug.Log($"Unity Authentication Name: {uniqueName}");
 
-            // Extract display name from unique name
             if (uniqueName.Contains("#"))
             {
                 displayName = uniqueName.Split('#')[0];
@@ -410,7 +391,6 @@ namespace Unity.Services.Samples.Friends
 
             Debug.Log($"Extracted Display Name: {displayName}");
 
-            // Sync to SaveManager
             if (SaveManager.Instance?.data != null)
             {
                 SaveManager.Instance.data.playerName = displayName;
@@ -432,7 +412,7 @@ namespace Unity.Services.Samples.Friends
             }
 
             RefreshAll();
-            Debug.Log($"✅ Logged in as '{displayName}' (unique: '{uniqueName}')");
+            Debug.Log($" Logged in as '{displayName}' (unique: '{uniqueName}')");
         }
 
         [System.Serializable]
@@ -458,7 +438,6 @@ namespace Unity.Services.Samples.Friends
 
         public void RefreshAll()
         {
-            // Safety check before refreshing
             if (m_RelationshipsView == null || m_FriendsListView == null)
             {
                 Debug.LogWarning("Cannot refresh: UI references are null (probably not in a scene with friends UI)");
@@ -469,17 +448,13 @@ namespace Unity.Services.Samples.Friends
             RefreshRequests();
             RefreshBlocks();
 
-            // Refresh local player view
             if (m_LocalPlayerView is LocalPlayerViewUGUI localPlayerView)
             {
                 localPlayerView.RefreshFromSaveManager();
             }
 
-            Debug.Log("✅ Friends data refreshed");
+            Debug.Log(" Friends data refreshed");
         }
-
-        // ... rest of your methods remain the same ...
-        // (All the async methods, RefreshFriends, RefreshRequests, etc.)
 
         async void BlockFriendAsync(string id)
         {
@@ -784,7 +759,6 @@ namespace Unity.Services.Samples.Friends
                     {
                         SetPresenceAsync((Availability.Online, "Back Online"));
 
-                        // Refresh all data when reconnecting
                         RefreshAll();
                     }
                     Debug.Log($"Change of state in notification system from {m_current_state} to {e.State}");
@@ -816,7 +790,7 @@ namespace Unity.Services.Samples.Friends
                 localPlayerView.RefreshFromSaveManager();
             }
 
-            Debug.Log($"✅ Local player name refreshed: {displayName}");
+            Debug.Log($" Local player name refreshed: {displayName}");
         }
 
         public async void SetGameActivity(string activity, Availability availability)
@@ -849,7 +823,7 @@ namespace Unity.Services.Samples.Friends
                 await SetPresence(Availability.Online, "In Lobby");
                 RefreshAll();
 
-                Debug.Log("✅ Friends connection verified");
+                Debug.Log(" Friends connection verified");
             }
             catch (Exception e)
             {

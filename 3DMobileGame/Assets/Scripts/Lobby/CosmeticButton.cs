@@ -112,13 +112,13 @@ public class CosmeticButton : MonoBehaviour
 
         if (cosmeticData.requiredLevel > SaveManager.Instance.data.level)
         {
-            Debug.Log($"❌ Need level {cosmeticData.requiredLevel} to unlock {cosmeticData.displayName}");
+            Debug.Log($" Need level {cosmeticData.requiredLevel} to unlock {cosmeticData.displayName}");
             return;
         }
 
         if (CoinsManager.Instance.GetCoins() < cosmeticData.coinCost)
         {
-            Debug.Log($"❌ Not enough coins! Need {cosmeticData.coinCost}, have {CoinsManager.Instance.GetCoins()}");
+            Debug.Log($" Not enough coins! Need {cosmeticData.coinCost}, have {CoinsManager.Instance.GetCoins()}");
             return;
         }
 
@@ -126,9 +126,8 @@ public class CosmeticButton : MonoBehaviour
         SaveManager.Instance.data.UnlockCosmetic(cosmeticData.cosmeticName);
         SaveManager.Instance.Save();
 
-        Debug.Log($"✅ Purchased {cosmeticData.displayName} for {cosmeticData.coinCost} coins!");
+        Debug.Log($" Purchased {cosmeticData.displayName} for {cosmeticData.coinCost} coins!");
 
-        // Auto-equip after purchase
         EquipCosmetic();
     }
 
@@ -137,7 +136,7 @@ public class CosmeticButton : MonoBehaviour
         if (LobbyInfo.Instance != null)
         {
             await LobbyInfo.Instance.SetSelectedCosmetic(cosmeticData.cosmeticName);
-            Debug.Log($"✅ Equipped {cosmeticData.displayName}");
+            Debug.Log($" Equipped {cosmeticData.displayName}");
         }
 
         UpdateAllButtons();

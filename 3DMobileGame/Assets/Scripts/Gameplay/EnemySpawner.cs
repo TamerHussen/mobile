@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,12 +12,18 @@ public class EnemySpawner : MonoBehaviour
     public int baseEnemyCount = 1;
     public int enemiesPerExtraPlayer = 1;
 
+    [Header("Spawn Rules")]
+    [Tooltip("Minimum distance from player spawn")]
+    public float minDistanceFromPlayer = 10f;
+
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private MazeGenerator mazeGen;
+    private LevelPlayerSpawner playerSpawner;
 
-    void Start()
+    void Awake()
     {
         mazeGen = FindFirstObjectByType<MazeGenerator>();
+        playerSpawner = FindFirstObjectByType<LevelPlayerSpawner>();
     }
 
     void OnEnable()
@@ -38,63 +45,83 @@ public class EnemySpawner : MonoBehaviour
         int enemiesToSpawn = baseEnemyCount + (playerCount > 1 ? (playerCount - 1) * enemiesPerExtraPlayer : 0);
         Debug.Log($"Spawning {enemiesToSpawn} enemies for {playerCount} player(s)");
 
+        Vector3 playerPosition = Vector3.zero;
+        if (playerSpawner != null)
+        {
+            playerPosition = playerSpawner.GetPlayerSpawnPosition();
+        }
+
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            SpawnEnemy(i);
+            SpawnEnemy(i, playerPosition);
         }
     }
 
-    void SpawnEnemy(int index)
+    void SpawnEnemy(int index, Vector3 playerPosition)
     {
         if (enemyPrefab == null)
         {
-            Debug.LogError("Enemy prefab not assigned!");
+            Debug.LogError(" Enemy prefab not assigned!");
             return;
         }
 
-        Vector3 spawnPosition = mazeGen != null ? mazeGen.GetRandomFloorPosition() : Vector3.zero;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(spawnPosition, out hit, 5f, NavMesh.AllAreas))
+        Vector3 spawnPosition;
+        if (mazeGen != null)
         {
-            spawnPosition = hit.position;
+            spawnPosition = mazeGen.GetSpawnPointAwayFrom(playerPosition, minDistanceFromPlayer);
         }
+        else
+        {
+            spawnPosition = Vector3.zero;
+        }
+
+        // CRITICAL: Ensure spawn point is on NavMesh BEFORE instantiating
+        NavMeshHit hit;
+        if (!NavMesh.SamplePosition(spawnPosition, out hit, 10f, NavMesh.AllAreas))
+        {
+            Debug.LogError($"Enemy {index + 1} spawn position NOT on NavMesh! Skipping spawn.");
+            return; // Don't spawn if not on NavMesh
+        }
+
+        spawnPosition = hit.position;
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
         enemy.name = $"Enemy_{index + 1}";
 
-        // ✅ AUTO-ASSIGN REFERENCES
+        // Wait one frame before initializing NavMeshAgent
+        StartCoroutine(InitializeEnemyAfterSpawn(enemy, index));
+    }
+
+    IEnumerator InitializeEnemyAfterSpawn(GameObject enemy, int index)
+    {
+        yield return null; // Wait one frame
+
+        var agent = enemy.GetComponent<NavMeshAgent>();
+        if (agent != null && !agent.isOnNavMesh)
+        {
+            Debug.LogError($"Enemy {index + 1} NavMeshAgent is NOT on NavMesh after spawn!");
+            Destroy(enemy);
+            yield break;
+        }
+
         var enemyBehavior = enemy.GetComponent<EnemyBehaviorSystem>();
         if (enemyBehavior != null)
         {
-            // Find player by TAG
             var player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
                 enemyBehavior.player = player.transform;
-                Debug.Log("✅ Auto-assigned Player via tag");
-            }
-            else
-            {
-                Debug.LogWarning("⚠️ No GameObject with tag 'Player' found!");
             }
 
-            // Find JumpScareManager by TYPE
             var jumpscareManager = FindFirstObjectByType<JumpScareManager>();
             if (jumpscareManager != null)
             {
                 enemyBehavior.jumpScareManager = jumpscareManager;
-                Debug.Log("✅ Auto-assigned JumpScareManager");
-            }
-            else
-            {
-                Debug.LogWarning("⚠️ JumpScareManager not found in scene!");
             }
 
             enemyBehavior.centrePoint = transform;
         }
 
-        // ✅ AUTO-ASSIGN PROXIMITY HAPTICS
         var proximityHaptics = enemy.GetComponent<EnemyProximityHaptics>();
         if (proximityHaptics != null)
         {
@@ -102,18 +129,16 @@ public class EnemySpawner : MonoBehaviour
             if (player != null)
             {
                 proximityHaptics.player = player.transform;
-                Debug.Log("✅ Auto-assigned Player to EnemyProximityHaptics");
             }
 
             if (enemyBehavior != null)
             {
                 proximityHaptics.enemy = enemyBehavior;
-                Debug.Log("✅ Auto-assigned EnemyBehaviorSystem to Haptics");
             }
         }
 
         spawnedEnemies.Add(enemy);
-        Debug.Log($"✅ Enemy {index + 1} fully configured at {spawnPosition}");
+        Debug.Log($"Enemy {index + 1} initialized on NavMesh");
     }
 
     public void ClearEnemies()

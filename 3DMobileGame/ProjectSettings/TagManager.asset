@@ -8,8 +8,8 @@ TagManager:
   - EastWall
   - SouthWall
   - WestWall
-  - Collectible
   - Enemy
+  - Collectible
   layers:
   - Default
   - TransparentFX
@@ -25,7 +25,7 @@ TagManager:
   - EastWall
   - WestWall
   - Walkable
-  - 
+  - MazeWalls
   - 
   - 
   - 

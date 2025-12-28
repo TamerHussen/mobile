@@ -14,7 +14,7 @@ public class WatchAdButton : MonoBehaviour
 
     private float checkTimer = 0f;
     private int adsWatchedThisSession = 0;
-    private const int MAX_ADS_PER_SESSION = 3;
+    private const int MAX_ADS_PER_SESSION = 5;
 
     void Start()
     {
@@ -68,7 +68,7 @@ public class WatchAdButton : MonoBehaviour
         adsWatchedThisSession++;
         SaveAdWatchCount();
 
-        Debug.Log($"✅ Ad watched! ({adsWatchedThisSession}/{MAX_ADS_PER_SESSION})");
+        Debug.Log($"Ad watched! ({adsWatchedThisSession}/{MAX_ADS_PER_SESSION})");
 
         UpdateButtonState();
     }
@@ -81,19 +81,20 @@ public class WatchAdButton : MonoBehaviour
 
     void UpdateButtonState()
     {
+        if (button == null || buttonText == null)
+            return;
+
         if (GoogleAdsManager.Instance == null)
         {
             button.interactable = false;
-            if (buttonText != null)
-                buttonText.text = "Ads Not Available";
+            buttonText.text = "Ads Not Available";
             return;
         }
 
         if (adsWatchedThisSession >= MAX_ADS_PER_SESSION)
         {
             button.interactable = false;
-            if (buttonText != null)
-                buttonText.text = $"Max Ads ({MAX_ADS_PER_SESSION}/{MAX_ADS_PER_SESSION})";
+            buttonText.text = $"Max Ads ({MAX_ADS_PER_SESSION}/{MAX_ADS_PER_SESSION})";
             if (rewardText != null)
                 rewardText.text = "Come back later!";
             return;
@@ -102,10 +103,7 @@ public class WatchAdButton : MonoBehaviour
         bool isReady = GoogleAdsManager.Instance.IsRewardedAdReady();
         button.interactable = isReady;
 
-        if (buttonText != null)
-        {
-            buttonText.text = isReady ? "Watch Ad" : "Loading...";
-        }
+        buttonText.text = isReady ? "Watch Ad" : "Loading...";
 
         if (rewardText != null && isReady)
         {

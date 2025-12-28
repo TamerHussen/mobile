@@ -15,14 +15,12 @@ public class SaveManagerDebugger : MonoBehaviour
 
     void Update()
     {
-        // Update debug info every frame if panel is visible
         if (debugPanel != null && debugPanel.activeSelf)
         {
             UpdateDebugInfo();
         }
     }
 
-    // Call this from a UI button
     public void ToggleDebugPanel()
     {
         if (debugPanel != null)
@@ -39,7 +37,6 @@ public class SaveManagerDebugger : MonoBehaviour
 
         string info = "=== SAVE MANAGER DEBUG ===\n\n";
 
-        // Check SaveManager
         if (SaveManager.Instance == null)
         {
             info += "SaveManager.Instance: NULL\n";
@@ -61,7 +58,6 @@ public class SaveManagerDebugger : MonoBehaviour
 
         info += "\n";
 
-        // Check UnityLobbyManager
         if (UnityLobbyManager.Instance == null)
         {
             info += "UnityLobbyManager: NULL\n";
@@ -82,10 +78,9 @@ public class SaveManagerDebugger : MonoBehaviour
 
         info += "\n";
 
-        // Check LobbyInfo
         if (LobbyInfo.Instance == null)
         {
-            info += "❌ LobbyInfo: NULL\n";
+            info += "LobbyInfo: NULL\n";
         }
         else
         {
@@ -98,18 +93,17 @@ public class SaveManagerDebugger : MonoBehaviour
         debugText.text = info;
     }
 
-    // Call this from console to log debug info
     public void LogDebugInfo()
     {
         Debug.Log("=== SAVE MANAGER DEBUG ===");
 
         if (SaveManager.Instance == null)
         {
-            Debug.LogError("❌ SaveManager.Instance is NULL!");
+            Debug.LogError("SaveManager.Instance is NULL!");
         }
         else if (SaveManager.Instance.data == null)
         {
-            Debug.LogError("❌ SaveManager.Instance.data is NULL!");
+            Debug.LogError("SaveManager.Instance.data is NULL!");
         }
         else
         {
@@ -120,20 +114,20 @@ public class SaveManagerDebugger : MonoBehaviour
 
         if (UnityLobbyManager.Instance == null)
         {
-            Debug.LogError("❌ UnityLobbyManager.Instance is NULL!");
+            Debug.LogError("UnityLobbyManager.Instance is NULL!");
         }
         else
         {
-            Debug.Log($"✅ UnityLobbyManager exists. Lobby: {(UnityLobbyManager.Instance.CurrentLobby != null ? "Active" : "None")}");
+            Debug.Log($"UnityLobbyManager exists. Lobby: {(UnityLobbyManager.Instance.CurrentLobby != null ? "Active" : "None")}");
         }
 
         if (LobbyInfo.Instance == null)
         {
-            Debug.LogError("❌ LobbyInfo.Instance is NULL!");
+            Debug.LogError("LobbyInfo.Instance is NULL!");
         }
         else
         {
-            Debug.Log($"✅ LobbyInfo exists. Players: {LobbyInfo.Instance.GetPlayers().Count}");
+            Debug.Log($"LobbyInfo exists. Players: {LobbyInfo.Instance.GetPlayers().Count}");
         }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
 using Unity.Services.Authentication;
 
-/// <summary>
-/// Spawns player and auto-assigns all references
-/// Attach to: LevelManager/LevelPlayerSpawner GameObject
-/// </summary>
 public class LevelPlayerSpawner : MonoBehaviour
 {
     [Header("Player Setup")]
@@ -15,10 +11,19 @@ public class LevelPlayerSpawner : MonoBehaviour
     public Transform[] respawnPoints;
 
     private GameObject spawnedPlayer;
+    private MazeGenerator mazeGen;
 
-    void Start()
+    void Awake()
     {
-        SpawnPlayer();
+        mazeGen = FindFirstObjectByType<MazeGenerator>();
+    }
+
+    void OnEnable()
+    {
+        if (Application.isPlaying)
+        {
+            SpawnPlayer();
+        }
     }
 
     void SpawnPlayer()
@@ -29,39 +34,42 @@ public class LevelPlayerSpawner : MonoBehaviour
             return;
         }
 
-        // Get spawn position
-        Vector3 spawnPosition = playerSpawnPoint != null
-            ? playerSpawnPoint.position
-            : Vector3.zero;
+        Vector3 spawnPosition;
+        Quaternion spawnRotation;
 
-        Quaternion spawnRotation = playerSpawnPoint != null
-            ? playerSpawnPoint.rotation
-            : Quaternion.identity;
+        if (playerSpawnPoint != null)
+        {
+            spawnPosition = playerSpawnPoint.position;
+            spawnRotation = playerSpawnPoint.rotation;
+        }
+        else if (mazeGen != null)
+        {
+            spawnPosition = mazeGen.GetRandomFloorPosition();
+            spawnRotation = Quaternion.identity;
+            Debug.Log(" No spawn point assigned, using maze position");
+        }
+        else
+        {
+            spawnPosition = Vector3.zero;
+            spawnRotation = Quaternion.identity;
+            Debug.LogWarning(" No MazeGenerator found, spawning at origin");
+        }
 
-        // Spawn player
         spawnedPlayer = Instantiate(playerPrefab, spawnPosition, spawnRotation);
         spawnedPlayer.name = "Player";
-
-        // ✅ IMPORTANT: Tag the player so EnemySpawner can find it!
         spawnedPlayer.tag = "Player";
 
-        Debug.Log($"Player spawned at {spawnPosition}");
+        Debug.Log($" Player spawned at {spawnPosition}");
 
-        // Get local player data from GameSessionData
         LobbyPlayer localPlayerData = GetLocalPlayerData();
 
         if (localPlayerData != null)
         {
-            // Apply cosmetic and name
             var playerView = spawnedPlayer.GetComponent<PlayerView>();
             if (playerView != null)
             {
                 playerView.Bind(localPlayerData);
-                Debug.Log($"✅ Applied cosmetic '{localPlayerData.Cosmetic}' to player '{localPlayerData.PlayerName}'");
-            }
-            else
-            {
-                Debug.LogWarning("PlayerView component not found on player prefab!");
+                Debug.Log($" Applied cosmetic '{localPlayerData.Cosmetic}' to player '{localPlayerData.PlayerName}'");
             }
         }
         else
@@ -70,33 +78,30 @@ public class LevelPlayerSpawner : MonoBehaviour
             ApplyDefaultCosmetic();
         }
 
-        // ✅ Setup lives system (just assign respawn points)
         SetupLivesSystem();
-
-        // ✅ Setup score UI references
         SetupScoreUI();
 
-        Debug.Log("✅ Player setup complete - UI will auto-assign in PlayerLivesSystem.Start()");
+        Debug.Log(" Player setup complete");
     }
 
     LobbyPlayer GetLocalPlayerData()
     {
-        // Try to get from GameSessionData first
         if (GameSessionData.Instance != null && GameSessionData.Instance.players != null)
         {
-            string localPlayerId = AuthenticationService.Instance.PlayerId;
+            string localPlayerId = AuthenticationService.Instance?.PlayerId;
 
-            // Find local player in session data
-            foreach (var player in GameSessionData.Instance.players)
+            if (!string.IsNullOrEmpty(localPlayerId))
             {
-                if (player.PlayerID == localPlayerId || player.IsLocal)
+                foreach (var player in GameSessionData.Instance.players)
                 {
-                    Debug.Log($"Found local player data: {player.PlayerName}, Cosmetic: {player.Cosmetic}");
-                    return player;
+                    if (player.PlayerID == localPlayerId || player.IsLocal)
+                    {
+                        Debug.Log($"Found local player data: {player.PlayerName}, Cosmetic: {player.Cosmetic}");
+                        return player;
+                    }
                 }
             }
 
-            // Fallback: use first player if solo
             if (GameSessionData.Instance.players.Count == 1)
             {
                 Debug.Log("Solo mode - using first player data");
@@ -104,12 +109,12 @@ public class LevelPlayerSpawner : MonoBehaviour
             }
         }
 
-        // Fallback: create from SaveManager
         if (SaveManager.Instance != null && SaveManager.Instance.data != null)
         {
             Debug.Log("Loading player data from SaveManager");
+            string playerId = AuthenticationService.Instance?.PlayerId ?? "local_player";
             return new LobbyPlayer(
-                AuthenticationService.Instance.PlayerId,
+                playerId,
                 SaveManager.Instance.data.playerName,
                 SaveManager.Instance.data.selectedCosmetic,
                 true
@@ -124,7 +129,7 @@ public class LevelPlayerSpawner : MonoBehaviour
         var playerCosmetic = spawnedPlayer.GetComponent<PlayerCosmetic>();
         if (playerCosmetic != null)
         {
-            playerCosmetic.Apply("Default");
+            playerCosmetic.Apply("DefaultCosmetic");
         }
 
         var playerNames = spawnedPlayer.GetComponentInChildren<PlayerNames>();
@@ -139,9 +144,8 @@ public class LevelPlayerSpawner : MonoBehaviour
         var livesSystem = spawnedPlayer.GetComponent<PlayerLivesSystem>();
         if (livesSystem != null && respawnPoints != null && respawnPoints.Length > 0)
         {
-            // Only assign respawn points - UI is auto-found in PlayerLivesSystem.Start()
             livesSystem.respawnPoints = respawnPoints;
-            Debug.Log($"✅ Assigned {respawnPoints.Length} respawn points to PlayerLivesSystem");
+            Debug.Log($" Assigned {respawnPoints.Length} respawn points");
         }
     }
 
@@ -150,12 +154,11 @@ public class LevelPlayerSpawner : MonoBehaviour
         var playerScore = spawnedPlayer.GetComponent<PlayerScore>();
         if (playerScore != null)
         {
-            // Auto-find UI elements by name
             playerScore.ScoreText = GameObject.Find("ScoreText")?.GetComponent<TMPro.TextMeshProUGUI>();
             playerScore.CollectibleText = GameObject.Find("CollectibleText")?.GetComponent<TMPro.TextMeshProUGUI>();
             playerScore.CoinsEarnedText = GameObject.Find("CoinsEarnedText")?.GetComponent<TMPro.TextMeshProUGUI>();
 
-            Debug.Log("✅ Auto-assigned Score UI references");
+            Debug.Log(" Auto-assigned Score UI references");
         }
     }
 
@@ -164,9 +167,13 @@ public class LevelPlayerSpawner : MonoBehaviour
         return spawnedPlayer;
     }
 
+    public Vector3 GetPlayerSpawnPosition()
+    {
+        return spawnedPlayer != null ? spawnedPlayer.transform.position : Vector3.zero;
+    }
+
     void OnDrawGizmos()
     {
-        // Visualize spawn point
         if (playerSpawnPoint != null)
         {
             Gizmos.color = Color.green;
@@ -174,7 +181,6 @@ public class LevelPlayerSpawner : MonoBehaviour
             Gizmos.DrawRay(playerSpawnPoint.position, playerSpawnPoint.forward * 2f);
         }
 
-        // Visualize respawn points
         if (respawnPoints != null)
         {
             Gizmos.color = Color.yellow;

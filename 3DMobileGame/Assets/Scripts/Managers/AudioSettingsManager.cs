@@ -3,10 +3,6 @@ using UnityEngine.Audio;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Manages audio settings (Master, Music, SFX volumes)
-/// Attach to: AudioManager GameObject (DontDestroyOnLoad)
-/// </summary>
 public class AudioSettingsManager : MonoBehaviour
 {
     public static AudioSettingsManager Instance;
@@ -53,7 +49,6 @@ public class AudioSettingsManager : MonoBehaviour
 
     void BindUIElements()
     {
-        // Try to find sliders if not assigned
         if (masterSlider == null)
             masterSlider = GameObject.Find("MasterVolumeSlider")?.GetComponent<Slider>();
 
@@ -63,7 +58,6 @@ public class AudioSettingsManager : MonoBehaviour
         if (sfxSlider == null)
             sfxSlider = GameObject.Find("SFXVolumeSlider")?.GetComponent<Slider>();
 
-        // Bind slider events
         if (masterSlider != null)
         {
             masterSlider.value = masterVolume;
@@ -117,7 +111,6 @@ public class AudioSettingsManager : MonoBehaviour
             return;
         }
 
-        // Convert 0-1 range to decibels (-80 to 0)
         float dbVolume = volume > 0.0001f ? Mathf.Log10(volume) * 20f : -80f;
         audioMixer.SetFloat(parameterName, dbVolume);
     }
@@ -168,7 +161,6 @@ public class AudioSettingsManager : MonoBehaviour
         UpdateUI();
     }
 
-    // Public methods for UI buttons
     public void ResetToDefaults()
     {
         SetMasterVolume(1f);
@@ -177,28 +169,3 @@ public class AudioSettingsManager : MonoBehaviour
         Debug.Log("Audio settings reset to defaults");
     }
 }
-
-/*
-=== AUDIO MIXER SETUP INSTRUCTIONS ===
-
-1. Create Audio Mixer:
-   - Right-click in Project → Create → Audio Mixer
-   - Name it "MainAudioMixer"
-
-2. Add Exposed Parameters:
-   - Click on Master group
-   - In Inspector, right-click "Volume" → Expose "Volume" to script
-   - Rename exposed parameter to "MasterVolume"
-   
-3. Create Music and SFX Groups:
-   - Right-click Master → Add child group → "Music"
-   - Right-click Master → Add child group → "SFX"
-   - Expose their volumes as "MusicVolume" and "SFXVolume"
-
-4. Assign Audio Sources:
-   - Set music AudioSource.outputAudioMixerGroup = Music
-   - Set sfx AudioSource.outputAudioMixerGroup = SFX
-
-5. Assign Mixer to Script:
-   - Drag MainAudioMixer into AudioSettingsManager.audioMixer field
-*/

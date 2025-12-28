@@ -17,16 +17,13 @@ public class LobbyInfo : MonoBehaviour
 {
     public static LobbyInfo Instance;
 
-    // UI
     public TextMeshProUGUI selectedLevelText;
     public TextMeshProUGUI selectedCosmeticText;
     public TextMeshProUGUI playerCountText;
 
-    // Preview
     public Transform previewSpawnPoint;
     public GameObject currentPreviewModel;
 
-    // Lobby Settings
     public int MaxPlayers = 3;
 
     private string selectedLevel = "None";
@@ -233,7 +230,6 @@ public class LobbyInfo : MonoBehaviour
 
             await UnityLobbyManager.Instance.UpdatePlayerDataAsync(displayName, CosmeticName);
 
-            // Force immediate refresh after update
             await RefreshLobbyDataAsync();
         }
     }
@@ -254,7 +250,6 @@ public class LobbyInfo : MonoBehaviour
             Debug.Log($"Player count changed: {players.Count} -> {newPlayers.Count}");
         }
 
-        // Check if any player data changed (including cosmetics!)
         bool playerDataChanged = false;
         if (!playerCountChanged && players.Count == newPlayers.Count)
         {
@@ -284,7 +279,6 @@ public class LobbyInfo : MonoBehaviour
             return;
         }
 
-        // Ensure cosmetics are set
         foreach (var p in newPlayers)
         {
             if (string.IsNullOrEmpty(p.Cosmetic))
@@ -294,23 +288,19 @@ public class LobbyInfo : MonoBehaviour
             }
         }
 
-        // Update player list
         players = newPlayers;
 
-        // Mark local player
         foreach (var p in players)
         {
             p.IsLocal = p.PlayerID == AuthenticationService.Instance.PlayerId;
         }
 
-        // Skip if players are still joining
         if (newPlayers.Any(p => p.PlayerName == "Joining..."))
         {
             Debug.Log("Some players still joining, skipping spawn");
             return;
         }
 
-        // Update UI
         UpdateUI();
 
         if (LobbyPlayerSpawner.Instance != null)
@@ -390,7 +380,7 @@ public class LobbyInfo : MonoBehaviour
 
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, targetPlayerId);
 
-            Debug.Log($"✅ Successfully kicked player: {targetPlayerId}");
+            Debug.Log($" Successfully kicked player: {targetPlayerId}");
 
             await Task.Delay(1000);
 
@@ -477,7 +467,7 @@ public class LobbyInfo : MonoBehaviour
 
             UnityLobbyManager.Instance?.EnableLobbyEvents();
 
-            Debug.Log("✅ Successfully subscribed to lobby events!");
+            Debug.Log(" Successfully subscribed to lobby events!");
         }
         catch (LobbyServiceException ex)
         {
@@ -537,7 +527,7 @@ public class LobbyInfo : MonoBehaviour
 
         isHandlingRemoval = false;
 
-        Debug.Log("✅ Rejoined personal lobby after being kicked");
+        Debug.Log(" Rejoined personal lobby after being kicked");
     }
 
     public async Task RefreshLobbyDataAsync()
@@ -596,7 +586,6 @@ public class LobbyInfo : MonoBehaviour
             }
             else if (e.Reason == LobbyExceptionReason.RateLimited)
             {
-                // Silently skip this refresh
             }
             else
             {
@@ -651,7 +640,6 @@ public class LobbyInfo : MonoBehaviour
             }
         }
 
-        // Always refresh after lobby changes to catch cosmetic updates
         await RefreshLobbyDataAsync();
     }
 
@@ -667,7 +655,7 @@ public class LobbyInfo : MonoBehaviour
             try
             {
                 _ = m_LobbyEvents.UnsubscribeAsync();
-                Debug.Log("✅ Unsubscribed from lobby events");
+                Debug.Log(" Unsubscribed from lobby events");
             }
             catch (Exception e)
             {
@@ -698,7 +686,7 @@ public class LobbyInfo : MonoBehaviour
 
         isHandlingRemoval = false;
 
-        Debug.Log("✅ Local lobby cleared");
+        Debug.Log(" Local lobby cleared");
     }
 
     public List<LobbyPlayer> GetPlayers() => players;

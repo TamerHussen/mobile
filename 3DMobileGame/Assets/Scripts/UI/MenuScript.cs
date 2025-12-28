@@ -13,7 +13,6 @@ public class MenuScript : MonoBehaviour
 
     private void Start()
     {
-        // Show only main menu at start
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(true);
 
@@ -26,7 +25,7 @@ public class MenuScript : MonoBehaviour
         if (optionsPanel != null)
             optionsPanel.SetActive(false);
 
-        Time.timeScale = 1f; // ensure game is running
+        Time.timeScale = 1f;
         SetMenuPresence();
     }
 
@@ -45,10 +44,6 @@ public class MenuScript : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MAIN MENU BUTTONS
-    // ============================================
-
     public void OnStartButton()
     {
         SceneManager.LoadScene("Lobby");
@@ -56,17 +51,14 @@ public class MenuScript : MonoBehaviour
 
     public void OnOptionsButton()
     {
-        // Check if we're in pause menu or main menu
         bool isPauseMenu = pauseMenuPanel != null && pauseMenuPanel.activeSelf;
 
         if (isPauseMenu)
         {
-            // From pause menu → open options
             OpenPanel(optionsPanel, pauseMenuPanel);
         }
         else
         {
-            // From main menu → open options
             OpenPanel(optionsPanel, mainMenuPanel);
         }
     }
@@ -75,7 +67,6 @@ public class MenuScript : MonoBehaviour
     {
         Debug.Log("Quitting game...");
 
-        // Save before quitting
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Save();
@@ -88,46 +79,37 @@ public class MenuScript : MonoBehaviour
 #endif
     }
 
-    // ============================================
-    // PAUSE MENU BUTTONS (IN-GAME)
-    // ============================================
-
     public void OnPauseButton()
     {
         if (pauseMenuPanel != null)
         {
             pauseMenuPanel.SetActive(true);
-            Time.timeScale = 0f; // Pause the game
-            Debug.Log("⏸️ Game paused");
+            Time.timeScale = 0f;
+            Debug.Log("Game paused");
         }
     }
 
     public void OnResumeButton()
     {
-        ClosePanel(pauseMenuPanel, null, true); // Resume game
+        ClosePanel(pauseMenuPanel, null, true);
         Debug.Log("▶️ Game resumed");
     }
 
-    /// <summary>
-    /// ✅ FIXED: Back button from pause menu → Return to lobby properly
-    /// </summary>
     public void OnBackButton()
     {
-        Debug.Log("🏠 Returning to lobby from pause menu...");
+        Debug.Log("Returning to lobby from pause menu...");
 
         Time.timeScale = 1f;
 
-        // Save progress
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Save();
         }
 
-        // Award partial coins based on current progress
         if (PlayerScore.Instance != null)
         {
             int currentScore = PlayerScore.Instance.Score;
-            int coinsEarned = Mathf.FloorToInt(currentScore * 0.025f); // 25% of normal rate for quitting
+            int coinsEarned = Mathf.FloorToInt(currentScore * 0.025f);
 
             if (CoinsManager.Instance != null && coinsEarned > 0)
             {
@@ -136,13 +118,8 @@ public class MenuScript : MonoBehaviour
             }
         }
 
-        // Return to lobby
         SceneManager.LoadScene("Lobby");
     }
-
-    // ============================================
-    // GENERIC PANEL HANDLERS
-    // ============================================
 
     private void OpenPanel(GameObject panelToOpen, GameObject panelToClose)
     {
@@ -163,7 +140,7 @@ public class MenuScript : MonoBehaviour
 
         if (resumeGame)
         {
-            Time.timeScale = 1f; // resume game if paused
+            Time.timeScale = 1f;
         }
     }
 }

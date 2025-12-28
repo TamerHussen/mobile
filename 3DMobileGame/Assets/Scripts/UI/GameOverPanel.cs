@@ -3,10 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Manages the Game Over panel UI and interactions
-/// Attach to: GameOverPanel GameObject
-/// </summary>
 public class GameOverPanel : MonoBehaviour
 {
     [Header("UI References")]
@@ -27,7 +23,8 @@ public class GameOverPanel : MonoBehaviour
 
     void Awake()
     {
-        // Auto-find UI elements if not assigned
+        Debug.Log(" GameOverPanel Awake()");
+
         if (titleText == null)
             titleText = transform.Find("TitleText")?.GetComponent<TextMeshProUGUI>();
 
@@ -46,27 +43,28 @@ public class GameOverPanel : MonoBehaviour
         if (retryButton == null)
             retryButton = transform.Find("RetryButton")?.GetComponent<Button>();
 
-        // Bind button events
         if (lobbyButton != null)
             lobbyButton.onClick.AddListener(OnLobbyButtonClicked);
 
         if (retryButton != null)
             retryButton.onClick.AddListener(OnRetryButtonClicked);
+
+        Debug.Log($" GameOverPanel UI references assigned - Title: {titleText != null}, Score: {scoreText != null}, Coins: {coinsEarnedText != null}");
     }
 
     void OnEnable()
     {
-        // ✅ PAUSE THE GAME when panel opens
-        Time.timeScale = 0f;
-        Debug.Log("⏸️ Game paused - Game Over panel shown");
+        Debug.Log("GameOverPanel OnEnable() called");
+        Debug.Log($" Current Time.timeScale: {Time.timeScale}");
 
-        // Start auto-return timer
+        Time.timeScale = 0f;
+        Debug.Log("Game paused - Game Over panel shown");
+
         returnTimer = autoReturnDelay;
     }
 
     void Update()
     {
-        // Countdown timer (uses unscaled time since game is paused)
         if (returnTimer > 0)
         {
             returnTimer -= Time.unscaledDeltaTime;
@@ -78,39 +76,67 @@ public class GameOverPanel : MonoBehaviour
 
             if (returnTimer <= 0)
             {
+                Debug.Log(" Auto-return timer expired, returning to lobby");
                 OnLobbyButtonClicked();
             }
         }
     }
 
-    /// <summary>
-    /// Show game over panel with defeat state
-    /// </summary>
     public void ShowDefeat(int finalScore, int coinsEarned)
     {
+        Debug.Log($" ShowDefeat() called - Score: {finalScore}, Coins: {coinsEarned}");
+
         isVictory = false;
 
         if (titleText != null)
+        {
             titleText.text = gameOverTitle;
+            Debug.Log($" Title set to: {gameOverTitle}");
+        }
+        else
+        {
+            Debug.LogError(" titleText is NULL!");
+        }
 
         if (scoreText != null)
+        {
             scoreText.text = $"Final Score: {finalScore}";
+            Debug.Log($" Score text set to: {finalScore}");
+        }
+        else
+        {
+            Debug.LogError(" scoreText is NULL!");
+        }
 
         if (coinsEarnedText != null)
+        {
             coinsEarnedText.text = $"+{coinsEarned} Coins";
+            Debug.Log($" Coins text set to: {coinsEarned}");
+        }
+        else
+        {
+            Debug.LogError(" coinsEarnedText is NULL!");
+        }
 
-        // Show retry button for defeat
         if (retryButton != null)
+        {
             retryButton.gameObject.SetActive(true);
+            Debug.Log(" Retry button shown");
+        }
 
-        gameObject.SetActive(true);
+        if (!gameObject.activeSelf)
+        {
+            Debug.LogWarning(" Panel was inactive during ShowDefeat, activating now!");
+            gameObject.SetActive(true);
+        }
+
+        Debug.Log($"ShowDefeat() complete - Panel active: {gameObject.activeSelf}");
     }
 
-    /// <summary>
-    /// Show game over panel with victory state
-    /// </summary>
     public void ShowVictory(int finalScore, int coinsEarned)
     {
+        Debug.Log($"ShowVictory() called - Score: {finalScore}, Coins: {coinsEarned}");
+
         isVictory = true;
 
         if (titleText != null)
@@ -122,42 +148,39 @@ public class GameOverPanel : MonoBehaviour
         if (coinsEarnedText != null)
             coinsEarnedText.text = $"+{coinsEarned} Coins";
 
-        // Hide retry button for victory
         if (retryButton != null)
             retryButton.gameObject.SetActive(false);
 
-        gameObject.SetActive(true);
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
+        }
     }
 
     void OnLobbyButtonClicked()
     {
-        Debug.Log("🏠 Returning to lobby...");
+        Debug.Log("Lobby button clicked");
 
-        // ✅ UNPAUSE before scene change
         Time.timeScale = 1f;
 
-        // Save data
         if (SaveManager.Instance != null)
             SaveManager.Instance.Save();
 
-        // Return to lobby
         SceneManager.LoadScene("Lobby");
     }
 
     void OnRetryButtonClicked()
     {
-        Debug.Log("🔄 Retrying level...");
+        Debug.Log("Retry button clicked");
 
-        // ✅ UNPAUSE before scene change
         Time.timeScale = 1f;
 
-        // Reload current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     void OnDisable()
     {
-        // Safety: ensure game is unpaused when panel closes
+        Debug.Log(" GameOverPanel OnDisable() called");
         Time.timeScale = 1f;
     }
 }

@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 
 public class LeaveLobbyButton : MonoBehaviour
 {
-    [SerializeField] private string LobbySceneName = "Lobby";
-
     public async void Leave()
     {
         Debug.Log("=== LEAVE BUTTON CLICKED ===");
@@ -29,7 +27,6 @@ public class LeaveLobbyButton : MonoBehaviour
 
         Debug.Log($"Leaving lobby - IsHost: {isHost}, PlayerCount: {playerCount}");
 
-        // Check if already in personal lobby alone
         if (isHost && playerCount == 1)
         {
             Debug.Log("Already in personal lobby alone");
@@ -46,16 +43,14 @@ public class LeaveLobbyButton : MonoBehaviour
             }
         }
 
-        // Leave the lobby
         await lobbyManager.LeaveLobby();
 
-        Debug.Log("✅ Left lobby successfully");
+        Debug.Log(" Left lobby successfully");
     }
     public void OnQuitButton()
     {
         Debug.Log("Quitting game...");
 
-        // Save before quitting
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Save();

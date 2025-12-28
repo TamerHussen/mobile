@@ -21,8 +21,12 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         Time.timeScale = 1f;
-        mainMenuPanel.SetActive(true);
-        loadingScreen.Hide();
+
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(true);
+
+        if (loadingScreen != null)
+            loadingScreen.Hide();
 
         if (startButton != null)
             startButton.interactable = true;
@@ -39,13 +43,11 @@ public class MainMenu : MonoBehaviour
             saveManagerObj.AddComponent<SaveManager>();
             DontDestroyOnLoad(saveManagerObj);
 
-            // Give it a frame to initialize
             Debug.Log("SaveManager created and initialized");
         }
         else
         {
             Debug.Log("SaveManager already exists");
-            // Ensure data is loaded
             SaveManager.Instance.Load();
         }
     }
@@ -56,50 +58,77 @@ public class MainMenu : MonoBehaviour
             return;
 
         isLoading = true;
-        startButton.interactable = false;
-        mainMenuPanel.SetActive(false);
-        loadingScreen.Show();
+
+        if (startButton != null)
+            startButton.interactable = false;
+
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(false);
+
+        if (loadingScreen != null)
+        {
+            loadingScreen.Show();
+            Debug.Log("Loading screen shown");
+        }
 
         try
         {
-            // CRITICAL FIX: Double-check SaveManager exists before proceeding
-            loadingText.text = "Preparing player data...";
-            loadingScreen.SetProgress(0.1f);
+            if (loadingText != null)
+                loadingText.text = "Preparing player data...";
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(0.1f);
+
             EnsureSaveManagerExists();
+            await Task.Delay(100);
 
-            // Wait a frame to ensure SaveManager is fully initialized
-            await Task.Yield();
+            if (loadingText != null)
+                loadingText.text = "Initializing services...";
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(0.3f);
 
-            loadingText.text = "Initializing services...";
-            loadingScreen.SetProgress(0.3f);
             await ServiceInitializer.Initialize();
+            await Task.Delay(100);
 
-            // CRITICAL FIX: Sync player names after authentication
-            loadingText.text = "Syncing player data...";
-            loadingScreen.SetProgress(0.4f);
+            if (loadingText != null)
+                loadingText.text = "Syncing player data...";
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(0.4f);
+
             if (PlayerNameSynchronizer.Instance != null)
             {
                 await PlayerNameSynchronizer.Instance.SyncPlayerName();
             }
+            await Task.Delay(100);
 
             if (UnityLobbyManager.Instance == null)
                 throw new System.Exception("UnityLobbyManager not found");
 
-            loadingText.text = "Creating lobby...";
-            loadingScreen.SetProgress(0.6f);
+            if (loadingText != null)
+                loadingText.text = "Creating lobby...";
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(0.6f);
 
             if (SaveManager.Instance == null)
             {
                 Debug.LogError("SaveManager is still null! Creating emergency instance.");
                 EnsureSaveManagerExists();
-                await Task.Yield();
+                await Task.Delay(100);
             }
 
             await UnityLobbyManager.Instance.CreateLobby(3);
-
-            loadingText.text = "Loading lobby...";
-            loadingScreen.SetProgress(0.9f);
             await Task.Delay(100);
+
+            if (loadingText != null)
+                loadingText.text = "Loading lobby...";
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(0.9f);
+
+            await Task.Delay(200);
+
+            if (loadingScreen != null)
+                loadingScreen.SetProgress(1f);
+
+            Debug.Log("All initialization complete, loading Lobby scene");
 
             SceneManager.LoadScene("Lobby");
         }
@@ -107,10 +136,18 @@ public class MainMenu : MonoBehaviour
         {
             Debug.LogError($"Failed to start game: {e.Message}");
             isLoading = false;
-            loadingScreen.Hide();
-            mainMenuPanel.SetActive(true);
-            startButton.interactable = true;
-            loadingText.text = "Failed to start";
+
+            if (loadingScreen != null)
+                loadingScreen.Hide();
+
+            if (mainMenuPanel != null)
+                mainMenuPanel.SetActive(true);
+
+            if (startButton != null)
+                startButton.interactable = true;
+
+            if (loadingText != null)
+                loadingText.text = "Failed to start";
         }
     }
 

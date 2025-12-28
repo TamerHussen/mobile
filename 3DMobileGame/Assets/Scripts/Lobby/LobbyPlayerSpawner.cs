@@ -71,7 +71,7 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
             SpawnedPlayers.Add(playerObj);
 
-            Debug.Log($"✅ Spawned: {lobbyPlayer.PlayerName} with cosmetic: {lobbyPlayer.Cosmetic}");
+            Debug.Log($" Spawned: {lobbyPlayer.PlayerName} with cosmetic: {lobbyPlayer.Cosmetic}");
         }
 
         Debug.Log($"=== SPAWN COMPLETE: {SpawnedPlayers.Count} players ===");
@@ -81,7 +81,6 @@ public class LobbyPlayerSpawner : MonoBehaviour
     {
         Debug.Log($"Clearing {SpawnedPlayers.Count} spawned players");
 
-        // Destroy all spawned players
         foreach (var player in SpawnedPlayers)
         {
             if (player != null)
@@ -92,6 +91,6 @@ public class LobbyPlayerSpawner : MonoBehaviour
 
         SpawnedPlayers.Clear();
 
-        Debug.Log("✅ All players cleared");
+        Debug.Log(" All players cleared");
     }
 }

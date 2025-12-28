@@ -15,7 +15,6 @@ public class UsernameChanger : MonoBehaviour
     const int MinLength = 3;
     const int MaxLength = 16;
 
-    // Letters, numbers, underscore
     static readonly Regex ValidNameRegex = new Regex(@"^[A-Za-z0-9_]+$");
 
     void OnEnable()
@@ -23,7 +22,6 @@ public class UsernameChanger : MonoBehaviour
         if (SaveManager.Instance?.data != null)
         {
             string currentName = SaveManager.Instance.data.playerName;
-            // Remove the #xxxx part to show only the display name
             if (currentName.Contains("#"))
             {
                 currentName = currentName.Split('#')[0];
@@ -38,7 +36,6 @@ public class UsernameChanger : MonoBehaviour
 
         string displayName = input.text.Trim();
 
-        // Validation
         if (string.IsNullOrEmpty(displayName))
         {
             feedbackText.text = "Name cannot be empty";
@@ -80,7 +77,6 @@ public class UsernameChanger : MonoBehaviour
                 SaveManager.Instance.Save();
             }
 
-            // Sync to lobby
             if (UnityLobbyManager.Instance?.CurrentLobby != null)
             {
                 await UnityLobbyManager.Instance.UpdatePlayerDataAsync(displayName, SaveManager.Instance.data.selectedCosmetic);
@@ -89,7 +85,6 @@ public class UsernameChanger : MonoBehaviour
             var relationshipsManager = FindFirstObjectByType<RelationshipsManager>();
             if (relationshipsManager != null)
             {
-                // Refresh local player name
                 relationshipsManager.RefreshLocalPlayerName();
 
                 await FriendsService.Instance.SetPresenceAsync(
@@ -97,7 +92,6 @@ public class UsernameChanger : MonoBehaviour
                     new Activity { Status = "In Lobby" }
                 );
 
-                // Refresh friends list
                 relationshipsManager.RefreshFriends();
             }
 
@@ -110,7 +104,7 @@ public class UsernameChanger : MonoBehaviour
             LobbyPlayerSpawner.Instance?.SpawnPlayers();
 
             feedbackText.text = $"Name changed to: {displayName}";
-            Debug.Log($"✅ Username changed - Display: '{displayName}', Unique: '{actualUniqueName}'");
+            Debug.Log($"Username changed - Display: '{displayName}', Unique: '{actualUniqueName}'");
 
             Invoke(nameof(Close), 1f);
         }

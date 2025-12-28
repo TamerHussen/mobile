@@ -14,49 +14,47 @@ public class ManagersInitializer : MonoBehaviour
 
     void Awake()
     {
-        // This runs BEFORE anything else
         Debug.Log("=== INITIALIZING MANAGERS ===");
 
-        // Check each manager and warn if missing
         if (saveManager == null)
-            Debug.LogError("❌ SaveManager not assigned!");
+            Debug.LogError(" SaveManager not assigned!");
         else
-            Debug.Log("✅ SaveManager assigned");
+            Debug.Log(" SaveManager assigned");
 
         if (coinsManager == null)
-            Debug.LogError("❌ CoinsManager not assigned!");
+            Debug.LogError(" CoinsManager not assigned!");
         else
-            Debug.Log("✅ CoinsManager assigned");
+            Debug.Log(" CoinsManager assigned");
 
         if (lobbyManager == null)
-            Debug.LogError("❌ UnityLobbyManager not assigned!");
+            Debug.LogError(" UnityLobbyManager not assigned!");
         else
-            Debug.Log("✅ UnityLobbyManager assigned");
+            Debug.Log(" UnityLobbyManager assigned");
 
         if (gameSessionData == null)
-            Debug.LogError("❌ GameSessionData not assigned!");
+            Debug.LogError(" GameSessionData not assigned!");
         else
-            Debug.Log("✅ GameSessionData assigned");
+            Debug.Log(" GameSessionData assigned");
 
         if (playerNameSync == null)
-            Debug.LogError("❌ PlayerNameSynchronizer not assigned!");
+            Debug.LogError(" PlayerNameSynchronizer not assigned!");
         else
-            Debug.Log("✅ PlayerNameSynchronizer assigned");
+            Debug.Log(" PlayerNameSynchronizer assigned");
 
         if (adsManager == null)
-            Debug.LogWarning("⚠️ GoogleAdsManager not assigned (optional)");
+            Debug.LogWarning(" GoogleAdsManager not assigned (optional)");
         else
-            Debug.Log("✅ GoogleAdsManager assigned");
+            Debug.Log(" GoogleAdsManager assigned");
 
         if (adFrequencyManager == null)
-            Debug.LogWarning("⚠️ AdFrequencyManager not assigned (optional)");
+            Debug.LogWarning(" AdFrequencyManager not assigned (optional)");
         else
-            Debug.Log("✅ AdFrequencyManager assigned");
+            Debug.Log(" AdFrequencyManager assigned");
 
         if (audioManager == null)
-            Debug.LogWarning("⚠️ AudioSettingsManager not assigned (optional)");
+            Debug.LogWarning(" AudioSettingsManager not assigned (optional)");
         else
-            Debug.Log("✅ AudioSettingsManager assigned");
+            Debug.Log(" AudioSettingsManager assigned");
 
         Debug.Log("=== MANAGERS INITIALIZATION COMPLETE ===");
     }

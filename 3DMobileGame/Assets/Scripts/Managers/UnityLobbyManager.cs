@@ -26,7 +26,6 @@ public class UnityLobbyManager : MonoBehaviour
 
     private bool isUsingLobbyEvents = false;
 
-    // Rate limit tracking
     private int rateLimitWarningCount = 0;
     private const int MaxRateLimitWarnings = 3;
     private float lastRateLimitWarning = 0f;
@@ -73,14 +72,14 @@ public class UnityLobbyManager : MonoBehaviour
     public void EnableLobbyEvents()
     {
         isUsingLobbyEvents = true;
-        Debug.Log("✅ Lobby events enabled - polling disabled");
+        Debug.Log(" Lobby events enabled - polling disabled");
     }
 
     public void DisableLobbyEvents()
     {
         isUsingLobbyEvents = false;
         pollTimer = PollInterval;
-        Debug.Log("✅ Lobby events disabled - polling re-enabled");
+        Debug.Log(" Lobby events disabled - polling re-enabled");
     }
 
     bool IsHost()
@@ -108,7 +107,6 @@ public class UnityLobbyManager : MonoBehaviour
             }
             else if (e.Reason == LobbyExceptionReason.RateLimited)
             {
-                // Only log rate limit warnings occasionally
                 if (Time.time - lastRateLimitWarning > RateLimitWarningCooldown)
                 {
                     rateLimitWarningCount++;
@@ -304,7 +302,7 @@ public class UnityLobbyManager : MonoBehaviour
             relationshipsManager.RefreshLocalPlayerName();
         }
 
-        Debug.Log($"✅ Post-join complete.");
+        Debug.Log($" Post-join complete.");
     }
 
     private async Task UpdatePresenceAfterJoin()
@@ -315,7 +313,7 @@ public class UnityLobbyManager : MonoBehaviour
                 Availability.Online,
                 new Activity { Status = "In Lobby" }
             );
-            Debug.Log("✅ Presence updated to 'In Lobby'");
+            Debug.Log(" Presence updated to 'In Lobby'");
         }
         catch (Exception e)
         {
@@ -470,7 +468,7 @@ public class UnityLobbyManager : MonoBehaviour
 
             CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(CurrentLobby.Id, options);
 
-            Debug.Log($"✅ Updated lobby level to: {levelName}");
+            Debug.Log($" Updated lobby level to: {levelName}");
 
             SyncLobbyToLocal();
         }
@@ -612,6 +610,6 @@ public class UnityLobbyManager : MonoBehaviour
         }
 
         IsJoiningExternalLobby = false;
-        Debug.Log("✅ Left lobby successfully");
+        Debug.Log(" Left lobby successfully");
     }
 }

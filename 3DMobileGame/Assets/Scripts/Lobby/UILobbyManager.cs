@@ -8,7 +8,6 @@ public class UILobbyManager : MonoBehaviour
     public GameObject friendsPanel;
     public GameObject settingsPanel;
 
-    // Close all panels
     void HideAll()
     {
         levelsPanel.SetActive(false);

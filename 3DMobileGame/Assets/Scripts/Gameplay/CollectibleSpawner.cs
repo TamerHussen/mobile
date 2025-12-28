@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class CollectibleSpawner : MonoBehaviour
 {
@@ -9,16 +8,22 @@ public class CollectibleSpawner : MonoBehaviour
     public int baseCollectibleCount = 10;
     public int collectiblesPerExtraPlayer = 5;
 
+    [Header("Spawn Rules")]
+    [Tooltip("Minimum distance from player spawn")]
+    public float minDistanceFromPlayer = 5f;
+
     [Header("Visuals")]
     public bool rotateCollectibles = true;
     public float rotationSpeed = 50f;
 
     private List<GameObject> spawnedCollectibles = new List<GameObject>();
     private MazeGenerator mazeGen;
+    private LevelPlayerSpawner playerSpawner;
 
-    void Start()
+    void Awake()
     {
         mazeGen = FindFirstObjectByType<MazeGenerator>();
+        playerSpawner = FindFirstObjectByType<LevelPlayerSpawner>();
     }
 
     void OnEnable()
@@ -38,15 +43,42 @@ public class CollectibleSpawner : MonoBehaviour
         }
 
         int collectiblesToSpawn = baseCollectibleCount + (playerCount > 1 ? (playerCount - 1) * collectiblesPerExtraPlayer : 0);
-        Debug.Log($"Spawning {collectiblesToSpawn} collectibles for {playerCount} player(s)");
+        Debug.Log($" Spawning {collectiblesToSpawn} collectibles for {playerCount} player(s)");
 
-        for (int i = 0; i < collectiblesToSpawn; i++)
+        Vector3 playerPosition = Vector3.zero;
+        if (playerSpawner != null)
         {
-            Vector3 spawnPos = mazeGen != null
-                ? mazeGen.GetRandomFloorPosition()
-                : Vector3.up * 0.5f;
+            playerPosition = playerSpawner.GetPlayerSpawnPosition();
+        }
 
-            SpawnCollectible(spawnPos);
+        HashSet<Vector3> usedPositions = new HashSet<Vector3>();
+        int attempts = 0;
+        int maxAttempts = collectiblesToSpawn * 10;
+
+        for (int i = 0; i < collectiblesToSpawn && attempts < maxAttempts; attempts++)
+        {
+            Vector3 spawnPos;
+            if (mazeGen != null)
+            {
+                spawnPos = mazeGen.GetSpawnPointAwayFrom(playerPosition, minDistanceFromPlayer);
+            }
+            else
+            {
+                spawnPos = Vector3.up * 0.5f;
+            }
+
+            Vector3 gridPos = new Vector3(
+                Mathf.Round(spawnPos.x * 2f) / 2f,
+                Mathf.Round(spawnPos.y * 2f) / 2f,
+                Mathf.Round(spawnPos.z * 2f) / 2f
+            );
+
+            if (!usedPositions.Contains(gridPos))
+            {
+                usedPositions.Add(gridPos);
+                SpawnCollectible(spawnPos);
+                i++;
+            }
         }
 
         Debug.Log($"✅ Spawned {spawnedCollectibles.Count} collectibles");

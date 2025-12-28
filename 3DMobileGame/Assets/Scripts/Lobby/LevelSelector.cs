@@ -33,7 +33,6 @@ public class LevelSelector : MonoBehaviour
 
     public void SelectLevel(string level)
     {
-        // Check if player is host
         if (UnityLobbyManager.Instance?.CurrentLobby != null)
         {
             string localPlayerId = Unity.Services.Authentication.AuthenticationService.Instance.PlayerId;
@@ -51,7 +50,6 @@ public class LevelSelector : MonoBehaviour
             LobbyInfo.Instance.SetSelectedLevel(level);
             Debug.Log($"Selected level: {level}");
 
-            // Update all level buttons
             UpdateAllLevelButtons();
         }
     }
@@ -63,7 +61,6 @@ public class LevelSelector : MonoBehaviour
 
         bool isSelected = LobbyInfo.Instance.GetSelectedLevel() == levelName;
 
-        // Check if player is host
         bool isHost = true;
         if (UnityLobbyManager.Instance?.CurrentLobby != null)
         {
@@ -71,7 +68,6 @@ public class LevelSelector : MonoBehaviour
             isHost = UnityLobbyManager.Instance.CurrentLobby.HostId == localPlayerId;
         }
 
-        // Set color and interactability
         if (isSelected)
         {
             buttonImage.color = selectedColor;

@@ -66,7 +66,6 @@ public class PlayerData
 
     public PlayerData()
     {
-        // Default constructor
     }
 
     public PlayerData(string name, string cosmetic = "DefaultCosmetic")
@@ -85,7 +84,7 @@ public class PlayerData
         if (!unlockedCosmetics.Contains(cosmeticName))
         {
             unlockedCosmetics.Add(cosmeticName);
-            Debug.Log($"✅ Unlocked cosmetic: {cosmeticName}");
+            Debug.Log($" Unlocked cosmetic: {cosmeticName}");
         }
     }
 }

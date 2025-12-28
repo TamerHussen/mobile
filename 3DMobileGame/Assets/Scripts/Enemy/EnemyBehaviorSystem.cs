@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 public class EnemyBehaviorSystem : MonoBehaviour
 {
-    [Header("Face Models (Visual State Only)")]
+    [Header("Face Models")]
     public GameObject angryFace;
     public GameObject happyFace;
     public GameObject staticFace;
@@ -18,27 +18,24 @@ public class EnemyBehaviorSystem : MonoBehaviour
     public float happyChaseSpeed = 3f;
     public float staticChaseSpeed = 3.5f;
 
-    [Header("Jumpscare Pools - ANGRY MODE")]
-    [Tooltip("Traditional scary jumpscares for Angry mode")]
+    [Header("Patrol Settings")]
+    public float patrolSpeed = 1.5f; // Walking speed for patrol
+
+    [Header("Jumpscare Pools")]
     public JumpscareData[] angryJumpscares;
-
-    [Header("Jumpscare Pools - HAPPY MODE")]
-    [Tooltip("Meme/funny jumpscares for Happy mode")]
     public JumpscareData[] happyJumpscares;
-
-    [Header("Jumpscare Pools - STATIC MODE")]
-    [Tooltip("Mismatched/broken jumpscares (scary image + funny sound OR funny image + scary sound)")]
     public JumpscareData[] staticJumpscares;
 
     [Header("References")]
     public NavMeshAgent agent;
-    [HideInInspector] public Transform player; // Assigned by spawner
+    [HideInInspector] public Transform player;
     public AudioSource audioSource;
-    [HideInInspector] public JumpScareManager jumpScareManager; // Assigned by spawner
+    [HideInInspector] public JumpScareManager jumpScareManager;
+    public Animator animator; // Add this!
 
     [Header("Patrol Settings")]
     public float patrolRange = 15f;
-    [HideInInspector] public Transform centrePoint; // Assigned by spawner
+    [HideInInspector] public Transform centrePoint;
     public float detectionRange = 8f;
     public float losePlayerTime = 3f;
 
@@ -52,12 +49,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     private float lastSeenPlayerTime;
     private float normalSpeed;
 
-    public enum EnemyMode
-    {
-        Angry,   // Scary jumpscares
-        Happy,   // Meme/funny jumpscares
-        Static   // Mismatched jumpscares
-    }
+    public enum EnemyMode { Angry, Happy, Static }
 
     void Start()
     {
@@ -67,7 +59,11 @@ public class EnemyBehaviorSystem : MonoBehaviour
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
 
-        normalSpeed = agent.speed;
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        normalSpeed = patrolSpeed; // Set normal speed to patrol speed
+        agent.speed = normalSpeed;
 
         if (centrePoint == null)
             centrePoint = transform;
@@ -78,7 +74,17 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void Update()
     {
-        if (isStunned || player == null) return;
+        if (isStunned || player == null)
+        {
+            UpdateAnimator();
+            return;
+        }
+
+        if (!agent.isOnNavMesh)
+        {
+            Debug.LogWarning($"Enemy {name} is not on NavMesh!");
+            return;
+        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -99,7 +105,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
             if (isChasing)
                 StopChase();
 
-            if (agent.remainingDistance <= agent.stoppingDistance)
+            if (agent.pathPending == false && agent.remainingDistance <= agent.stoppingDistance)
             {
                 Vector3 point;
                 if (RandomPoint(centrePoint.position, patrolRange, out point))
@@ -108,6 +114,23 @@ public class EnemyBehaviorSystem : MonoBehaviour
                 }
             }
         }
+
+        UpdateAnimator();
+    }
+
+    void UpdateAnimator()
+    {
+        if (animator == null) return;
+
+        // Calculate speed based on agent velocity
+        float speed = agent.velocity.magnitude;
+
+        // Update animator parameters
+        animator.SetFloat("Speed", speed);
+        animator.SetBool("IsChasing", isChasing);
+
+        // Debug info
+        // Debug.Log($"Agent Speed: {speed}, IsChasing: {isChasing}");
     }
 
     void StartChase()
@@ -133,7 +156,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     void StopChase()
     {
         isChasing = false;
-        agent.speed = normalSpeed;
+        agent.speed = patrolSpeed; // Return to patrol speed
     }
 
     IEnumerator ModeSwitchRoutine()
@@ -143,7 +166,6 @@ public class EnemyBehaviorSystem : MonoBehaviour
             yield return new WaitForSeconds(behaviorSwitchInterval);
             EnemyMode newMode = (EnemyMode)Random.Range(0, 3);
             SetMode(newMode);
-            Debug.Log($"Enemy switched to {newMode} mode!");
         }
     }
 
@@ -151,7 +173,6 @@ public class EnemyBehaviorSystem : MonoBehaviour
     {
         currentMode = mode;
 
-        // Update visual face
         if (angryFace != null) angryFace.SetActive(false);
         if (happyFace != null) happyFace.SetActive(false);
         if (staticFace != null) staticFace.SetActive(false);
@@ -181,7 +202,10 @@ public class EnemyBehaviorSystem : MonoBehaviour
                 return;
             }
 
-            // Trigger jumpscare based on current mode
+            // Trigger attack animation
+            if (animator != null)
+                animator.SetTrigger("Attack");
+
             TriggerJumpscareByMode();
 
             if (livesSystem != null)
@@ -201,7 +225,6 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
         JumpscareData[] pool = null;
 
-        // Select jumpscare pool based on current mode
         switch (currentMode)
         {
             case EnemyMode.Angry:
@@ -215,23 +238,18 @@ public class EnemyBehaviorSystem : MonoBehaviour
                 break;
         }
 
-        // Validate pool
         if (pool == null || pool.Length == 0)
         {
             Debug.LogWarning($"No jumpscares configured for {currentMode} mode!");
             return;
         }
 
-        // Select random jumpscare from pool
         JumpscareData selectedJumpscare = pool[Random.Range(0, pool.Length)];
 
-        // Trigger it
         jumpScareManager.TriggerCustomJumpscare(
             selectedJumpscare.image,
             selectedJumpscare.audio
         );
-
-        Debug.Log($"Triggered {currentMode} jumpscare: {selectedJumpscare.name}");
 
 #if UNITY_ANDROID || UNITY_IOS
         Handheld.Vibrate();
@@ -243,7 +261,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
         isStunned = true;
         isChasing = false;
 
-        if (agent != null)
+        if (agent != null && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -251,7 +269,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
         yield return new WaitForSeconds(stunDuration);
 
-        if (player != null && agent != null)
+        if (player != null && agent != null && agent.isOnNavMesh)
         {
             Vector3 retreatDirection = (transform.position - player.position).normalized;
             Vector3 retreatPoint = transform.position + (retreatDirection * retreatDistance);
@@ -264,7 +282,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
             }
         }
 
-        if (agent != null)
+        if (agent != null && agent.isOnNavMesh)
             agent.isStopped = false;
 
         isStunned = false;
@@ -296,13 +314,10 @@ public class EnemyBehaviorSystem : MonoBehaviour
     }
 }
 
-/// <summary>
-/// Serializable jumpscare data - create as many as you need in the Inspector
-/// </summary>
 [System.Serializable]
 public class JumpscareData
 {
-    public string name; // For organization in Inspector
+    public string name;
     public Sprite image;
     public AudioClip audio;
 }

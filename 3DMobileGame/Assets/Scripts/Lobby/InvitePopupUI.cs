@@ -64,26 +64,21 @@ public class InvitePopupUI : MonoBehaviour
             {
                 Debug.Log("Leaving current lobby...");
 
-                // Unsubscribe from events
                 LobbyInfo.Instance?.UnsubscribeFromLobby();
 
-                // Remove from lobby
                 await LobbyService.Instance.RemovePlayerAsync(
                     UnityLobbyManager.Instance.CurrentLobby.Id,
                     AuthenticationService.Instance.PlayerId
                 );
 
-                // Clear local state
                 UnityLobbyManager.Instance.CurrentLobby = null;
                 LobbyInfo.Instance?.ClearLocalLobby();
 
                 await Task.Delay(300);
             }
 
-            // Set flag before joining
             UnityLobbyManager.Instance.IsJoiningExternalLobby = true;
 
-            // Join new lobby
             await UnityLobbyManager.Instance.JoinLobbyByCode(currentJoinCode);
 
             await Task.Delay(500);
@@ -99,10 +94,9 @@ public class InvitePopupUI : MonoBehaviour
 
             Debug.Log($"Successfully joined lobby: {UnityLobbyManager.Instance.CurrentLobby.Id}");
 
-            // Load lobby scene
             SceneManager.LoadScene("Lobby");
 
-            Debug.Log("✅ Joined lobby successfully!");
+            Debug.Log(" Joined lobby successfully!");
             VisualPanel.SetActive(false);
         }
         catch (LobbyServiceException e)

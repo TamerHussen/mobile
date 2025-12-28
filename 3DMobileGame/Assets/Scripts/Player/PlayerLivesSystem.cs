@@ -3,10 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
-/// <summary>
-/// Player lives system with panel integration
-/// Attach to: Player Prefab
-/// </summary>
 public class PlayerLivesSystem : MonoBehaviour
 {
     public static PlayerLivesSystem Instance;
@@ -52,26 +48,39 @@ public class PlayerLivesSystem : MonoBehaviour
         currentLives = maxLives;
         UpdateLivesUI();
 
-        // Panels are controlled by their own scripts
         if (gameOverPanel != null)
+        {
             gameOverPanel.gameObject.SetActive(false);
+            Debug.Log(" GameOverPanel hidden at start");
+        }
 
         if (reviveAdPanel != null)
+        {
             reviveAdPanel.gameObject.SetActive(false);
+            Debug.Log(" ReviveAdPanel hidden at start");
+        }
     }
 
     void AutoAssignUIReferences()
     {
         livesText = GameObject.Find("LivesText")?.GetComponent<TextMeshProUGUI>();
-        if (livesText != null) Debug.Log("✅ Auto-found LivesText");
+        if (livesText != null)
+            Debug.Log(" Auto-found LivesText");
+        else
+            Debug.LogWarning(" LivesText not found");
 
-        // Find panel scripts
         var gameOverObj = GameObject.Find("GameOverPanel");
         if (gameOverObj != null)
         {
             gameOverPanel = gameOverObj.GetComponent<GameOverPanel>();
             if (gameOverPanel != null)
-                Debug.Log("✅ Auto-found GameOverPanel script");
+                Debug.Log($" Auto-found GameOverPanel script (currently {(gameOverObj.activeSelf ? "active" : "inactive")})");
+            else
+                Debug.LogError(" GameOverPanel GameObject found but no GameOverPanel script attached!");
+        }
+        else
+        {
+            Debug.LogError(" GameOverPanel GameObject not found! Check hierarchy name is exactly 'GameOverPanel'");
         }
 
         var reviveAdObj = GameObject.Find("ReviveAdPanel");
@@ -79,33 +88,45 @@ public class PlayerLivesSystem : MonoBehaviour
         {
             reviveAdPanel = reviveAdObj.GetComponent<ReviveAdPanel>();
             if (reviveAdPanel != null)
-                Debug.Log("✅ Auto-found ReviveAdPanel script");
+                Debug.Log($" Auto-found ReviveAdPanel script (currently {(reviveAdObj.activeSelf ? "active" : "inactive")})");
+            else
+                Debug.LogError(" ReviveAdPanel GameObject found but no ReviveAdPanel script attached!");
+        }
+        else
+        {
+            Debug.LogError("ReviveAdPanel GameObject not found! Check hierarchy name is exactly 'ReviveAdPanel'");
         }
 
-        // Find life icons
         lifeIcons = new Image[maxLives];
         for (int i = 0; i < maxLives; i++)
         {
-            string iconName = $"LifeIcon{i + 1}";
+            string iconName = $"LivesIcon{i + 1}";
             GameObject iconObj = GameObject.Find(iconName);
             if (iconObj != null)
             {
                 lifeIcons[i] = iconObj.GetComponent<Image>();
-                Debug.Log($"✅ Auto-found {iconName}");
+                Debug.Log($" Auto-found {iconName}");
+            }
+            else
+            {
+                Debug.LogWarning($" {iconName} not found");
             }
         }
     }
 
     public void LoseLife()
     {
-        if (isInvincible || isDead) return;
+        if (isInvincible || isDead)
+        {
+            Debug.Log($"LoseLife ignored - Invincible: {isInvincible}, Dead: {isDead}");
+            return;
+        }
 
         currentLives--;
         UpdateLivesUI();
 
-        Debug.Log($"Life lost! Remaining: {currentLives}");
+        Debug.Log($" Life lost! Remaining: {currentLives}/{maxLives}");
 
-        // ✅ NOTIFY AD FREQUENCY MANAGER
         if (AdFrequencyManager.Instance != null)
         {
             AdFrequencyManager.Instance.OnPlayerDeath();
@@ -123,6 +144,8 @@ public class PlayerLivesSystem : MonoBehaviour
 
     IEnumerator RespawnPlayer()
     {
+        Debug.Log("Starting respawn sequence...");
+
         var controller = GetComponent<PlayerController>();
         if (controller != null)
             controller.enabled = false;
@@ -134,6 +157,11 @@ public class PlayerLivesSystem : MonoBehaviour
             Transform spawnPoint = respawnPoints[Random.Range(0, respawnPoints.Length)];
             transform.position = spawnPoint.position;
             transform.rotation = spawnPoint.rotation;
+            Debug.Log($" Respawned at {spawnPoint.name}");
+        }
+        else
+        {
+            Debug.LogWarning(" No respawn points assigned!");
         }
 
         if (controller != null)
@@ -145,7 +173,7 @@ public class PlayerLivesSystem : MonoBehaviour
     IEnumerator GrantInvincibility()
     {
         isInvincible = true;
-        Debug.Log("Player is invincible for " + respawnInvincibilityTime + " seconds");
+        Debug.Log($" Player is invincible for {respawnInvincibilityTime} seconds");
 
         float elapsed = 0f;
         var renderers = GetComponentsInChildren<Renderer>();
@@ -170,69 +198,140 @@ public class PlayerLivesSystem : MonoBehaviour
         }
 
         isInvincible = false;
-        Debug.Log("Invincibility ended");
+        Debug.Log(" Invincibility ended");
     }
 
     void OnAllLivesLost()
     {
         isDead = true;
-        Debug.Log("All lives lost!");
+        Debug.Log(" ========== ALL LIVES LOST ==========");
+
+        var controller = GetComponent<PlayerController>();
+        if (controller != null)
+        {
+            controller.enabled = false;
+            Debug.Log(" Player controller disabled");
+        }
 
         bool isSolo = GameSessionData.Instance == null ||
                       GameSessionData.Instance.players == null ||
                       GameSessionData.Instance.players.Count <= 1;
 
-        // ✅ SHOW REVIVE AD OFFER (Solo only, one-time)
-        if (isSolo && !hasUsedReviveAd && GoogleAdsManager.Instance != null &&
-            GoogleAdsManager.Instance.IsRewardedAdReady())
+        Debug.Log($" Game mode: {(isSolo ? "SOLO" : "MULTIPLAYER")}");
+        Debug.Log($" Has used revive ad: {hasUsedReviveAd}");
+
+        if (isSolo && !hasUsedReviveAd)
         {
-            ShowReviveAdOffer();
+            bool adsManagerExists = GoogleAdsManager.Instance != null;
+            bool adsReady = adsManagerExists && GoogleAdsManager.Instance.IsRewardedAdReady();
+
+            Debug.Log($" GoogleAdsManager exists: {adsManagerExists}");
+            Debug.Log($" Rewarded ad ready: {adsReady}");
+
+            if (adsReady)
+            {
+                ShowReviveAdOffer();
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ No ads available, proceeding to game over");
+                ShowGameOver();
+            }
         }
         else
         {
+            if (!isSolo)
+                Debug.Log(" Multiplayer mode - skipping revive ad");
+            else
+                Debug.Log(" Already used revive ad - skipping to game over");
+
             ShowGameOver();
         }
     }
 
     void ShowReviveAdOffer()
     {
-        if (reviveAdPanel != null)
+        Debug.Log("========== SHOWING REVIVE AD OFFER ==========");
+
+        if (reviveAdPanel == null)
         {
-            // ReviveAdPanel script handles:
-            // - Pausing game
-            // - Countdown timer
-            // - Ad display
-            reviveAdPanel.gameObject.SetActive(true);
-            Debug.Log("💰 Showing revive ad offer");
+            Debug.LogError(" ReviveAdPanel reference is NULL! Cannot show revive offer.");
+            Debug.LogError(" This means GameObject.Find('ReviveAdPanel') failed during Start()");
+            ShowGameOver();
+            return;
+        }
+
+        Debug.Log($" ReviveAdPanel reference found: {reviveAdPanel.name}");
+        Debug.Log($"Current active state: {reviveAdPanel.gameObject.activeSelf}");
+
+        // Activate the panel
+        reviveAdPanel.gameObject.SetActive(true);
+
+        if (reviveAdPanel.gameObject.activeSelf)
+        {
+            Debug.Log(" ReviveAdPanel successfully activated!");
         }
         else
         {
-            Debug.LogWarning("ReviveAdPanel not found! Showing game over instead.");
+            Debug.LogError(" Failed to activate ReviveAdPanel! Something is preventing activation.");
+            Debug.LogError(" Check if parent Canvas is active and enabled.");
+
+            Transform parent = reviveAdPanel.transform.parent;
+            while (parent != null)
+            {
+                Debug.Log($" Checking parent: {parent.name} - Active: {parent.gameObject.activeSelf}");
+                if (!parent.gameObject.activeSelf)
+                {
+                    Debug.LogWarning($" Parent {parent.name} is inactive! This might be the issue.");
+                }
+                parent = parent.parent;
+            }
+
             ShowGameOver();
         }
     }
 
-    /// <summary>
-    /// Called by ReviveAdPanel when ad is successfully watched
-    /// </summary>
     public void OnReviveAdSuccess()
     {
+        Debug.Log("========== REVIVE AD SUCCESS ==========");
+
         hasUsedReviveAd = true;
         currentLives = 1;
         isDead = false;
 
         UpdateLivesUI();
-        Time.timeScale = 1f; // Unpause
+
+        Time.timeScale = 1f;
+        Debug.Log(" Game unpaused");
+
+        var controller = GetComponent<PlayerController>();
+        if (controller != null)
+        {
+            controller.enabled = true;
+            Debug.Log(" Player controller re-enabled");
+        }
 
         StartCoroutine(RespawnPlayer());
-        StartCoroutine(GrantInvincibility());
 
-        Debug.Log("✅ Player revived with ad!");
+        Debug.Log(" Player revived with 1 life remaining!");
     }
 
     void ShowGameOver()
     {
-        // Get final score
+        Debug.Log("========== SHOWING GAME OVER ==========");
+
+        if (gameOverPanel == null)
+        {
+            Debug.LogError(" GameOverPanel reference is NULL! Forcing scene reload.");
+            Debug.LogError(" This means GameObject.Find('GameOverPanel') failed during Start()");
+            Time.timeScale = 1f;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+            return;
+        }
+
+        Debug.Log($" GameOverPanel reference found: {gameOverPanel.name}");
+        Debug.Log($" Current active state: {gameOverPanel.gameObject.activeSelf}");
+
         int finalScore = 0;
         int coinsEarned = 0;
 
@@ -240,31 +339,46 @@ public class PlayerLivesSystem : MonoBehaviour
         if (scoreSystem != null)
         {
             finalScore = scoreSystem.Score;
-            coinsEarned = Mathf.FloorToInt(finalScore * 0.05f); // 50% penalty for death
+            coinsEarned = Mathf.FloorToInt(finalScore * 0.05f);
 
             if (CoinsManager.Instance != null)
             {
                 CoinsManager.Instance.AddCoins(coinsEarned);
+                Debug.Log($" Awarded {coinsEarned} coins");
             }
 
-            Debug.Log($"Game Over - Score: {finalScore}, Earned {coinsEarned} coins");
-        }
-
-        // Show game over panel
-        if (gameOverPanel != null)
-        {
-            // GameOverPanel script handles:
-            // - Pausing game
-            // - Auto-return timer
-            // - Button interactions
-            gameOverPanel.ShowDefeat(finalScore, coinsEarned);
+            Debug.Log($" Final Score: {finalScore}");
         }
         else
         {
-            Debug.LogWarning("GameOverPanel not found! Returning to lobby directly.");
-            Time.timeScale = 1f;
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+            Debug.LogWarning(" PlayerScore component not found on player!");
         }
+
+        gameOverPanel.gameObject.SetActive(true);
+
+        if (gameOverPanel.gameObject.activeSelf)
+        {
+            Debug.Log(" GameOverPanel successfully activated!");
+        }
+        else
+        {
+            Debug.LogError(" Failed to activate GameOverPanel!");
+
+            Transform parent = gameOverPanel.transform.parent;
+            while (parent != null)
+            {
+                Debug.Log($" Checking parent: {parent.name} - Active: {parent.gameObject.activeSelf}");
+                if (!parent.gameObject.activeSelf)
+                {
+                    Debug.LogWarning($" Parent {parent.name} is inactive!");
+                }
+                parent = parent.parent;
+            }
+        }
+
+        gameOverPanel.ShowDefeat(finalScore, coinsEarned);
+
+        Debug.Log(" GameOverPanel.ShowDefeat() called");
     }
 
     void UpdateLivesUI()

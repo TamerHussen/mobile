@@ -13,26 +13,26 @@ public class FriendSystemDebugger : MonoBehaviour
 
         if (SaveManager.Instance == null)
         {
-            output += "❌ SaveManager is NULL!\n";
+            output += "SaveManager is NULL!\n";
         }
         else if (SaveManager.Instance.data == null)
         {
-            output += "❌ SaveManager.data is NULL!\n";
+            output += "SaveManager.data is NULL!\n";
         }
         else
         {
-            output += "✅ SaveManager exists\n";
+            output += "SaveManager exists\n";
             output += $"Display Name: '{SaveManager.Instance.data.playerName}'\n";
             output += $"Unique Name: '{SaveManager.Instance.data.uniquePlayerName}'\n\n";
         }
 
         if (!AuthenticationService.Instance.IsSignedIn)
         {
-            output += "❌ Not signed in to Authentication!\n";
+            output += "Not signed in to Authentication!\n";
         }
         else
         {
-            output += "✅ Authentication signed in\n";
+            output += "Authentication signed in\n";
             output += $"Player ID: {AuthenticationService.Instance.PlayerId}\n";
             output += $"Auth Name: '{AuthenticationService.Instance.PlayerName}'\n\n";
         }
@@ -47,15 +47,15 @@ public class FriendSystemDebugger : MonoBehaviour
 
             if (string.IsNullOrEmpty(uniqueName))
             {
-                output += "❌ Unique name is EMPTY!\n";
+                output += "Unique name is EMPTY!\n";
             }
             else if (!uniqueName.Contains("#"))
             {
-                output += $"❌ Unique name missing #: '{uniqueName}'\n";
+                output += $"Unique name missing #: '{uniqueName}'\n";
             }
             else
             {
-                output += $"✅ Unique name has #: '{uniqueName}'\n";
+                output += $"Unique name has #: '{uniqueName}'\n";
             }
 
             if (!string.IsNullOrEmpty(uniqueName) && uniqueName.Contains("#"))
@@ -63,21 +63,21 @@ public class FriendSystemDebugger : MonoBehaviour
                 string expectedDisplay = uniqueName.Split('#')[0];
                 if (displayName == expectedDisplay)
                 {
-                    output += $"✅ Display matches unique prefix\n";
+                    output += $"Display matches unique prefix\n";
                 }
                 else
                 {
-                    output += $"⚠️ Display '{displayName}' != Unique prefix '{expectedDisplay}'\n";
+                    output += $"Display '{displayName}' != Unique prefix '{expectedDisplay}'\n";
                 }
             }
 
             if (authName == uniqueName)
             {
-                output += $"✅ Auth name matches unique name\n";
+                output += $"Auth name matches unique name\n";
             }
             else
             {
-                output += $"❌ Auth '{authName}' != Unique '{uniqueName}'\n";
+                output += $"Auth '{authName}' != Unique '{uniqueName}'\n";
             }
 
             output += "\n--- FRIEND REQUEST INFO ---\n";

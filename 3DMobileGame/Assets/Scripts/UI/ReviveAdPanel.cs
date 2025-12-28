@@ -3,10 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
-/// <summary>
-/// Manages the Revive Ad panel UI and interactions
-/// Attach to: ReviveAdPanel GameObject
-/// </summary>
 public class ReviveAdPanel : MonoBehaviour
 {
     [Header("UI References")]
@@ -26,7 +22,8 @@ public class ReviveAdPanel : MonoBehaviour
 
     void Awake()
     {
-        // Auto-find UI elements if not assigned
+        Debug.Log(" ReviveAdPanel Awake()");
+
         if (titleText == null)
             titleText = transform.Find("TitleText")?.GetComponent<TextMeshProUGUI>();
 
@@ -42,28 +39,47 @@ public class ReviveAdPanel : MonoBehaviour
         if (declineButton == null)
             declineButton = transform.Find("DeclineButton")?.GetComponent<Button>();
 
-        // Bind button events
         if (reviveButton != null)
+        {
             reviveButton.onClick.AddListener(OnReviveClicked);
+            Debug.Log(" Revive button listener added");
+        }
+        else
+        {
+            Debug.LogError(" Revive button not found!");
+        }
 
         if (declineButton != null)
+        {
             declineButton.onClick.AddListener(OnDeclineClicked);
+            Debug.Log(" Decline button listener added");
+        }
+        else
+        {
+            Debug.LogError(" Decline button not found!");
+        }
     }
 
     void OnEnable()
     {
-        // ✅ PAUSE THE GAME when panel opens
-        Time.timeScale = 0f;
-        Debug.Log("⏸️ Game paused - Revive Ad panel shown");
+        Debug.Log("ReviveAdPanel OnEnable() called");
+        Debug.Log($" Current Time.timeScale: {Time.timeScale}");
 
-        // Set initial text
+        Time.timeScale = 0f;
+        Debug.Log(" Game paused - Revive Ad panel shown");
+
         if (titleText != null)
+        {
             titleText.text = titleMessage;
+            Debug.Log($" Title set to: {titleMessage}");
+        }
 
         if (descriptionText != null)
+        {
             descriptionText.text = descriptionMessage;
+            Debug.Log($" Description set");
+        }
 
-        // Start timeout countdown
         timeRemaining = timeoutDuration;
         isWaitingForResponse = true;
 
@@ -72,6 +88,8 @@ public class ReviveAdPanel : MonoBehaviour
 
     IEnumerator CountdownTimer()
     {
+        Debug.Log($" Starting countdown timer ({timeoutDuration} seconds)");
+
         while (timeRemaining > 0 && isWaitingForResponse)
         {
             if (timerText != null)
@@ -79,74 +97,68 @@ public class ReviveAdPanel : MonoBehaviour
                 timerText.text = $"Time Remaining: {Mathf.Ceil(timeRemaining)}s";
             }
 
-            // Use unscaled time since game is paused
             timeRemaining -= Time.unscaledDeltaTime;
             yield return null;
         }
 
-        // Auto-decline if time runs out
         if (isWaitingForResponse)
         {
+            Debug.Log(" Countdown expired - declining automatically");
             OnDeclineClicked();
         }
     }
 
     void OnReviveClicked()
     {
+        Debug.Log("========== REVIVE BUTTON CLICKED ==========");
+
         isWaitingForResponse = false;
 
-        Debug.Log("💰 Player accepted revive ad offer");
-
-        // Check if ad is ready
         if (GoogleAdsManager.Instance == null)
         {
-            Debug.LogError("GoogleAdsManager not found!");
+            Debug.LogError(" GoogleAdsManager not found!");
             OnReviveFailed();
             return;
         }
 
         if (!GoogleAdsManager.Instance.IsRewardedAdReady())
         {
-            Debug.LogWarning("Rewarded ad not ready!");
+            Debug.LogWarning(" Rewarded ad not ready!");
             OnReviveFailed();
             return;
         }
 
-        // Hide panel while ad plays
+        Debug.Log(" Hiding panel and showing ad...");
         gameObject.SetActive(false);
 
-        // Show the ad
         GoogleAdsManager.Instance.ShowRewardedAd(OnReviveSuccess, OnReviveFailed);
     }
 
     void OnReviveSuccess()
     {
-        Debug.Log("✅ Revive ad completed successfully!");
+        Debug.Log("========== REVIVE AD COMPLETED ==========");
 
-        // Notify PlayerLivesSystem to revive player
         if (PlayerLivesSystem.Instance != null)
         {
             PlayerLivesSystem.Instance.OnReviveAdSuccess();
+            Debug.Log(" Called PlayerLivesSystem.OnReviveAdSuccess()");
         }
         else
         {
-            Debug.LogError("PlayerLivesSystem.Instance not found!");
-            Time.timeScale = 1f; // Emergency unpause
+            Debug.LogError(" PlayerLivesSystem.Instance not found!");
+            Time.timeScale = 1f;
         }
     }
 
     void OnReviveFailed()
     {
-        Debug.LogWarning("❌ Revive ad failed or was cancelled");
+        Debug.Log("========== REVIVE AD FAILED/CANCELLED ==========");
 
-        // Close revive panel
         gameObject.SetActive(false);
 
-        // Show game over panel instead
         var gameOverPanel = GameObject.Find("GameOverPanel")?.GetComponent<GameOverPanel>();
         if (gameOverPanel != null)
         {
-            // Get final score
             int finalScore = 0;
             int coinsEarned = 0;
 
@@ -156,15 +168,17 @@ public class ReviveAdPanel : MonoBehaviour
                 if (playerScore != null)
                 {
                     finalScore = playerScore.Score;
-                    coinsEarned = Mathf.FloorToInt(finalScore * 0.05f); // 50% penalty
+                    coinsEarned = Mathf.FloorToInt(finalScore * 0.05f);
                 }
             }
 
+            Debug.Log($" Showing game over - Score: {finalScore}, Coins: {coinsEarned}");
+            gameOverPanel.gameObject.SetActive(true);
             gameOverPanel.ShowDefeat(finalScore, coinsEarned);
         }
         else
         {
-            // Fallback: just unpause and return to lobby
+            Debug.LogError(" GameOverPanel not found! Returning to lobby.");
             Time.timeScale = 1f;
             UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
         }
@@ -172,18 +186,15 @@ public class ReviveAdPanel : MonoBehaviour
 
     void OnDeclineClicked()
     {
+        Debug.Log("========== DECLINE BUTTON CLICKED ==========");
+
         isWaitingForResponse = false;
 
-        Debug.Log("❌ Player declined revive ad offer");
-
-        // Close revive panel
         gameObject.SetActive(false);
 
-        // Show game over panel
         var gameOverPanel = GameObject.Find("GameOverPanel")?.GetComponent<GameOverPanel>();
         if (gameOverPanel != null)
         {
-            // Get final score
             int finalScore = 0;
             int coinsEarned = 0;
 
@@ -193,15 +204,17 @@ public class ReviveAdPanel : MonoBehaviour
                 if (playerScore != null)
                 {
                     finalScore = playerScore.Score;
-                    coinsEarned = Mathf.FloorToInt(finalScore * 0.05f); // 50% penalty
+                    coinsEarned = Mathf.FloorToInt(finalScore * 0.05f);
                 }
             }
 
+            Debug.Log($" Showing game over - Score: {finalScore}, Coins: {coinsEarned}");
+            gameOverPanel.gameObject.SetActive(true);
             gameOverPanel.ShowDefeat(finalScore, coinsEarned);
         }
         else
         {
-            // Fallback: just unpause and return to lobby
+            Debug.LogError(" GameOverPanel not found! Returning to lobby.");
             Time.timeScale = 1f;
             UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
         }
@@ -209,17 +222,17 @@ public class ReviveAdPanel : MonoBehaviour
 
     void OnDisable()
     {
-        // Stop countdown
+        Debug.Log(" ReviveAdPanel OnDisable() called");
+
         isWaitingForResponse = false;
 
-        // Safety: ensure game is unpaused when panel closes
-        // (Only if we're not showing another panel)
         if (!gameObject.activeInHierarchy)
         {
             var gameOverPanel = GameObject.Find("GameOverPanel");
             if (gameOverPanel == null || !gameOverPanel.activeSelf)
             {
                 Time.timeScale = 1f;
+                Debug.Log("Game unpaused (no other panels active)");
             }
         }
     }

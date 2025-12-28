@@ -16,7 +16,7 @@ public class CoinsManager : MonoBehaviour
 
     [Header("UI Auto-Find Names")]
     [Tooltip("Name of the TextMeshProUGUI GameObject to find in each scene")]
-    public string coinsTextName = "CoinsText";
+    public string coinsTextName = "CoinText";
 
     public event Action<int> OnCoinsChanged;
 
@@ -26,7 +26,7 @@ public class CoinsManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("✅ CoinsManager initialized");
+            Debug.Log(" CoinsManager initialized");
         }
         else
         {
@@ -41,13 +41,11 @@ public class CoinsManager : MonoBehaviour
 
     void OnDisable()
     {
-        // Unsubscribe to prevent memory leaks
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void Start()
     {
-        // Initialize coins if new player
         if (SaveManager.Instance != null)
         {
             if (SaveManager.Instance.data.coins == 0 && PlayerPrefs.GetInt("FirstTimePlaying", 1) == 1)
@@ -59,7 +57,6 @@ public class CoinsManager : MonoBehaviour
             }
         }
 
-        // Find UI in current scene
         FindCoinsUI();
         UpdateUI();
     }
@@ -67,12 +64,10 @@ public class CoinsManager : MonoBehaviour
     {
         Debug.Log($"Scene loaded: {scene.name} - Finding coins UI...");
 
-        // Small delay to ensure scene is fully loaded
         Invoke(nameof(FindCoinsUI), 0.1f);
     }
     void FindCoinsUI()
     {
-        // Try to find by name
         GameObject coinsObj = GameObject.Find(coinsTextName);
 
         if (coinsObj != null)
@@ -81,17 +76,16 @@ public class CoinsManager : MonoBehaviour
 
             if (coinsText != null)
             {
-                Debug.Log($"✅ Auto-linked coins UI: {coinsTextName}");
-                UpdateUI(); // Update immediately after finding
+                Debug.Log($" Auto-linked coins UI: {coinsTextName}");
+                UpdateUI();
             }
             else
             {
-                Debug.LogWarning($"⚠️ Found '{coinsTextName}' but no TextMeshProUGUI component!");
+                Debug.LogWarning($" Found '{coinsTextName}' but no TextMeshProUGUI component!");
             }
         }
         else
         {
-            // Try alternative names
             coinsObj = GameObject.Find("Coins");
             if (coinsObj == null)
                 coinsObj = GameObject.Find("CoinsWallet");
@@ -103,13 +97,13 @@ public class CoinsManager : MonoBehaviour
                 coinsText = coinsObj.GetComponent<TextMeshProUGUI>();
                 if (coinsText != null)
                 {
-                    Debug.Log($"✅ Auto-linked coins UI: {coinsObj.name}");
+                    Debug.Log($" Auto-linked coins UI: {coinsObj.name}");
                     UpdateUI();
                 }
             }
             else
             {
-                Debug.LogWarning($"⚠️ Coins UI not found in scene! Looking for '{coinsTextName}'");
+                Debug.LogWarning($" Coins UI not found in scene! Looking for '{coinsTextName}'");
                 coinsText = null;
             }
         }
@@ -186,35 +180,30 @@ public class CoinsManager : MonoBehaviour
 
     public void UpdateUI()
     {
-        // If UI not found, try to find it again
         if (coinsText == null)
         {
             FindCoinsUI();
         }
 
-        // Update UI if available
         if (coinsText != null)
         {
             int coins = GetCoins();
-            coinsText.text = $"{coins}"; // Simple number display
+            coinsText.text = $"{coins}";
 
-            // Alternative formats:
-            // coinsText.text = $"Coins: {coins}";
-            // coinsText.text = $"💰 {coins}";
         }
     }
 
     public void RewardAdCoins()
     {
         AddCoins(adRewardAmount);
-        Debug.Log($"✅ Rewarded {adRewardAmount} coins for watching ad!");
+        Debug.Log($" Rewarded {adRewardAmount} coins for watching ad!");
     }
 
     public void RebindUI(TextMeshProUGUI newCoinsText)
     {
         coinsText = newCoinsText;
         UpdateUI();
-        Debug.Log("✅ Manually rebound coins UI");
+        Debug.Log(" Manually rebound coins UI");
     }
 
     public void ForceRefreshUI()

@@ -38,7 +38,6 @@ public class Accelerometer : MonoBehaviour
     {
         Vector3 accel = Input.acceleration;
 
-        // low-pass to approximate gravity, then high-pass to remove it
         lowPassValue = Vector3.Lerp(lowPassValue, accel, lowPassFilterFactor);
         Vector3 highPass = accel - lowPassValue;
         float strength = highPass.magnitude;
@@ -53,7 +52,6 @@ public class Accelerometer : MonoBehaviour
     {
         canDodge = false;
 
-        // Dodge forward relative to player transform
         Vector3 forwardDir = transform.forward;
         forwardDir.y = 0f;
         if (forwardDir.sqrMagnitude < 0.001f) forwardDir = Vector3.forward;
@@ -64,7 +62,6 @@ public class Accelerometer : MonoBehaviour
         }
         else
         {
-            // fallback direct velocity change
             playerRigidbody.AddForce(forwardDir.normalized * dodgeForce, ForceMode.VelocityChange);
         }
 
