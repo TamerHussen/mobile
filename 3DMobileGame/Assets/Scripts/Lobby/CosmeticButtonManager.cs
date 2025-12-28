@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class CosmeticButtonManager : MonoBehaviour
@@ -22,11 +21,21 @@ public class CosmeticButtonManager : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (CoinsManager.Instance != null)
+        {
+            CoinsManager.Instance.OnCoinsChanged += OnCoinsChanged;
+        }
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        if (CoinsManager.Instance != null)
+        {
+            CoinsManager.Instance.OnCoinsChanged -= OnCoinsChanged;
+        }
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -38,6 +47,11 @@ public class CosmeticButtonManager : MonoBehaviour
         }
     }
 
+    void OnCoinsChanged(int newCoinAmount)
+    {
+        RefreshAllButtons();
+    }
+
     void RebindCosmeticButtons()
     {
         var allButtons = FindObjectsByType<CosmeticButton>(FindObjectsSortMode.None);
@@ -47,6 +61,15 @@ public class CosmeticButtonManager : MonoBehaviour
         foreach (var cosmeticButton in allButtons)
         {
             cosmeticButton.RebindButton();
+        }
+    }
+
+    public void RefreshAllButtons()
+    {
+        var allButtons = FindObjectsByType<CosmeticButton>(FindObjectsSortMode.None);
+
+        foreach (var cosmeticButton in allButtons)
+        {
         }
     }
 }

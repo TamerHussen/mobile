@@ -2,10 +2,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-/// <summary>
-/// Spawns enemies and AUTO-ASSIGNS all scene references via tags/names
-/// Attach to: LevelManager/EnemySpawner GameObject
-/// </summary>
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Enemy Settings")]

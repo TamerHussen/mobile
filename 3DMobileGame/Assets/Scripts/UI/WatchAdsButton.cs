@@ -11,11 +11,10 @@ public class WatchAdButton : MonoBehaviour
 
     [Header("Settings")]
     public float checkInterval = 1f;
-    public int rewardAmount = 50;
 
     private float checkTimer = 0f;
     private int adsWatchedThisSession = 0;
-    private const int MAX_ADS_PER_SESSION = 5;
+    private const int MAX_ADS_PER_SESSION = 3;
 
     void Start()
     {
@@ -69,11 +68,7 @@ public class WatchAdButton : MonoBehaviour
         adsWatchedThisSession++;
         SaveAdWatchCount();
 
-        if (CoinsManager.Instance != null)
-        {
-            CoinsManager.Instance.AddCoins(rewardAmount);
-            Debug.Log($"✅ Rewarded {rewardAmount} coins! ({adsWatchedThisSession}/{MAX_ADS_PER_SESSION} ads watched)");
-        }
+        Debug.Log($"✅ Ad watched! ({adsWatchedThisSession}/{MAX_ADS_PER_SESSION})");
 
         UpdateButtonState();
     }
@@ -115,6 +110,7 @@ public class WatchAdButton : MonoBehaviour
         if (rewardText != null && isReady)
         {
             int remaining = MAX_ADS_PER_SESSION - adsWatchedThisSession;
+            int rewardAmount = GoogleAdsManager.Instance.coinsPerAd;
             rewardText.text = $"+{rewardAmount} Coins ({remaining} left)";
         }
     }
@@ -132,7 +128,6 @@ public class WatchAdButton : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        // Reset ad counter when game closes
         PlayerPrefs.SetInt("AdsWatchedThisSession", 0);
         PlayerPrefs.Save();
     }

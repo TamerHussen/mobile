@@ -2,11 +2,6 @@
 using UnityEngine;
 using GoogleMobileAds.Api;
 
-/// <summary>
-/// Comprehensive Google Ads Manager for Banner, Interstitial, and Rewarded ads.
-/// FIXED VERSION - Resolves callback issues and adds proper reward handling
-/// Place on a DontDestroyOnLoad GameObject in your MainMenu scene.
-/// </summary>
 public class GoogleAdsManager : MonoBehaviour
 {
     public static GoogleAdsManager Instance;
@@ -17,38 +12,27 @@ public class GoogleAdsManager : MonoBehaviour
 
     [Header("Ad Unit IDs - Android")]
 #if UNITY_ANDROID
-    [Tooltip("Android Rewarded Ad Unit ID")]
-    public string androidRewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"; // Test ID
-    [Tooltip("Android Interstitial Ad Unit ID")]
-    public string androidInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"; // Test ID
-    [Tooltip("Android Banner Ad Unit ID")]
-    public string androidBannerAdUnitId = "ca-app-pub-3940256099942544/6300978111"; // Test ID
+    public string androidRewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917";
+    public string androidInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712";
+    public string androidBannerAdUnitId = "ca-app-pub-3940256099942544/6300978111";
 #endif
 
     [Header("Ad Unit IDs - iOS")]
 #if UNITY_IOS
-    [Tooltip("iOS Rewarded Ad Unit ID")]
-    public string iosRewardedAdUnitId = "ca-app-pub-3940256099942544/1712485313"; // Test ID
-    [Tooltip("iOS Interstitial Ad Unit ID")]
-    public string iosInterstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910"; // Test ID
-    [Tooltip("iOS Banner Ad Unit ID")]
-    public string iosBannerAdUnitId = "ca-app-pub-3940256099942544/2934735716"; // Test ID
+    public string iosRewardedAdUnitId = "ca-app-pub-3940256099942544/1712485313";
+    public string iosInterstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910";
+    public string iosBannerAdUnitId = "ca-app-pub-3940256099942544/2934735716";
 #endif
 
     [Header("Ad Behavior")]
-    [Tooltip("Automatically load next ad after showing one")]
     public bool autoReloadAds = true;
-    [Tooltip("Show banner ads")]
     public bool useBannerAds = false;
-    [Tooltip("Banner position")]
     public AdPosition bannerPosition = AdPosition.Bottom;
 
-    // Ad instances
     private RewardedAd rewardedAd;
     private InterstitialAd interstitialAd;
     private BannerView bannerView;
 
-    // Ad state tracking
     private bool isRewardedAdLoaded = false;
     private bool isInterstitialAdLoaded = false;
     private bool isBannerAdLoaded = false;
@@ -56,13 +40,15 @@ public class GoogleAdsManager : MonoBehaviour
     private bool isLoadingInterstitialAd = false;
     private bool isInitialized = false;
 
-    // CRITICAL FIX: Store callbacks for rewarded ads
+    // ✅ FIX: Track if reward was already given
+    private bool rewardAlreadyGiven = false;
+
+    // Store callbacks for rewarded ads
     private Action onRewardedSuccess;
     private Action onRewardedFailed;
 
     void Awake()
     {
-        // Singleton pattern with DontDestroyOnLoad
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -78,9 +64,6 @@ public class GoogleAdsManager : MonoBehaviour
         InitializeAds();
     }
 
-    /// <summary>
-    /// Initialize Google Mobile Ads SDK
-    /// </summary>
     void InitializeAds()
     {
         if (isInitialized)
@@ -91,7 +74,6 @@ public class GoogleAdsManager : MonoBehaviour
 
         Debug.Log("Initializing Google Mobile Ads SDK...");
 
-        // Initialize the Google Mobile Ads SDK
         MobileAds.Initialize((InitializationStatus initStatus) =>
         {
             if (initStatus == null)
@@ -100,20 +82,9 @@ public class GoogleAdsManager : MonoBehaviour
                 return;
             }
 
-            // Log adapter statuses
-            var adapterStatusMap = initStatus.getAdapterStatusMap();
-            if (adapterStatusMap != null)
-            {
-                foreach (var adapter in adapterStatusMap)
-                {
-                    Debug.Log($"Adapter: {adapter.Key}, State: {adapter.Value.InitializationState}");
-                }
-            }
-
             isInitialized = true;
             Debug.Log("✅ Google Mobile Ads initialized successfully");
 
-            // Load initial ads
             LoadRewardedAd();
             LoadInterstitialAd();
 
@@ -126,9 +97,6 @@ public class GoogleAdsManager : MonoBehaviour
 
     #region REWARDED ADS
 
-    /// <summary>
-    /// Load a rewarded ad
-    /// </summary>
     public void LoadRewardedAd()
     {
         if (isLoadingRewardedAd)
@@ -137,7 +105,6 @@ public class GoogleAdsManager : MonoBehaviour
             return;
         }
 
-        // Clean up old ad
         if (rewardedAd != null)
         {
             rewardedAd.Destroy();
@@ -146,6 +113,7 @@ public class GoogleAdsManager : MonoBehaviour
 
         isLoadingRewardedAd = true;
         isRewardedAdLoaded = false;
+        rewardAlreadyGiven = false; // ✅ Reset reward flag
 
         Debug.Log("Loading rewarded ad...");
 
@@ -170,25 +138,11 @@ public class GoogleAdsManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Show the rewarded ad (LEGACY - for backward compatibility)
-    /// Use ShowRewardedAd(onSuccess, onFail) for better control
-    /// </summary>
-    public void ShowRewardedAd()
-    {
-        ShowRewardedAd(null, null);
-    }
-
-    /// <summary>
-    /// Show the rewarded ad with callbacks (RECOMMENDED)
-    /// </summary>
-    /// <param name="onSuccess">Called when user completes the ad</param>
-    /// <param name="onFail">Called if ad fails to show</param>
     public void ShowRewardedAd(Action onSuccess, Action onFail)
     {
-        // CRITICAL FIX: Store callbacks
         onRewardedSuccess = onSuccess;
         onRewardedFailed = onFail;
+        rewardAlreadyGiven = false; // Reset before showing
 
         if (rewardedAd != null && rewardedAd.CanShowAd())
         {
@@ -196,31 +150,35 @@ public class GoogleAdsManager : MonoBehaviour
 
             rewardedAd.Show((Reward reward) =>
             {
-                Debug.Log($"✅ User earned reward: {reward.Amount} {reward.Type}");
-
-                // Award coins to player
-                if (CoinsManager.Instance != null)
+                if (!rewardAlreadyGiven)
                 {
-                    CoinsManager.Instance.AddCoins(coinsPerAd);
-                    Debug.Log($"Awarded {coinsPerAd} coins!");
+                    rewardAlreadyGiven = true;
+
+                    Debug.Log($"✅ User earned reward: {reward.Amount} {reward.Type}");
+
+                    if (CoinsManager.Instance != null)
+                    {
+                        CoinsManager.Instance.AddCoins(coinsPerAd);
+                        Debug.Log($"✅ Awarded {coinsPerAd} coins via GoogleAdsManager!");
+                    }
+                    else
+                    {
+                        Debug.LogError("CoinsManager not found! Cannot award coins.");
+                    }
+
+                    onRewardedSuccess?.Invoke();
                 }
                 else
                 {
-                    Debug.LogError("CoinsManager not found! Cannot award coins.");
+                    Debug.LogWarning("⚠️ Reward already given for this ad!");
                 }
-
-                // CRITICAL FIX: Call success callback
-                onRewardedSuccess?.Invoke();
             });
         }
         else
         {
             Debug.LogWarning("Rewarded ad not ready yet!");
-
-            // CRITICAL FIX: Call failure callback
             onRewardedFailed?.Invoke();
 
-            // Try to load if not already loading
             if (!isLoadingRewardedAd)
             {
                 LoadRewardedAd();
@@ -255,13 +213,11 @@ public class GoogleAdsManager : MonoBehaviour
             Debug.Log("Rewarded ad closed");
             isRewardedAdLoaded = false;
 
-            // Reload next ad
             if (autoReloadAds)
             {
                 LoadRewardedAd();
             }
 
-            // CRITICAL FIX: Clear callbacks after use
             onRewardedSuccess = null;
             onRewardedFailed = null;
         };
@@ -271,16 +227,13 @@ public class GoogleAdsManager : MonoBehaviour
             Debug.LogError($"Rewarded ad failed to show: {error}");
             isRewardedAdLoaded = false;
 
-            // CRITICAL FIX: Call failure callback
             onRewardedFailed?.Invoke();
 
-            // Reload ad
             if (autoReloadAds)
             {
                 LoadRewardedAd();
             }
 
-            // Clear callbacks
             onRewardedSuccess = null;
             onRewardedFailed = null;
         };
@@ -295,9 +248,6 @@ public class GoogleAdsManager : MonoBehaviour
 
     #region INTERSTITIAL ADS
 
-    /// <summary>
-    /// Load an interstitial ad
-    /// </summary>
     public void LoadInterstitialAd()
     {
         if (isLoadingInterstitialAd)
@@ -306,7 +256,6 @@ public class GoogleAdsManager : MonoBehaviour
             return;
         }
 
-        // Clean up old ad
         if (interstitialAd != null)
         {
             interstitialAd.Destroy();
@@ -339,9 +288,6 @@ public class GoogleAdsManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Show the interstitial ad
-    /// </summary>
     public void ShowInterstitialAd()
     {
         if (interstitialAd != null && interstitialAd.CanShowAd())
@@ -414,14 +360,10 @@ public class GoogleAdsManager : MonoBehaviour
 
     #region BANNER ADS
 
-    /// <summary>
-    /// Create and load a banner ad
-    /// </summary>
     public void CreateBannerView()
     {
         Debug.Log("Creating banner view...");
 
-        // Destroy old banner if exists
         if (bannerView != null)
         {
             bannerView.Destroy();
@@ -429,13 +371,9 @@ public class GoogleAdsManager : MonoBehaviour
         }
 
         string adUnitId = GetBannerAdUnitId();
-
-        // Create banner at specified position
         bannerView = new BannerView(adUnitId, AdSize.Banner, bannerPosition);
 
         RegisterBannerAdEvents();
-
-        // Load the banner
         LoadBannerAd();
     }
 
@@ -560,7 +498,6 @@ public class GoogleAdsManager : MonoBehaviour
 #endif
     }
 
-    // Legacy compatibility with old method name
     public bool IsAdReady()
     {
         return IsRewardedAdReady();
@@ -570,7 +507,6 @@ public class GoogleAdsManager : MonoBehaviour
 
     void OnDestroy()
     {
-        // Clean up all ads
         if (rewardedAd != null)
         {
             rewardedAd.Destroy();

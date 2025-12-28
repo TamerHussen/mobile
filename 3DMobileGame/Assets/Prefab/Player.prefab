@@ -7875,10 +7875,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9968a7d5c3cb17b429deedf767ceb01c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 9216055239865534819}
-  _joystick: {fileID: 0}
-  _lookJoystick: {fileID: 0}
-  _animator: {fileID: 0}
   _moveSpeed: 5
   _jumpForce: 7
   _jumpAccelThreshold: 1.5

@@ -1969,6 +1969,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 5
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &783871726778973338
 GameObject:
   m_ObjectHideFlags: 0
@@ -2773,6 +2776,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 1
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1340782812858775143
 GameObject:
   m_ObjectHideFlags: 0
@@ -4081,6 +4087,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Test
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &2094382395531693564
 GameObject:
   m_ObjectHideFlags: 0
@@ -5736,6 +5745,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 2
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &2795684658737173174
 GameObject:
   m_ObjectHideFlags: 0
@@ -7513,7 +7525,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: lobs#6021#4578#3614
+  m_text: lobs#6021
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8577,7 +8589,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9003294921180474701}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UILobbyManager, Assembly-CSharp
         m_MethodName: ShowCosmetics
         m_Mode: 1
@@ -9875,7 +9887,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9003294921180474701}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UILobbyManager, Assembly-CSharp
         m_MethodName: ShowLevels
         m_Mode: 1
@@ -10980,7 +10992,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9003294921180474701}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UILobbyManager, Assembly-CSharp
         m_MethodName: ShowAchievements
         m_Mode: 1
@@ -11772,7 +11784,6 @@ GameObject:
   - component: {fileID: 4691587290363169332}
   - component: {fileID: 1771838225320629906}
   - component: {fileID: 7808028654623068964}
-  - component: {fileID: 9003294921180474701}
   m_Layer: 5
   m_Name: CharacterPanel
   m_TagString: Untagged
@@ -11841,23 +11852,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &9003294921180474701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5073731661689908262}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e5274cc4c594c648bc7c91cd022f15a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelsPanel: {fileID: 3120494583070176263}
-  cosmeticsPanel: {fileID: 5406747580817130806}
-  achievementsPanel: {fileID: 5083660684969247242}
-  friendsPanel: {fileID: 5885016419554258467}
-  settingsPanel: {fileID: 6712698133573126375}
 --- !u!1 &5074684411716323363
 GameObject:
   m_ObjectHideFlags: 0
@@ -14831,7 +14825,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9003294921180474701}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UILobbyManager, Assembly-CSharp
         m_MethodName: ShowFriends
         m_Mode: 1
@@ -16283,6 +16277,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 4
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &6495071729093023526
 GameObject:
   m_ObjectHideFlags: 0
@@ -18346,6 +18343,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 6
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &7282456178024502002
 GameObject:
   m_ObjectHideFlags: 0
@@ -19163,6 +19163,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 3
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &7570124902542170061
 GameObject:
   m_ObjectHideFlags: 0
@@ -21835,7 +21838,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 9003294921180474701}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UILobbyManager, Assembly-CSharp
         m_MethodName: ShowSettings
         m_Mode: 1
@@ -22360,6 +22363,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelName: Level 0
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8622052788210010077
 GameObject:
   m_ObjectHideFlags: 0

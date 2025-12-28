@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
@@ -40,6 +40,10 @@ public class SaveManager : MonoBehaviour
         else
         {
             Debug.Log("No save file found. Starting new game.");
+            if (!data.unlockedCosmetics.Contains("DefaultCosmetic"))
+            {
+                data.unlockedCosmetics.Add("DefaultCosmetic");
+            }
         }
     }
 
@@ -56,16 +60,16 @@ public class PlayerData
     public int level = 1;
     public string playerName = "Player";
     public string uniquePlayerName = "";
-    public string selectedCosmetic = "Default";
+    public string selectedCosmetic = "DefaultCosmetic";
     public string lastSelectedLevel = "None";
-    public List<string> unlockedCosmetics = new List<string> { "Default" };
+    public List<string> unlockedCosmetics = new List<string> { "DefaultCosmetic" };
 
     public PlayerData()
     {
-        // Default constructor for deserialization
+        // Default constructor
     }
 
-    public PlayerData(string name, string cosmetic = "Default")
+    public PlayerData(string name, string cosmetic = "DefaultCosmetic")
     {
         playerName = name;
         selectedCosmetic = cosmetic;
@@ -81,6 +85,7 @@ public class PlayerData
         if (!unlockedCosmetics.Contains(cosmeticName))
         {
             unlockedCosmetics.Add(cosmeticName);
+            Debug.Log($"✅ Unlocked cosmetic: {cosmeticName}");
         }
     }
 }
