@@ -3,41 +3,37 @@ using UnityEngine.UI;
 
 public class JumpScareManager : MonoBehaviour
 {
+    public static JumpScareManager Instance;
+
     [Header("UI")]
     public Image jumpscareUI;
     public AudioSource audioSource;
 
     [Header("Display Settings")]
-    public float displayTime = 3.5f;
+    public float displayTime = 3f;
     public float scareCooldown = 5f;
 
     private bool canScare = true;
 
     void Awake()
     {
-        Debug.Log(" JumpScareManager Awake()");
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        if (LevelUIManager.Instance == null)
+        {
+            Debug.LogError("LevelUIManager not initialized BEFORE JumpScareManager");
+            return;
+        }
 
         if (jumpscareUI == null)
-        {
-            jumpscareUI = GameObject.Find("JumpscareImage")?.GetComponent<Image>();
-            if (jumpscareUI != null)
-            {
-                Debug.Log(" Auto-found JumpscareImage");
-            }
-            else
-            {
-                Debug.LogError(" JumpscareImage not found! Looking for GameObject named 'JumpscareImage'");
-            }
-        }
+            Debug.LogError("Jumpscare Image not assigned in LevelUIManager!");
 
-        if (audioSource == null)
-        {
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource != null)
-            {
-                Debug.Log(" AudioSource found on JumpScareManager");
-            }
-        }
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -50,50 +46,28 @@ public class JumpScareManager : MonoBehaviour
 
         if (jumpscareUI != null)
         {
-            jumpscareUI.enabled = false;
-            Debug.Log(" JumpscareImage hidden at start");
+            jumpscareUI.gameObject.SetActive(false);
+            Debug.Log("JumpscareImage hidden at start");
         }
     }
 
     public void TriggerCustomJumpscare(Sprite image, AudioClip audio)
     {
-        if (!canScare)
-        {
-            Debug.Log(" Jumpscare on cooldown");
-            return;
-        }
+        if (!canScare) return;
+        if (image == null || jumpscareUI == null) return;
 
-        if (image == null)
-        {
-            Debug.LogWarning(" No jumpscare image provided!");
-            return;
-        }
-
-        if (jumpscareUI == null)
-        {
-            Debug.LogError(" jumpscareUI is null! Cannot show jumpscare!");
-            return;
-        }
-
-        Debug.Log($" ========== TRIGGERING JUMPSCARE: {image.name} ==========");
+        Debug.Log($"Triggering jumpscare: {image.name}");
 
         canScare = false;
 
         jumpscareUI.sprite = image;
-        jumpscareUI.enabled = true;
-
-        Debug.Log($" Jumpscare image set and enabled");
+        jumpscareUI.gameObject.SetActive(true);
 
         if (audio != null && audioSource != null)
         {
-            audioSource.enabled = true;
             audioSource.clip = audio;
             audioSource.Play();
-            Debug.Log($" Playing jumpscare audio: {audio.name}");
-        }
-        else if (audio == null)
-        {
-            Debug.LogWarning("⚠No audio clip provided for jumpscare");
+            Debug.Log($"Playing jumpscare audio: {audio.name}");
         }
 
         Invoke(nameof(HideJumpScare), displayTime);
@@ -109,7 +83,7 @@ public class JumpScareManager : MonoBehaviour
     {
         if (jumpscareUI != null)
         {
-            jumpscareUI.enabled = false;
+            jumpscareUI.gameObject.SetActive(false);
             Debug.Log("Jumpscare hidden");
         }
     }

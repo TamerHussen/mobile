@@ -18,7 +18,6 @@ public class GameOverPanel : MonoBehaviour
     public string victoryTitle = "Victory!";
     public float autoReturnDelay = 5f;
 
-    private bool isVictory = false;
     private float returnTimer;
 
     void Awake()
@@ -49,7 +48,7 @@ public class GameOverPanel : MonoBehaviour
         if (retryButton != null)
             retryButton.onClick.AddListener(OnRetryButtonClicked);
 
-        Debug.Log($" GameOverPanel UI references assigned - Title: {titleText != null}, Score: {scoreText != null}, Coins: {coinsEarnedText != null}");
+        Debug.Log($"GameOverPanel UI references assigned - Title: {titleText != null}, Score: {scoreText != null}, Coins: {coinsEarnedText != null}");
     }
 
     void OnEnable()
@@ -76,7 +75,7 @@ public class GameOverPanel : MonoBehaviour
 
             if (returnTimer <= 0)
             {
-                Debug.Log(" Auto-return timer expired, returning to lobby");
+                Debug.Log("Auto-return timer expired, returning to lobby");
                 OnLobbyButtonClicked();
             }
         }
@@ -86,8 +85,6 @@ public class GameOverPanel : MonoBehaviour
     {
         Debug.Log($" ShowDefeat() called - Score: {finalScore}, Coins: {coinsEarned}");
 
-        isVictory = false;
-
         if (titleText != null)
         {
             titleText.text = gameOverTitle;
@@ -95,7 +92,7 @@ public class GameOverPanel : MonoBehaviour
         }
         else
         {
-            Debug.LogError(" titleText is NULL!");
+            Debug.LogError("titleText is NULL!");
         }
 
         if (scoreText != null)
@@ -121,23 +118,21 @@ public class GameOverPanel : MonoBehaviour
         if (retryButton != null)
         {
             retryButton.gameObject.SetActive(true);
-            Debug.Log(" Retry button shown");
+            Debug.Log("Retry button shown");
         }
 
         if (!gameObject.activeSelf)
         {
-            Debug.LogWarning(" Panel was inactive during ShowDefeat, activating now!");
+            Debug.LogWarning("⚠ Panel was inactive during ShowDefeat, activating now!");
             gameObject.SetActive(true);
         }
 
-        Debug.Log($"ShowDefeat() complete - Panel active: {gameObject.activeSelf}");
+        Debug.Log($" ShowDefeat() complete - Panel active: {gameObject.activeSelf}");
     }
 
     public void ShowVictory(int finalScore, int coinsEarned)
     {
-        Debug.Log($"ShowVictory() called - Score: {finalScore}, Coins: {coinsEarned}");
-
-        isVictory = true;
+        Debug.Log($" ShowVictory() called - Score: {finalScore}, Coins: {coinsEarned}");
 
         if (titleText != null)
             titleText.text = victoryTitle;
@@ -155,11 +150,13 @@ public class GameOverPanel : MonoBehaviour
         {
             gameObject.SetActive(true);
         }
+
+        Debug.Log($" ShowVictory() complete - Panel active: {gameObject.activeSelf}");
     }
 
     void OnLobbyButtonClicked()
     {
-        Debug.Log("Lobby button clicked");
+        Debug.Log(" Lobby button clicked");
 
         Time.timeScale = 1f;
 
@@ -171,7 +168,7 @@ public class GameOverPanel : MonoBehaviour
 
     void OnRetryButtonClicked()
     {
-        Debug.Log("Retry button clicked");
+        Debug.Log(" Retry button clicked");
 
         Time.timeScale = 1f;
 

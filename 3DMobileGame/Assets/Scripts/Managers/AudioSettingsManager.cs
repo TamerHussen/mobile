@@ -127,13 +127,13 @@ public class AudioSettingsManager : MonoBehaviour
             sfxSlider.SetValueWithoutNotify(sfxVolume);
 
         if (masterValueText != null)
-            masterValueText.text = $"{Mathf.RoundToInt(masterVolume * 100)}%";
+            masterValueText.text = $"Master: {Mathf.RoundToInt(masterVolume * 100)}%";
 
         if (musicValueText != null)
-            musicValueText.text = $"{Mathf.RoundToInt(musicVolume * 100)}%";
+            musicValueText.text = $"Music: {Mathf.RoundToInt(musicVolume * 100)}%";
 
         if (sfxValueText != null)
-            sfxValueText.text = $"{Mathf.RoundToInt(sfxVolume * 100)}%";
+            sfxValueText.text = $"SFX: {Mathf.RoundToInt(sfxVolume * 100)}%";
     }
 
     void LoadSettings()

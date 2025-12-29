@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Unity.AI.Navigation;
+using System;
 
 
 public class MazeGenerator : MonoBehaviour
@@ -22,6 +23,8 @@ public class MazeGenerator : MonoBehaviour
 
     [Header("NavMesh")]
     [SerializeField] private NavMeshSurface navMeshSurface;
+
+    public static System.Action MazeReady;
 
     private Cell[,] _CellGrid;
     private Vector3 mazeOffset;
@@ -44,9 +47,13 @@ public class MazeGenerator : MonoBehaviour
             return;
         }
 
-        mazeOffset = new Vector3(-_CellWidth * cellSize / 2f, 0, -_CellDepth * cellSize / 2f);
+        Transform parent = mazeParent != null ? mazeParent : transform;
 
-        Debug.Log($"Generating {_CellWidth}x{_CellDepth} maze with {cellSize}m cells...");
+        mazeOffset = new Vector3(
+            -(_CellWidth - 1) * cellSize / 2f,
+            0,
+            -(_CellDepth - 1) * cellSize / 2f
+        );
 
         _CellGrid = new Cell[_CellWidth, _CellDepth];
 
@@ -54,15 +61,12 @@ public class MazeGenerator : MonoBehaviour
         {
             for (int z = 0; z < _CellDepth; z++)
             {
-                Vector3 position = new Vector3(x * cellSize, 0, z * cellSize) + mazeOffset;
-                Cell newCell = Instantiate(_CellPrefab, position, Quaternion.identity);
+                Vector3 localPos = new Vector3(x * cellSize, 0, z * cellSize) + mazeOffset;
 
+                Cell newCell = Instantiate(_CellPrefab, parent);
+                newCell.transform.localPosition = localPos;
+                newCell.transform.localRotation = Quaternion.identity;
                 newCell.transform.localScale = Vector3.one * cellSize;
-
-                if (mazeParent != null)
-                    newCell.transform.SetParent(mazeParent);
-                else
-                    newCell.transform.SetParent(transform);
 
                 newCell.name = $"Cell_{x}_{z}";
                 _CellGrid[x, z] = newCell;
@@ -170,6 +174,8 @@ public class MazeGenerator : MonoBehaviour
 
     void OnMazeGenerationComplete()
     {
+        MazeReady?.Invoke();
+
         var playerSpawner = FindFirstObjectByType<LevelPlayerSpawner>();
         if (playerSpawner != null)
         {
@@ -198,7 +204,7 @@ public class MazeGenerator : MonoBehaviour
         if (unvisitedCells.Count == 0)
             return null;
 
-        return unvisitedCells[Random.Range(0, unvisitedCells.Count)];
+        return unvisitedCells[UnityEngine.Random.Range(0, unvisitedCells.Count)];
     }
 
     private IEnumerable<Cell> GetUnvisitedCells(Cell currentCell)
@@ -310,7 +316,7 @@ public class MazeGenerator : MonoBehaviour
             return Vector3.up * 0.5f;
         }
 
-        Vector3 spawnPoint = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
+        Vector3 spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
         return spawnPoint;
     }
 
@@ -333,17 +339,18 @@ public class MazeGenerator : MonoBehaviour
 
         if (validPoints.Count == 0)
         {
-            return availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
+            return availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
         }
 
-        return validPoints[Random.Range(0, validPoints.Count)];
+        return validPoints[UnityEngine.Random.Range(0, validPoints.Count)];
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         Vector3 size = new Vector3(_CellWidth * cellSize, 2, _CellDepth * cellSize);
-        Gizmos.DrawWireCube(Vector3.zero, size);
+        Vector3 center = mazeParent != null ? mazeParent.position : transform.position;
+        Gizmos.DrawWireCube(center, size);
 
         if (availableSpawnPoints != null && availableSpawnPoints.Count > 0)
         {
@@ -354,4 +361,10 @@ public class MazeGenerator : MonoBehaviour
             }
         }
     }
+
+    public List<Vector3> GetAllFloorPositions()
+    {
+        return new List<Vector3>(availableSpawnPoints);
+    }
+
 }

@@ -15,6 +15,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Spawn Rules")]
     [Tooltip("Minimum distance from player spawn")]
     public float minDistanceFromPlayer = 10f;
+    public int maxSpawnAttempts = 10;
 
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private MazeGenerator mazeGen;
@@ -30,8 +31,31 @@ public class EnemySpawner : MonoBehaviour
     {
         if (Application.isPlaying && mazeGen != null)
         {
-            SpawnEnemies();
+            StartCoroutine(WaitAndSpawnEnemies());
         }
+    }
+
+    IEnumerator WaitAndSpawnEnemies()
+    {
+        // Wait for NavMesh to be built
+        yield return new WaitForSeconds(1f);
+
+        // Wait for player to spawn
+        int waitFrames = 0;
+        while (playerSpawner == null || playerSpawner.GetSpawnedPlayer() == null)
+        {
+            playerSpawner = FindFirstObjectByType<LevelPlayerSpawner>();
+            yield return null;
+
+            waitFrames++;
+            if (waitFrames > 100)
+            {
+                Debug.LogWarning("⚠️ Player didn't spawn in time, spawning enemies anyway");
+                break;
+            }
+        }
+
+        SpawnEnemies();
     }
 
     void SpawnEnemies()
@@ -43,67 +67,82 @@ public class EnemySpawner : MonoBehaviour
         }
 
         int enemiesToSpawn = baseEnemyCount + (playerCount > 1 ? (playerCount - 1) * enemiesPerExtraPlayer : 0);
-        Debug.Log($"Spawning {enemiesToSpawn} enemies for {playerCount} player(s)");
+        Debug.Log($"👹 Spawning {enemiesToSpawn} enemies for {playerCount} player(s)");
 
         Vector3 playerPosition = Vector3.zero;
-        if (playerSpawner != null)
+        if (playerSpawner != null && playerSpawner.GetSpawnedPlayer() != null)
         {
             playerPosition = playerSpawner.GetPlayerSpawnPosition();
         }
 
+        int successfulSpawns = 0;
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            SpawnEnemy(i, playerPosition);
+            if (SpawnEnemy(i, playerPosition))
+            {
+                successfulSpawns++;
+            }
         }
+
+        Debug.Log($"✓ Successfully spawned {successfulSpawns}/{enemiesToSpawn} enemies");
     }
 
-    void SpawnEnemy(int index, Vector3 playerPosition)
+    bool SpawnEnemy(int index, Vector3 playerPosition)
     {
         if (enemyPrefab == null)
         {
-            Debug.LogError(" Enemy prefab not assigned!");
-            return;
+            Debug.LogError("❌ Enemy prefab not assigned!");
+            return false;
         }
 
-        Vector3 spawnPosition;
-        if (mazeGen != null)
+        Vector3 spawnPosition = Vector3.zero;
+        bool foundValidPosition = false;
+
+        // Try multiple times to find a valid NavMesh position
+        for (int attempt = 0; attempt < maxSpawnAttempts; attempt++)
         {
-            spawnPosition = mazeGen.GetSpawnPointAwayFrom(playerPosition, minDistanceFromPlayer);
-        }
-        else
-        {
-            spawnPosition = Vector3.zero;
+            if (mazeGen != null)
+            {
+                spawnPosition = mazeGen.GetSpawnPointAwayFrom(playerPosition, minDistanceFromPlayer);
+            }
+            else
+            {
+                spawnPosition = playerPosition + Random.insideUnitSphere * 15f;
+                spawnPosition.y = 0;
+            }
+
+            // Check if position is on NavMesh
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(spawnPosition, out hit, 5f, NavMesh.AllAreas))
+            {
+                spawnPosition = hit.position;
+                foundValidPosition = true;
+                break;
+            }
         }
 
-        // CRITICAL: Ensure spawn point is on NavMesh BEFORE instantiating
-        NavMeshHit hit;
-        if (!NavMesh.SamplePosition(spawnPosition, out hit, 10f, NavMesh.AllAreas))
+        if (!foundValidPosition)
         {
-            Debug.LogError($"Enemy {index + 1} spawn position NOT on NavMesh! Skipping spawn.");
-            return; // Don't spawn if not on NavMesh
+            Debug.LogWarning($"⚠️ Enemy {index + 1} couldn't find valid NavMesh position after {maxSpawnAttempts} attempts");
+            return false;
         }
-
-        spawnPosition = hit.position;
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
         enemy.name = $"Enemy_{index + 1}";
 
-        // Wait one frame before initializing NavMeshAgent
-        StartCoroutine(InitializeEnemyAfterSpawn(enemy, index));
-    }
-
-    IEnumerator InitializeEnemyAfterSpawn(GameObject enemy, int index)
-    {
-        yield return null; // Wait one frame
-
-        var agent = enemy.GetComponent<NavMeshAgent>();
-        if (agent != null && !agent.isOnNavMesh)
+        // Verify NavMeshAgent is on NavMesh
+        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+        if (agent != null)
         {
-            Debug.LogError($"Enemy {index + 1} NavMeshAgent is NOT on NavMesh after spawn!");
-            Destroy(enemy);
-            yield break;
+            if (!agent.isOnNavMesh)
+            {
+                Debug.LogError($"❌ Enemy {index + 1} NavMeshAgent is NOT on NavMesh after spawn! Destroying.");
+                Destroy(enemy);
+                return false;
+            }
         }
 
+        // Setup enemy references
         var enemyBehavior = enemy.GetComponent<EnemyBehaviorSystem>();
         if (enemyBehavior != null)
         {
@@ -111,12 +150,22 @@ public class EnemySpawner : MonoBehaviour
             if (player != null)
             {
                 enemyBehavior.player = player.transform;
+                Debug.Log($"✓ Enemy {index + 1} assigned player reference");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ No GameObject with tag 'Player' found for Enemy {index + 1}");
             }
 
             var jumpscareManager = FindFirstObjectByType<JumpScareManager>();
             if (jumpscareManager != null)
             {
                 enemyBehavior.jumpScareManager = jumpscareManager;
+                Debug.Log($"✓ Enemy {index + 1} assigned JumpScareManager");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ JumpScareManager not found for Enemy {index + 1}");
             }
 
             enemyBehavior.centrePoint = transform;
@@ -138,7 +187,9 @@ public class EnemySpawner : MonoBehaviour
         }
 
         spawnedEnemies.Add(enemy);
-        Debug.Log($"Enemy {index + 1} initialized on NavMesh");
+        Debug.Log($"✓ Enemy {index + 1} spawned at {spawnPosition} (distance from player: {Vector3.Distance(spawnPosition, playerPosition):F1}m)");
+
+        return true;
     }
 
     public void ClearEnemies()
@@ -149,5 +200,10 @@ public class EnemySpawner : MonoBehaviour
                 Destroy(enemy);
         }
         spawnedEnemies.Clear();
+    }
+
+    void OnDisable()
+    {
+        ClearEnemies();
     }
 }

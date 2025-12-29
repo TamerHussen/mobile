@@ -19,7 +19,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     public float staticChaseSpeed = 3.5f;
 
     [Header("Patrol Settings")]
-    public float patrolSpeed = 1.5f; // Walking speed for patrol
+    public float patrolSpeed = 1.5f;
 
     [Header("Jumpscare Pools")]
     public JumpscareData[] angryJumpscares;
@@ -31,7 +31,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     [HideInInspector] public Transform player;
     public AudioSource audioSource;
     [HideInInspector] public JumpScareManager jumpScareManager;
-    public Animator animator; // Add this!
+    public Animator animator;
 
     [Header("Patrol Settings")]
     public float patrolRange = 15f;
@@ -42,6 +42,9 @@ public class EnemyBehaviorSystem : MonoBehaviour
     [Header("Post-Capture")]
     public float stunDuration = 3f;
     public float retreatDistance = 10f;
+
+    private float idleTimer = 0f;
+    private float idleDuration = 1.5f;
 
     private EnemyMode currentMode;
     private bool isStunned = false;
@@ -62,7 +65,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
         if (animator == null)
             animator = GetComponent<Animator>();
 
-        normalSpeed = patrolSpeed; // Set normal speed to patrol speed
+        normalSpeed = patrolSpeed;
         agent.speed = normalSpeed;
 
         if (centrePoint == null)
@@ -74,25 +77,13 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void Update()
     {
-        if (isStunned || player == null)
-        {
-            UpdateAnimator();
-            return;
-        }
-
-        if (!agent.isOnNavMesh)
-        {
-            Debug.LogWarning($"Enemy {name} is not on NavMesh!");
-            return;
-        }
+        if (isStunned || player == null) { UpdateAnimator(); return; }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         if (distanceToPlayer <= detectionRange)
         {
-            if (!isChasing)
-                StartChase();
-
+            if (!isChasing) StartChase();
             lastSeenPlayerTime = Time.time;
             agent.SetDestination(player.position);
         }
@@ -102,16 +93,29 @@ public class EnemyBehaviorSystem : MonoBehaviour
         }
         else
         {
-            if (isChasing)
-                StopChase();
+            if (isChasing) StopChase();
 
             if (agent.pathPending == false && agent.remainingDistance <= agent.stoppingDistance)
             {
-                Vector3 point;
-                if (RandomPoint(centrePoint.position, patrolRange, out point))
+                if (idleTimer <= 0f)
                 {
-                    agent.SetDestination(point);
+                    Vector3 point;
+                    if (RandomPoint(centrePoint.position, patrolRange, out point))
+                    {
+                        agent.SetDestination(point);
+                        idleDuration = Random.Range(0.5f, 2f);
+                    }
                 }
+                else
+                {
+                    idleTimer -= Time.deltaTime;
+                    agent.isStopped = true;
+                }
+            }
+            else
+            {
+                agent.isStopped = false;
+                idleTimer = idleDuration;
             }
         }
 
@@ -120,18 +124,15 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void UpdateAnimator()
     {
-        if (animator == null) return;
+        if (animator == null || agent == null) return;
 
-        // Calculate speed based on agent velocity
         float speed = agent.velocity.magnitude;
 
-        // Update animator parameters
         animator.SetFloat("Speed", speed);
         animator.SetBool("IsChasing", isChasing);
-
-        // Debug info
-        // Debug.Log($"Agent Speed: {speed}, IsChasing: {isChasing}");
     }
+
+
 
     void StartChase()
     {
@@ -156,7 +157,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     void StopChase()
     {
         isChasing = false;
-        agent.speed = patrolSpeed; // Return to patrol speed
+        agent.speed = patrolSpeed;
     }
 
     IEnumerator ModeSwitchRoutine()
@@ -193,26 +194,22 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            var livesSystem = collision.gameObject.GetComponent<PlayerLivesSystem>();
-            if (livesSystem != null && livesSystem.IsInvincible())
-            {
-                Debug.Log("Player is invincible - no damage");
-                return;
-            }
+        if (!collision.gameObject.CompareTag("Player"))
+            return;
 
-            // Trigger attack animation
-            if (animator != null)
-                animator.SetTrigger("Attack");
+        if (!isStunned)
+            agent.isStopped = false;
+        agent.velocity = Vector3.zero;
 
-            TriggerJumpscareByMode();
+        animator.SetTrigger("Attack");
 
-            if (livesSystem != null)
-                livesSystem.LoseLife();
+        TriggerJumpscareByMode();
 
-            StartCoroutine(StunAndRetreat());
-        }
+        collision.gameObject
+            .GetComponent<PlayerLivesSystem>()
+            ?.LoseLife();
+
+        StartCoroutine(StunAndRetreat());
     }
 
     void TriggerJumpscareByMode()
@@ -261,18 +258,18 @@ public class EnemyBehaviorSystem : MonoBehaviour
         isStunned = true;
         isChasing = false;
 
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
-        }
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
-        yield return new WaitForSeconds(stunDuration);
+        float effectiveStun = stunDuration + 2.5f;
 
-        if (player != null && agent != null && agent.isOnNavMesh)
+
+        yield return new WaitForSeconds(effectiveStun);
+
+        if (player != null)
         {
             Vector3 retreatDirection = (transform.position - player.position).normalized;
-            Vector3 retreatPoint = transform.position + (retreatDirection * retreatDistance);
+            Vector3 retreatPoint = transform.position + retreatDirection * retreatDistance;
 
             NavMeshHit hit;
             if (NavMesh.SamplePosition(retreatPoint, out hit, retreatDistance, NavMesh.AllAreas))
@@ -282,9 +279,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
             }
         }
 
-        if (agent != null && agent.isOnNavMesh)
-            agent.isStopped = false;
-
+        agent.isStopped = false;
         isStunned = false;
     }
 
