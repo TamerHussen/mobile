@@ -62,6 +62,16 @@ public class CollectibleSpawner : MonoBehaviour
             spawnPoints.RemoveAt(index);
         }
 
+        // Notify PlayerScore that spawning is done
+        if (PlayerScore.Instance != null)
+        {
+            PlayerScore.Instance.MaxCollectibles = count;
+            PlayerScore.Instance.UpdateCollectedUI();
+        }
+
+        Debug.Log($"✓ Spawned {count} collectibles");
+
+
         Debug.Log($"✓ Spawned {count} collectibles");
     }
 }

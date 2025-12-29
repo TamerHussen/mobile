@@ -50,19 +50,6 @@ public class PlayerScore : MonoBehaviour
         if (CoinsEarnedText == null)
             CoinsEarnedText = GameObject.Find("CoinsEarnedText")?.GetComponent<TextMeshProUGUI>();
 
-        GameObject[] collectibles = GameObject.FindGameObjectsWithTag("Collectible");
-        MaxCollectibles = collectibles.Length;
-
-        if (GameSessionData.Instance != null && GameSessionData.Instance.players != null)
-        {
-            int playerCount = GameSessionData.Instance.players.Count;
-            if (playerCount > 1)
-            {
-                int additionalCollectibles = (playerCount - 1) * 5;
-                MaxCollectibles += additionalCollectibles;
-            }
-        }
-
         levelStartTime = Time.time;
         UpdateScoreUI();
         UpdateCollectedUI();
@@ -75,17 +62,22 @@ public class PlayerScore : MonoBehaviour
             timeBonusMultiplier = Mathf.Max(0.1f, timeBonusMultiplier - (timeBonusDecayRate * Time.deltaTime));
         }
     }
+    public void SetMaxCollectibles(int count)
+    {
+        MaxCollectibles = count;
+        UpdateCollectedUI();
+    }
 
     public void AddCollectible()
     {
-        Collected++;
+        if (levelCompleted) return;
+        Collected = Mathf.Min(Collected + 1, MaxCollectibles);
         UpdateCollectedUI();
 
         if (Collected >= MaxCollectibles)
-        {
-            CompleteLevel();
-        }
+            CompleteLevel(true);
     }
+
 
     public void AddScore(int amount)
     {
@@ -100,13 +92,13 @@ public class PlayerScore : MonoBehaviour
             ScoreText.text = "Score: " + Score;
     }
 
-    void UpdateCollectedUI()
+    public void UpdateCollectedUI()
     {
         if (CollectibleText != null)
             CollectibleText.text = $"Collected: {Collected} / {MaxCollectibles}";
     }
 
-    public void CompleteLevel()
+    public void CompleteLevel(bool victory = true)
     {
         if (levelCompleted) return;
         levelCompleted = true;
@@ -151,12 +143,14 @@ public class PlayerScore : MonoBehaviour
 
         UpdateScoreUI();
 
-        Invoke(nameof(ReturnToLobby), 3f);
-    }
+        if (LevelUIManager.Instance != null)
+        {
+            if (victory)
+                LevelUIManager.Instance.gameOverPanel.ShowVictory(Score, coinsEarned);
+            else
+                LevelUIManager.Instance.ShowGameOver(Score, coinsEarned);
+        }
 
-    void ReturnToLobby()
-    {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
     }
 
     public int GetCurrentScore()
