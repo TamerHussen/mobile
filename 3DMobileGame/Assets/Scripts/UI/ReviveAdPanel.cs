@@ -100,8 +100,26 @@ public class ReviveAdPanel : MonoBehaviour
         }
 
         Debug.Log(" Hiding panel and showing ad...");
+        Time.timeScale = 1.0f;
 
-        GoogleAdsManager.Instance.ShowRewardedAd(PlayerLivesSystem.Instance.OnReviveAdSuccess, OnReviveFailed);
+        if (!GoogleAdsManager.Instance.IsRewardedAdReady())
+        {
+            GoogleAdsManager.Instance.LoadRewardedAd();
+            StartCoroutine(WaitAndShowAd());
+        }
+        else
+        {
+            GoogleAdsManager.Instance.ShowRewardedAd(PlayerLivesSystem.Instance.OnReviveAdSuccess, OnReviveFailed);
+        }
+
+        IEnumerator WaitAndShowAd()
+        {
+            while (!GoogleAdsManager.Instance.IsRewardedAdReady())
+                yield return new WaitForSeconds(0.5f);
+
+            GoogleAdsManager.Instance.ShowRewardedAd(PlayerLivesSystem.Instance.OnReviveAdSuccess, OnReviveFailed);
+        }
+
     }
 
     void OnReviveFailed()

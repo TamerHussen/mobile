@@ -295,6 +295,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 524d9d79ec70c6f4783ec7879f0c21bf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 782138954173398831}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 524d9d79ec70c6f4783ec7879f0c21bf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9128382799900476473}
   m_SourcePrefab: {fileID: 100100000, guid: 524d9d79ec70c6f4783ec7879f0c21bf, type: 3}
 --- !u!4 &543900674314386266 stripped
 Transform:
@@ -356,29 +359,47 @@ MonoBehaviour:
   behaviorSwitchInterval: 30
   startingMode: 0
   angryChaseSpeed: 5
-  happyChaseSpeed: 3
-  staticChaseSpeed: 3.5
+  happyChaseSpeed: 4
+  staticChaseSpeed: 4.5
   patrolSpeed: 1.5
   angryJumpscares:
-  - name: AngryTest
-    image: {fileID: 1430519738, guid: 22a4fce25404e9d4a902a4b7709a307a, type: 3}
-    audio: {fileID: 8300000, guid: f23a6ab09e9d3ee4ca529435c16f1c25, type: 3}
+  - name: AngryJumpscare1
+    image: {fileID: 1639619268, guid: 157509955b40e8c4c861995cab8d6949, type: 3}
+    audio: {fileID: 8300000, guid: 6a5665d9a6f491d4b96114a39d6981f6, type: 3}
+  - name: AngryJumpscare2
+    image: {fileID: -1604272635, guid: 51fdb28ad2c5e8f4996431e5764584d7, type: 3}
+    audio: {fileID: 8300000, guid: 72850c48a77158641ad053148d9ac8bb, type: 3}
+  - name: AngryJumpscare3
+    image: {fileID: -1282425433, guid: 96e0c13879d1cae43ac6fd05c55d0e1f, type: 3}
+    audio: {fileID: 8300000, guid: 0e8229c0686d622429a3f55a0dbce876, type: 3}
   happyJumpscares:
-  - name: happyTest
-    image: {fileID: 1793695207, guid: d84aa7def9610634a83dc44755e801e7, type: 3}
-    audio: {fileID: 8300000, guid: 08474bf12cfa02845915adbd108ab108, type: 3}
+  - name: happyJumpscare1
+    image: {fileID: -1498859073, guid: 1c750f770cf77e143a497f052441f562, type: 3}
+    audio: {fileID: 8300000, guid: 13fba3bc67e2f544a97accd89ef5b796, type: 3}
+  - name: happyJumpscare2
+    image: {fileID: -1787882714, guid: 04714b28dfb4b77418bf960fea6ea198, type: 3}
+    audio: {fileID: 8300000, guid: 80d937176f89036498d084a8653f3585, type: 3}
+  - name: happyJumpscare3
+    image: {fileID: -956468354, guid: 1be2c6428f3bbdb41b2255127d975e35, type: 3}
+    audio: {fileID: 8300000, guid: 9606cea79cf14fa42a33c76613e79c6f, type: 3}
   staticJumpscares:
-  - name: StaticTest
-    image: {fileID: -400161915, guid: eea216eb151d15846890f71a3844b3bc, type: 3}
-    audio: {fileID: 8300000, guid: d549a65e0bd048a4b82b2b3506628258, type: 3}
+  - name: StaticJumpscare1
+    image: {fileID: 235452577, guid: 47d0f13077162394cbee0ac031ea96d2, type: 3}
+    audio: {fileID: 8300000, guid: abc88522c56083c47bdabead9722c926, type: 3}
+  - name: StaticJumpscare2
+    image: {fileID: -1604272635, guid: 51fdb28ad2c5e8f4996431e5764584d7, type: 3}
+    audio: {fileID: 8300000, guid: 13fba3bc67e2f544a97accd89ef5b796, type: 3}
+  - name: StaticJumpscare3
+    image: {fileID: -1787882714, guid: 04714b28dfb4b77418bf960fea6ea198, type: 3}
+    audio: {fileID: 8300000, guid: 0e8229c0686d622429a3f55a0dbce876, type: 3}
   agent: {fileID: 100244331917853957}
   player: {fileID: 0}
-  audioSource: {fileID: 782138954173398831}
+  audioSource: {fileID: 9128382799900476473}
   jumpScareManager: {fileID: 0}
   animator: {fileID: 688780485425740603}
   patrolRange: 15
   centrePoint: {fileID: 0}
-  detectionRange: 6
+  detectionRange: 10
   losePlayerTime: 5
   stunDuration: 4
   retreatDistance: 10
@@ -482,8 +503,177 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 2052640509562061890, guid: f48ac030c2843e44f8ee718faf7ca2f9, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: d404edf3fee853c40b43b4cb47455c97, type: 3}
   m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 20
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.002
+      value: 1
+      inSlope: -500.20065
+      outSlope: -500.20065
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.004
+      value: 0.5
+      inSlope: -125.05016
+      outSlope: -125.05016
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.008
+      value: 0.25
+      inSlope: -31.26254
+      outSlope: -31.26254
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.016
+      value: 0.125
+      inSlope: -7.815635
+      outSlope: -7.815635
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.032
+      value: 0.0625
+      inSlope: -1.9539088
+      outSlope: -1.9539088
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.064
+      value: 0.03125
+      inSlope: -0.4884772
+      outSlope: -0.4884772
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.256
+      value: 0.0078125
+      inSlope: -0.030529825
+      outSlope: -0.030529825
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25900435
+      value: 0.19573975
+      inSlope: -0.1221193
+      outSlope: -0.1221193
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.512
+      value: 0.00390625
+      inSlope: -0.0076324563
+      outSlope: -0.0076324563
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.002
+      inSlope: -0.002000801
+      outSlope: -0.002000801
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!82 &9128382799900476473
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6533333910597661539}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 2052640509562061890, guid: f48ac030c2843e44f8ee718faf7ca2f9, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0

@@ -150,23 +150,29 @@ public class GoogleAdsManager : MonoBehaviour
 
             rewardedAd.Show((Reward reward) =>
             {
+
                 if (!rewardAlreadyGiven)
                 {
                     rewardAlreadyGiven = true;
 
                     Debug.Log($" User earned reward: {reward.Amount} {reward.Type}");
-
-                    if (CoinsManager.Instance != null)
+                    MainThreadDispatcher.Enqueue(() =>
                     {
-                        CoinsManager.Instance.AddCoins(coinsPerAd);
-                        Debug.Log($" Awarded {coinsPerAd} coins via GoogleAdsManager!");
-                    }
-                    else
-                    {
-                        Debug.LogError("CoinsManager not found! Cannot award coins.");
-                    }
+                        if (CoinsManager.Instance != null)
+                        {
+                            CoinsManager.Instance.AddCoins(coinsPerAd);
+                            Debug.Log($" Awarded {coinsPerAd} coins via GoogleAdsManager!");
+                        }
+                        else
+                        {
+                            Debug.LogError("CoinsManager not found! Cannot award coins.");
+                        }
 
-                    onRewardedSuccess?.Invoke();
+                        onRewardedSuccess?.Invoke();
+                        onRewardedSuccess = null;
+
+                    });
+
                 }
                 else
                 {
@@ -218,7 +224,6 @@ public class GoogleAdsManager : MonoBehaviour
                 LoadRewardedAd();
             }
 
-            onRewardedSuccess = null;
             onRewardedFailed = null;
         };
 

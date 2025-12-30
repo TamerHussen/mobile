@@ -32,6 +32,9 @@ public class MainMenu : MonoBehaviour
             startButton.interactable = true;
 
         EnsureSaveManagerExists();
+
+        DontDestroyOnLoad(loadingScreen.gameObject);
+
     }
 
     private void EnsureSaveManagerExists()
@@ -130,7 +133,20 @@ public class MainMenu : MonoBehaviour
 
             Debug.Log("All initialization complete, loading Lobby scene");
 
-            SceneManager.LoadScene("Lobby");
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Lobby");
+            asyncLoad.allowSceneActivation = false;
+
+            while (!asyncLoad.isDone)
+            {
+                float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
+                if (loadingScreen != null)
+                    loadingScreen.SetProgress(progress);
+
+                if (asyncLoad.progress >= 0.9f)
+                    asyncLoad.allowSceneActivation = true;
+
+                await Task.Yield();
+            }
         }
         catch (System.Exception e)
         {

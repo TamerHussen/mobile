@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class AudioSettingsManager : MonoBehaviour
@@ -41,42 +42,98 @@ public class AudioSettingsManager : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void Start()
     {
         BindUIElements();
         ApplySettings();
     }
 
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log($"Audio manager detecting scene change to: {scene.name}");
+        Invoke(nameof(RebindUI), 0.1f);
+    }
+
+    void RebindUI()
+    {
+        masterSlider = null;
+        musicSlider = null;
+        sfxSlider = null;
+        masterValueText = null;
+        musicValueText = null;
+        sfxValueText = null;
+
+        BindUIElements();
+        ApplySettings();
+
+        Debug.Log("Audio UI rebound for new scene");
+    }
+
     void BindUIElements()
     {
         if (masterSlider == null)
-            masterSlider = GameObject.Find("MasterVolumeSlider")?.GetComponent<Slider>();
+            masterSlider = FindObjectOfTypeIncludingInactive<Slider>("MasterVolumeSlider");
 
         if (musicSlider == null)
-            musicSlider = GameObject.Find("MusicVolumeSlider")?.GetComponent<Slider>();
+            musicSlider = FindObjectOfTypeIncludingInactive<Slider>("MusicVolumeSlider");
 
         if (sfxSlider == null)
-            sfxSlider = GameObject.Find("SFXVolumeSlider")?.GetComponent<Slider>();
+            sfxSlider = FindObjectOfTypeIncludingInactive<Slider>("SFXVolumeSlider");
+
+        if (masterValueText == null)
+            masterValueText = FindObjectOfTypeIncludingInactive<TextMeshProUGUI>("MasterValueText");
+
+        if (musicValueText == null)
+            musicValueText = FindObjectOfTypeIncludingInactive<TextMeshProUGUI>("MusicValueText");
+
+        if (sfxValueText == null)
+            sfxValueText = FindObjectOfTypeIncludingInactive<TextMeshProUGUI>("SFXValueText");
 
         if (masterSlider != null)
         {
             masterSlider.value = masterVolume;
+            masterSlider.onValueChanged.RemoveAllListeners();
             masterSlider.onValueChanged.AddListener(SetMasterVolume);
         }
 
         if (musicSlider != null)
         {
             musicSlider.value = musicVolume;
+            musicSlider.onValueChanged.RemoveAllListeners();
             musicSlider.onValueChanged.AddListener(SetMusicVolume);
         }
 
         if (sfxSlider != null)
         {
             sfxSlider.value = sfxVolume;
+            sfxSlider.onValueChanged.RemoveAllListeners();
             sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         }
 
         UpdateUI();
+    }
+
+    T FindObjectOfTypeIncludingInactive<T>(string name) where T : Component
+    {
+        T[] allObjects = Resources.FindObjectsOfTypeAll<T>();
+        foreach (T obj in allObjects)
+        {
+            if (obj.gameObject.scene.isLoaded && obj.gameObject.name == name)
+            {
+                return obj;
+            }
+        }
+        return null;
     }
 
     public void SetMasterVolume(float volume)
