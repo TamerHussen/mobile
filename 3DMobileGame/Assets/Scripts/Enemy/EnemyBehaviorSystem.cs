@@ -126,6 +126,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     {
         if (animator == null || agent == null) return;
 
+        
         float speed = agent.velocity.magnitude;
 
         animator.SetFloat("Speed", speed);
@@ -194,23 +195,33 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        if (isStunned)
+        {
+            Debug.Log(" Enemy is stunned - cannot attack!");
+            return;
+        }
+
         if (!collision.gameObject.CompareTag("Player"))
             return;
 
-        if (!isStunned)
-            agent.isStopped = false;
+        var livesSystem = collision.gameObject.GetComponent<PlayerLivesSystem>();
+
+        if (livesSystem == null)
+            return;
+
+        agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
-        animator.SetTrigger("Attack");
+        if (animator != null)
+            animator.SetTrigger("Attack");
 
         TriggerJumpscareByMode();
 
-        collision.gameObject
-            .GetComponent<PlayerLivesSystem>()
-            ?.LoseLife();
+        livesSystem.LoseLife();
 
         StartCoroutine(StunAndRetreat());
     }
+
 
     void TriggerJumpscareByMode()
     {

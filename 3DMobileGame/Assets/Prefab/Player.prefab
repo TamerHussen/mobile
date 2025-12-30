@@ -8262,7 +8262,7 @@ GameObject:
   - component: {fileID: 619983564937839781}
   - component: {fileID: 8349680138539368604}
   - component: {fileID: 4255537090315323844}
-  - component: {fileID: 1486812815164728772}
+  - component: {fileID: 8737650574366013368}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -8307,8 +8307,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   respawnInvincibilityTime: 3
-  respawnDelay: 1
-  reviveAdTimeout: 10
 --- !u!114 &5226731703588795288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8408,8 +8406,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nameTag: {fileID: 8893390017328925473}
   cosmetic: {fileID: 3360052040777842101}
---- !u!65 &1486812815164728772
-BoxCollider:
+--- !u!136 &8737650574366013368
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -8426,8 +8424,10 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.6, y: 1.5, z: 1.2}
+  serializedVersion: 2
+  m_Radius: 0.75
+  m_Height: 2
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7281219212258298882
 GameObject:

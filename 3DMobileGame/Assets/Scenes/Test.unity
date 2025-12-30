@@ -58254,7 +58254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpscareUI: {fileID: 2030478359}
   audioSource: {fileID: 1300755751}
-  displayTime: 3.5
+  displayTime: 3
   scareCooldown: 5
 --- !u!4 &1300755753
 Transform:

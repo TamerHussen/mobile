@@ -378,9 +378,9 @@ MonoBehaviour:
   animator: {fileID: 688780485425740603}
   patrolRange: 15
   centrePoint: {fileID: 0}
-  detectionRange: 5
-  losePlayerTime: 3
-  stunDuration: 3
+  detectionRange: 6
+  losePlayerTime: 5
+  stunDuration: 4
   retreatDistance: 10
 --- !u!114 &1065892549571993889
 MonoBehaviour:
