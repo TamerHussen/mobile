@@ -1,5 +1,0 @@
-D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/h4u3j6g1/armeabi-v7a/CMakeFiles/edit_cache.dir
-D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/h4u3j6g1/armeabi-v7a/CMakeFiles/rebuild_cache.dir
-D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/h4u3j6g1/armeabi-v7a/GameActivity/CMakeFiles/game.dir
-D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/h4u3j6g1/armeabi-v7a/GameActivity/CMakeFiles/edit_cache.dir
-D:/GithubProjects/mobile/3DMobileGame/.utmp/Debug/h4u3j6g1/armeabi-v7a/GameActivity/CMakeFiles/rebuild_cache.dir
