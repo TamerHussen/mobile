@@ -9599,9 +9599,7 @@ GameObject:
   - component: {fileID: 3228379297793353805}
   - component: {fileID: 5083362837702226863}
   - component: {fileID: 9081062775616189555}
-  - component: {fileID: 2180108506703974825}
   - component: {fileID: 4256060433375387105}
-  - component: {fileID: 4173311215927281659}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -9739,21 +9737,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f53f045fc3a61744879f26664f79729, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2180108506703974825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8379116886908007130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1babd026151ccf42820c4f04b840143, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   player: {fileID: 6885006365436481858}
-  rotationSpeed: 5
-  leanAmount: 15
+  pitchSensitivity: 3
+  maxUpAngle: 20
+  maxDownAngle: -20
+  rollLeanAmount: 0.3
+  smoothSpeed: 8
+  showDebugLogs: 0
 --- !u!114 &4256060433375387105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9772,26 +9762,6 @@ MonoBehaviour:
   collisionLayers:
     serializedVersion: 2
     m_Bits: 16384
---- !u!114 &4173311215927281659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8379116886908007130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11cf7ba0389db45479d1d2f590bf8cae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerRigidbody: {fileID: 9216055239865534819}
-  playerTransform: {fileID: 6885006365436481858}
-  enableGyro: 1
-  yawSmooth: 6
-  cameraSmooth: 8
-  maxUpPitch: 60
-  maxDownPitch: -60
-  leanAmount: 0.3
 --- !u!1 &8452720089523036984
 GameObject:
   m_ObjectHideFlags: 0

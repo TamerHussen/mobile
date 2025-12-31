@@ -44,8 +44,8 @@ namespace Unity.Services.Samples.Friends.UGUI
 
                 bool isInLobby = lobbyPlayers.Exists(p => p.PlayerID == data.Id);
 
-                entry.onInvite = (id) => onInvite?.Invoke(id);
-                entry.onKick = (id) => onKick?.Invoke(id);
+                //entry.onInvite = (id) => onInvite?.Invoke(id);
+                //entry.onKick = (id) => onKick?.Invoke(id);
 
                 entry.removeFriendButton.onClick.AddListener(() =>
                 {
@@ -58,6 +58,7 @@ namespace Unity.Services.Samples.Friends.UGUI
                     entry.gameObject.SetActive(false);
                 });
 
+                /**
                 if (isInLobby)
                 {
                     entry.inviteFriendButton.gameObject.SetActive(false);
@@ -75,7 +76,7 @@ namespace Unity.Services.Samples.Friends.UGUI
                     entry.inviteFriendButton.interactable = data.Availability == Availability.Online;
 
                 }
-
+                **/
                 m_FriendEntries.Add(entry);
             }
         }

@@ -91,6 +91,7 @@ public class ReviveAdPanel : MonoBehaviour
 
         isWaitingForResponse = false;
         gameObject.SetActive(false);
+        Time.timeScale = 1.0f;
 
         if (GoogleAdsManager.Instance == null || !GoogleAdsManager.Instance.IsRewardedAdReady())
         {
@@ -100,7 +101,6 @@ public class ReviveAdPanel : MonoBehaviour
         }
 
         Debug.Log(" Hiding panel and showing ad...");
-        Time.timeScale = 1.0f;
 
         if (!GoogleAdsManager.Instance.IsRewardedAdReady())
         {

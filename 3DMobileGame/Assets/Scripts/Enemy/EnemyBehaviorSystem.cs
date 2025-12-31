@@ -65,6 +65,13 @@ public class EnemyBehaviorSystem : MonoBehaviour
         if (animator == null)
             animator = GetComponent<Animator>();
 
+        // critical navmesh settings for mobile
+        agent.updateRotation = true;
+        agent.updateUpAxis = true;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        agent.acceleration = 8f; // faster acceleration
+        agent.angularSpeed = 360f; // faster turning
+
         normalSpeed = patrolSpeed;
         agent.speed = normalSpeed;
 
@@ -77,7 +84,11 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
     void Update()
     {
-        if (isStunned || player == null) { UpdateAnimator(); return; }
+        if (isStunned || player == null)
+        {
+            UpdateAnimator();
+            return;
+        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -85,6 +96,8 @@ public class EnemyBehaviorSystem : MonoBehaviour
         {
             if (!isChasing) StartChase();
             lastSeenPlayerTime = Time.time;
+
+            // update destination every frame when chasing for smooth tracking
             agent.SetDestination(player.position);
         }
         else if (Time.time - lastSeenPlayerTime <= losePlayerTime)
@@ -126,18 +139,19 @@ public class EnemyBehaviorSystem : MonoBehaviour
     {
         if (animator == null || agent == null) return;
 
-        
+        // use actual velocity magnitude for accurate speed
         float speed = agent.velocity.magnitude;
 
         animator.SetFloat("Speed", speed);
         animator.SetBool("IsChasing", isChasing);
     }
 
-
-
     void StartChase()
     {
         isChasing = true;
+
+        // force agent to be active
+        agent.isStopped = false;
 
         switch (currentMode)
         {
@@ -152,7 +166,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"Enemy started chasing in {currentMode} mode!");
+        Debug.Log($"Enemy started chasing in {currentMode} mode! Speed: {agent.speed}");
     }
 
     void StopChase()
@@ -197,7 +211,7 @@ public class EnemyBehaviorSystem : MonoBehaviour
     {
         if (isStunned)
         {
-            Debug.Log(" Enemy is stunned - cannot attack!");
+            Debug.Log("Enemy is stunned - cannot attack!");
             return;
         }
 
@@ -221,7 +235,6 @@ public class EnemyBehaviorSystem : MonoBehaviour
 
         StartCoroutine(StunAndRetreat());
     }
-
 
     void TriggerJumpscareByMode()
     {
@@ -273,7 +286,6 @@ public class EnemyBehaviorSystem : MonoBehaviour
         agent.velocity = Vector3.zero;
 
         float effectiveStun = stunDuration + 2.5f;
-
 
         yield return new WaitForSeconds(effectiveStun);
 

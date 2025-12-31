@@ -65,20 +65,20 @@ public class GoogleAdsManager : MonoBehaviour
 
     void Start()
     {
-        // safety check - don't init if already initialized
+        // safety check - don't init if already done
         if (isInitialized)
         {
             Debug.LogWarning("GoogleAdsManager already initialized, skipping");
             return;
         }
 
-        // delay init so android can breathe
+        // delay so android doesn't choke on startup
         StartCoroutine(DelayedInitialization());
     }
 
     IEnumerator DelayedInitialization()
     {
-        // give the device a moment to settle after splash
+        // give the device a sec to wake up properly
         yield return new WaitForSeconds(initDelay);
 
         InitializeAds();
@@ -107,7 +107,7 @@ public class GoogleAdsManager : MonoBehaviour
                 isInitialized = true;
                 Debug.Log("Google Mobile Ads initialized successfully");
 
-                // load ads after successful init
+                // preload ads now that we're ready
                 LoadRewardedAd();
                 LoadInterstitialAd();
 
@@ -172,6 +172,8 @@ public class GoogleAdsManager : MonoBehaviour
         });
     }
 
+    private bool pendingReward = false;
+
     public void ShowRewardedAd(Action onSuccess, Action onFail)
     {
         onRewardedSuccess = onSuccess;
@@ -184,42 +186,65 @@ public class GoogleAdsManager : MonoBehaviour
 
             rewardedAd.Show((Reward reward) =>
             {
-                if (!rewardAlreadyGiven)
-                {
-                    rewardAlreadyGiven = true;
+                // this callback fires from ad SDK thread, not main thread
+                if (rewardAlreadyGiven)
+                    return;
 
-                    Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
+                rewardAlreadyGiven = true;
+                Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
 
-                    // ad callbacks run on main thread in newer SDK versions
-                    if (CoinsManager.Instance != null)
-                    {
-                        CoinsManager.Instance.AddCoins(coinsPerAd);
-                        Debug.Log($"Awarded {coinsPerAd} coins via GoogleAdsManager!");
-                    }
-                    else
-                    {
-                        Debug.LogError("CoinsManager not found! Cannot award coins.");
-                    }
-
-                    onRewardedSuccess?.Invoke();
-                    onRewardedSuccess = null;
-                }
-                else
-                {
-                    Debug.LogWarning("Reward already given for this ad!");
-                }
+                // just set flag - Update() will handle it on main thread
+                pendingReward = true;
             });
         }
         else
         {
             Debug.LogWarning("Rewarded ad not ready yet!");
             onRewardedFailed?.Invoke();
-
-            if (!isLoadingRewardedAd)
-            {
-                LoadRewardedAd();
-            }
+            LoadRewardedAd();
         }
+    }
+
+    void Update()
+    {
+        // check for pending rewards on main thread
+        if (pendingReward)
+        {
+            pendingReward = false;
+            ApplyRewardImmediately();
+        }
+    }
+
+    private void ApplyRewardImmediately()
+    {
+        Debug.Log("Applying reward on main thread NOW");
+
+        if (CoinsManager.Instance == null)
+        {
+            Debug.LogError("CoinsManager missing when trying to apply reward!");
+            onRewardedFailed?.Invoke();
+            onRewardedSuccess = null;
+            onRewardedFailed = null;
+            return;
+        }
+
+        // give coins right now
+        CoinsManager.Instance.AddCoins(coinsPerAd);
+        Debug.Log($"Applied {coinsPerAd} coins successfully");
+
+        // trigger success callback
+        if (onRewardedSuccess != null)
+        {
+            Debug.Log("Calling onRewardedSuccess callback");
+            onRewardedSuccess.Invoke();
+        }
+        else
+        {
+            Debug.LogWarning("onRewardedSuccess was null!");
+        }
+
+        onRewardedSuccess = null;
+        onRewardedFailed = null;
     }
 
     void RegisterRewardedAdEvents(RewardedAd ad)
@@ -249,6 +274,7 @@ public class GoogleAdsManager : MonoBehaviour
             Debug.Log("Rewarded ad closed");
             isRewardedAdLoaded = false;
 
+            // reload next ad
             if (autoReloadAds)
             {
                 LoadRewardedAd();
@@ -262,15 +288,17 @@ public class GoogleAdsManager : MonoBehaviour
             Debug.LogError($"Rewarded ad failed to show: {error}");
             isRewardedAdLoaded = false;
 
-            onRewardedFailed?.Invoke();
+            MainThreadDispatcher.Enqueue(() =>
+            {
+                onRewardedFailed?.Invoke();
+                onRewardedSuccess = null;
+                onRewardedFailed = null;
+            });
 
             if (autoReloadAds)
             {
                 LoadRewardedAd();
             }
-
-            onRewardedSuccess = null;
-            onRewardedFailed = null;
         };
     }
 

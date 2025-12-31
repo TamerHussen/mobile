@@ -17,12 +17,18 @@ public class PlayerLivesSystem : MonoBehaviour
     public Transform[] respawnPoints;
     public float respawnInvincibilityTime = 3f;
 
+    private Rigidbody rb;
+    private PlayerController controller;
+
     void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
+
+        rb = GetComponent<Rigidbody>();
+        controller = GetComponent<PlayerController>();
     }
 
     void Start()
@@ -61,17 +67,83 @@ public class PlayerLivesSystem : MonoBehaviour
 
     public void OnReviveAdSuccess()
     {
+        Debug.Log("========== REVIVE AD SUCCESS - RESPAWNING PLAYER ==========");
+
         hasUsedReviveAd = true;
         isDead = false;
         currentLives = 1;
 
         UpdateLivesUI();
 
+        StartCoroutine(RespawnPlayer());
+    }
+
+    IEnumerator RespawnPlayer()
+    {
+        yield return null;
+
+        if (respawnPoints == null || respawnPoints.Length == 0)
+        {
+            Debug.LogWarning("No respawn points assigned!");
+            yield break;
+        }
+
+        Transform spawn = respawnPoints[Random.Range(0, respawnPoints.Length)];
+
+        Debug.Log($"Respawning at: {spawn.position}");
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        if (controller != null)
+            controller.enabled = false;
+
+        if (rb != null)
+        {
+            rb.position = spawn.position;
+            rb.rotation = spawn.rotation;
+        }
+        else
+        {
+            transform.position = spawn.position;
+            transform.rotation = spawn.rotation;
+        }
+
+        yield return new WaitForFixedUpdate();
+
+        if (controller != null)
+            controller.enabled = true;
+
+        Debug.Log($"Player respawned at {spawn.position}");
+
+        StartCoroutine(InvincibilityCoroutine());
+    }
+
+    IEnumerator RespawnAfterHit()
+    {
+        yield return new WaitForSeconds(0.5f);
+
         if (respawnPoints != null && respawnPoints.Length > 0)
         {
             Transform spawn = respawnPoints[Random.Range(0, respawnPoints.Length)];
-            transform.position = spawn.position;
-            transform.rotation = spawn.rotation;
+
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.position = spawn.position;
+                rb.rotation = spawn.rotation; 
+            }
+            else
+            {
+                transform.position = spawn.position;
+                transform.rotation = spawn.rotation;
+            }
+
+            Debug.Log($"Respawned after hit at {spawn.position}");
         }
 
         StartCoroutine(InvincibilityCoroutine());
@@ -103,7 +175,11 @@ public class PlayerLivesSystem : MonoBehaviour
     IEnumerator InvincibilityCoroutine()
     {
         isInvincible = true;
+        Debug.Log("Player is now invincible for 3 seconds");
+
         yield return new WaitForSeconds(respawnInvincibilityTime);
+
         isInvincible = false;
+        Debug.Log("Player invincibility ended");
     }
 }

@@ -14,12 +14,12 @@ namespace Unity.Services.Samples.Friends.UGUI
 
         public Button removeFriendButton = null;
         public Button blockFriendButton = null;
-        public Button inviteFriendButton = null;
-        public Button kickPlayerButton = null;
+        //public Button inviteFriendButton = null;
+        //public Button kickPlayerButton = null;
 
         public string Id {  get; private set; }
-        public Action<string> onInvite;
-        public Action<string> onKick;
+        //public Action<string> onInvite;
+        //public Action<string> onKick;
 
 
         public void Init(string friendId, string playerName, Availability presenceAvailabilityOptions, string activity)
@@ -32,6 +32,7 @@ namespace Unity.Services.Samples.Friends.UGUI
             m_PresenceColorImage.color = presenceColor;
             m_ActivityText.text = activity;
 
+            /**
             if (inviteFriendButton != null )
             {
                 inviteFriendButton.onClick.RemoveAllListeners();
@@ -43,6 +44,7 @@ namespace Unity.Services.Samples.Friends.UGUI
                 kickPlayerButton.onClick.RemoveAllListeners();
                 kickPlayerButton.onClick.AddListener(() => onKick?.Invoke(Id));
             }
+            **/
         }
     }
 }

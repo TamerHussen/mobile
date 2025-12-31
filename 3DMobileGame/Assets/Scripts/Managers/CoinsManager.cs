@@ -26,7 +26,7 @@ public class CoinsManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log(" CoinsManager initialized");
+            Debug.Log("CoinsManager initialized");
         }
         else
         {
@@ -60,12 +60,13 @@ public class CoinsManager : MonoBehaviour
         FindCoinsUI();
         UpdateUI();
     }
+
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log($"Scene loaded: {scene.name} - Finding coins UI...");
-
         Invoke(nameof(FindCoinsUI), 0.1f);
     }
+
     void FindCoinsUI()
     {
         GameObject coinsObj = GameObject.Find(coinsTextName);
@@ -76,16 +77,17 @@ public class CoinsManager : MonoBehaviour
 
             if (coinsText != null)
             {
-                Debug.Log($" Auto-linked coins UI: {coinsTextName}");
+                Debug.Log($"Auto-linked coins UI: {coinsTextName}");
                 UpdateUI();
             }
             else
             {
-                Debug.LogWarning($" Found '{coinsTextName}' but no TextMeshProUGUI component!");
+                Debug.LogWarning($"Found '{coinsTextName}' but no TextMeshProUGUI component!");
             }
         }
         else
         {
+            // fallback search for common names
             coinsObj = GameObject.Find("Coins");
             if (coinsObj == null)
                 coinsObj = GameObject.Find("CoinsWallet");
@@ -97,13 +99,13 @@ public class CoinsManager : MonoBehaviour
                 coinsText = coinsObj.GetComponent<TextMeshProUGUI>();
                 if (coinsText != null)
                 {
-                    Debug.Log($" Auto-linked coins UI: {coinsObj.name}");
+                    Debug.Log($"Auto-linked coins UI: {coinsObj.name}");
                     UpdateUI();
                 }
             }
             else
             {
-                Debug.LogWarning($" Coins UI not found in scene! Looking for '{coinsTextName}'");
+                Debug.LogWarning($"Coins UI not found in scene! Looking for '{coinsTextName}'");
                 coinsText = null;
             }
         }
@@ -133,8 +135,17 @@ public class CoinsManager : MonoBehaviour
 
         Debug.Log($"Added {amount} coins. Total: {SaveManager.Instance.data.coins}");
 
+        // force immediate updates
         OnCoinsChanged?.Invoke(SaveManager.Instance.data.coins);
+
+        // make sure UI updates happen this frame
+        if (coinsText == null)
+            FindCoinsUI();
+
         UpdateUI();
+
+        // backup delayed update in case UI wasn't ready
+        StartCoroutine(DelayedUIUpdate());
     }
 
     public bool SpendCoins(int amount)
@@ -158,6 +169,7 @@ public class CoinsManager : MonoBehaviour
 
         OnCoinsChanged?.Invoke(SaveManager.Instance.data.coins);
         UpdateUI();
+
         return true;
     }
 
@@ -183,27 +195,40 @@ public class CoinsManager : MonoBehaviour
         if (coinsText == null)
         {
             FindCoinsUI();
+            if (coinsText == null)
+                return;
         }
+
+        // direct update on main thread
+        int currentCoins = GetCoins();
+        coinsText.text = $"{currentCoins}";
+
+        Debug.Log($"UI updated to show {currentCoins} coins");
+    }
+
+    // backup method to ensure UI catches up
+    private System.Collections.IEnumerator DelayedUIUpdate()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
 
         if (coinsText != null)
         {
-            int coins = GetCoins();
-            coinsText.text = $"{coins}";
-
+            UpdateUI();
         }
     }
 
     public void RewardAdCoins()
     {
         AddCoins(adRewardAmount);
-        Debug.Log($" Rewarded {adRewardAmount} coins for watching ad!");
+        Debug.Log($"Rewarded {adRewardAmount} coins for watching ad!");
     }
 
     public void RebindUI(TextMeshProUGUI newCoinsText)
     {
         coinsText = newCoinsText;
         UpdateUI();
-        Debug.Log(" Manually rebound coins UI");
+        Debug.Log("Manually rebound coins UI");
     }
 
     public void ForceRefreshUI()
