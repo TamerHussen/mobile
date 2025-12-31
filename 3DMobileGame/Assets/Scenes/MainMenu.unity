@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 42634802}
   - component: {fileID: 42634801}
   - component: {fileID: 42634800}
+  - component: {fileID: 42634804}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -199,6 +200,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &42634804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42634799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e446b87d3906334bb0d5c921670dee2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &216519158
 GameObject:
   m_ObjectHideFlags: 0
@@ -1247,6 +1260,7 @@ MonoBehaviour:
   autoReloadAds: 1
   useBannerAds: 0
   bannerPosition: 1
+  initDelay: 0.5
 --- !u!4 &983362399
 Transform:
   m_ObjectHideFlags: 0

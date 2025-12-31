@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using GoogleMobileAds.Api;
 
@@ -29,6 +30,10 @@ public class GoogleAdsManager : MonoBehaviour
     public bool useBannerAds = false;
     public AdPosition bannerPosition = AdPosition.Bottom;
 
+    [Header("Initialization")]
+    [Tooltip("Delay before initializing ads (seconds) - helps prevent build crashes")]
+    public float initDelay = 2f;
+
     private RewardedAd rewardedAd;
     private InterstitialAd interstitialAd;
     private BannerView bannerView;
@@ -56,11 +61,26 @@ public class GoogleAdsManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         Screen.orientation = ScreenOrientation.LandscapeRight;
-
     }
 
     void Start()
     {
+        // safety check - don't init if already initialized
+        if (isInitialized)
+        {
+            Debug.LogWarning("GoogleAdsManager already initialized, skipping");
+            return;
+        }
+
+        // delay init so android can breathe
+        StartCoroutine(DelayedInitialization());
+    }
+
+    IEnumerator DelayedInitialization()
+    {
+        // give the device a moment to settle after splash
+        yield return new WaitForSeconds(initDelay);
+
         InitializeAds();
     }
 
@@ -74,31 +94,45 @@ public class GoogleAdsManager : MonoBehaviour
 
         Debug.Log("Initializing Google Mobile Ads SDK...");
 
-        MobileAds.Initialize((InitializationStatus initStatus) =>
+        try
         {
-            if (initStatus == null)
+            MobileAds.Initialize((InitializationStatus initStatus) =>
             {
-                Debug.LogError("Google Mobile Ads initialization failed!");
-                return;
-            }
+                if (initStatus == null)
+                {
+                    Debug.LogError("Google Mobile Ads initialization failed!");
+                    return;
+                }
 
-            isInitialized = true;
-            Debug.Log(" Google Mobile Ads initialized successfully");
+                isInitialized = true;
+                Debug.Log("Google Mobile Ads initialized successfully");
 
-            LoadRewardedAd();
-            LoadInterstitialAd();
+                // load ads after successful init
+                LoadRewardedAd();
+                LoadInterstitialAd();
 
-            if (useBannerAds)
-            {
-                CreateBannerView();
-            }
-        });
+                if (useBannerAds)
+                {
+                    CreateBannerView();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Exception during ads initialization: {e.Message}");
+        }
     }
 
     #region REWARDED ADS
 
     public void LoadRewardedAd()
     {
+        if (!isInitialized)
+        {
+            Debug.LogWarning("Ads not initialized yet, can't load rewarded ad");
+            return;
+        }
+
         if (isLoadingRewardedAd)
         {
             Debug.Log("Already loading a rewarded ad");
@@ -113,7 +147,7 @@ public class GoogleAdsManager : MonoBehaviour
 
         isLoadingRewardedAd = true;
         isRewardedAdLoaded = false;
-        rewardAlreadyGiven = false; 
+        rewardAlreadyGiven = false;
 
         Debug.Log("Loading rewarded ad...");
 
@@ -130,7 +164,7 @@ public class GoogleAdsManager : MonoBehaviour
                 return;
             }
 
-            Debug.Log(" Rewarded ad loaded successfully");
+            Debug.Log("Rewarded ad loaded successfully");
             rewardedAd = ad;
             isRewardedAdLoaded = true;
 
@@ -150,33 +184,29 @@ public class GoogleAdsManager : MonoBehaviour
 
             rewardedAd.Show((Reward reward) =>
             {
-
                 if (!rewardAlreadyGiven)
                 {
                     rewardAlreadyGiven = true;
 
-                    Debug.Log($" User earned reward: {reward.Amount} {reward.Type}");
-                    MainThreadDispatcher.Enqueue(() =>
+                    Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
+
+                    // ad callbacks run on main thread in newer SDK versions
+                    if (CoinsManager.Instance != null)
                     {
-                        if (CoinsManager.Instance != null)
-                        {
-                            CoinsManager.Instance.AddCoins(coinsPerAd);
-                            Debug.Log($" Awarded {coinsPerAd} coins via GoogleAdsManager!");
-                        }
-                        else
-                        {
-                            Debug.LogError("CoinsManager not found! Cannot award coins.");
-                        }
+                        CoinsManager.Instance.AddCoins(coinsPerAd);
+                        Debug.Log($"Awarded {coinsPerAd} coins via GoogleAdsManager!");
+                    }
+                    else
+                    {
+                        Debug.LogError("CoinsManager not found! Cannot award coins.");
+                    }
 
-                        onRewardedSuccess?.Invoke();
-                        onRewardedSuccess = null;
-
-                    });
-
+                    onRewardedSuccess?.Invoke();
+                    onRewardedSuccess = null;
                 }
                 else
                 {
-                    Debug.LogWarning(" Reward already given for this ad!");
+                    Debug.LogWarning("Reward already given for this ad!");
                 }
             });
         }
@@ -255,6 +285,12 @@ public class GoogleAdsManager : MonoBehaviour
 
     public void LoadInterstitialAd()
     {
+        if (!isInitialized)
+        {
+            Debug.LogWarning("Ads not initialized yet, can't load interstitial ad");
+            return;
+        }
+
         if (isLoadingInterstitialAd)
         {
             Debug.Log("Already loading an interstitial ad");
@@ -285,7 +321,7 @@ public class GoogleAdsManager : MonoBehaviour
                 return;
             }
 
-            Debug.Log(" Interstitial ad loaded successfully");
+            Debug.Log("Interstitial ad loaded successfully");
             interstitialAd = ad;
             isInterstitialAdLoaded = true;
 
@@ -367,6 +403,12 @@ public class GoogleAdsManager : MonoBehaviour
 
     public void CreateBannerView()
     {
+        if (!isInitialized)
+        {
+            Debug.LogWarning("Ads not initialized yet, can't create banner");
+            return;
+        }
+
         Debug.Log("Creating banner view...");
 
         if (bannerView != null)
@@ -400,7 +442,7 @@ public class GoogleAdsManager : MonoBehaviour
     {
         bannerView.OnBannerAdLoaded += () =>
         {
-            Debug.Log(" Banner ad loaded");
+            Debug.Log("Banner ad loaded");
             isBannerAdLoaded = true;
             ShowBannerAd();
         };

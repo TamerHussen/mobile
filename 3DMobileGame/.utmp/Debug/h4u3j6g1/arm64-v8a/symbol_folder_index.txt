@@ -1,1 +1,1 @@
-D:\GithubProjects\mobile\3DMobileGame\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\Debug\h4u3j6g1\obj\arm64-v8a
+D:\GithubProjects\mobile\3DMobileGame\Library\PramData\AndroidApplicationController\Cache\com.UnityTechnologies.com.unity.template.urpblank\gradle-project\unityLibrary\build\intermediates\cxx\Debug\h4u3j6g1\obj\arm64-v8a
