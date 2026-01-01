@@ -1,0 +1,2 @@
+D:\GithubProjects\mobile\3DMobileGame\Library\PramData\AndroidApplicationController\Cache\com.lazyforge.staticrun\gradle-project\unityLibrary\src\main\cpp\CMakeLists.txt
+D:\GithubProjects\mobile\3DMobileGame\Library\PramData\AndroidApplicationController\Cache\com.lazyforge.staticrun\gradle-project\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
