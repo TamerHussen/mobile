@@ -1,64 +1,91 @@
+# 3D Horror-Comedy Mobile Game
 
-# 3D horror, comedy mobile game
+**Genre:** First-Person Horror / Comedy  
+**Theme:** Meme-inspired Survival Maze  
+**Engine:** Unity 3D  
+**Art Style:** Low-Poly Stylized 3D  
+**Target Platforms:** Android, iOS  
+
+## Overview
+This mobile game is a first-person survival maze experience inspired by Pac-Man, combined with horror and comedy elements. Players navigate randomized mazes, collect points and power-ups, avoid patrolling enemies, and survive meme-based jump scares. The game emphasizes immersive mobile controls, replayability, and engaging visual and audio feedback.  
+
+## Core Features
+
+- **Gameplay Mechanics:**
+  - Collect orbs to gain points.  
+  - Avoid enemies using programmed AI behavior.  
+  - Dodge and jump using accelerometer input.  
+  - Gyroscopic camera control for immersive first-person experience.  
+  - Haptic feedback for proximity-based enemy encounters.  
+- **Monetization & Progression:**
+  - Points are converted into in-game currency.  
+  - Players can purchase cosmetic skins or upgrades.  
+  - Optional rewarded ads for extra currency or unlockables.  
+- **Replayability & Immersion:**
+  - Randomized maze layouts for variety each playthrough.  
+  - Meme-based jump scares to keep gameplay unpredictable.  
+  - Multiple levels with increasing difficulty.  
+- **Visual & Audio:**
+  - Low-poly modern horror-comedy style.  
+  - Dynamic lighting, fog, and ambient sound effects to enhance tension.  
 
 
-This is a short and summarised description of this project. 
+## Controls
 
-The game is about players playing as pac man in first person to collect all the points and fruits,
-without dying to the enemy 3 times.
-
-Features:
-
-* Collect powerups to gain ability to eat ghosts :Powerups:
-* Collect orbs to gain points :Orbs:
-* Can dodge and jump over enemies :Movement:
-* Points are calculated into money, players can use money to buy skins or upgrades, or can choose to watch ads to get those features. :Monetise:
-* Low poly
-* Modern Horror
-
-Controls:
-* Gyro
-* input system
-* Accelerometer
-* Haptic Feedback
-* Joystick
+- Gyroscope (camera rotation)  
+- Accelerometer (shake dodge action)  
+- Joystick (movement option)  
+- Haptic feedback (proximity alerts and jump scares)  
+- Unity Input System  
 
 ## Dependencies
-* Unity 3D, Blender, Maya
 
-## Target platforms
-Support Android, IOS.
+- Unity 3D  
+- Blender
+- Mixamo 
 
-Instructions to build on Android platforms:
-1) download the apk Game file;
-2) run the game;
-3) play the game.
+## Installation / Build Instructions (Android)
 
+1. Download the `.apk` file.  
+2. Install on your Android device.  
+3. Open the game and enjoy.  
 
-## TODO
+## Development Status / TODO
 
-* Build player,enemy,fruits and orb models. (use temporary models). Almost Done
-* Make Fog
-* Make it creepy
-* Build Map. Done
-* Make movement features. Done
-* Make First Person. Done
-* Add gyro and accelerometer. Done
-* Add mobile Controls. Done
-* Add haptic feedback. Done
-* Add jumpscares. Done
+- [x] Build Map  
+- [x] Implement First-Person Movement  
+- [x] Add Gyroscope & Accelerometer Controls  
+- [x] Add Mobile Controls (Joystick)  
+- [x] Add Haptic Feedback  
+- [x] Implement Enemy AI & Movement  
+- [x] Add Jump Scares  
+- [ ] Build Player, Enemy, Fruits, and Orb Models (temporary models used)  
+- [ ] Enhance Fog & Atmospheric Effects  
+- [ ] Increase Creepy / Horror Elements  
 
-## Reference
-* MAZE build: https://www.youtube.com/watch?v=TMOEYdV4Ot4&t=1555s
-* Joystick asset: https://assetstore.unity.com/packages/tools/input-management/joystick-pack-107631
-* Enemy movement: https://youtu.be/ploU82inrCw
-* Player movement: https://youtu.be/f473C43s8nE
-* Gyro script: https://docs.unity3d.com/6000.2/Documentation/ScriptReference/Gyroscope.html
-* Accelerometer Script: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Accelerometer.html
-* Joystick movement: https://www.youtube.com/watch?v=7bQqpTkZTkk
-* Haptic feedback: https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.0/manual/simple-haptic-feedback.html
-* Jumpscares: https://youtu.be/qnNRdUMULoo
+---
+
+## References
+
+**Game Mechanics & Assets:**
+
+- Maze Build: [YouTube](https://www.youtube.com/watch?v=TMOEYdV4Ot4&t=1555s)  
+- Joystick Asset: [Unity Asset Store](https://assetstore.unity.com/packages/tools/input-management/joystick-pack-107631)  
+- Enemy Movement Tutorial: [YouTube](https://youtu.be/ploU82inrCw)  
+- Player Movement Tutorial: [YouTube](https://youtu.be/f473C43s8nE)  
+- Gyroscope: [Unity Docs](https://docs.unity3d.com/6000.2/Documentation/ScriptReference/Gyroscope.html)  
+- Accelerometer: [Unity Input System Docs](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Accelerometer.html)  
+- Haptic Feedback: [Unity XR Toolkit](https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.0/manual/simple-haptic-feedback.html)  
+- Jump Scares Tutorial: [YouTube](https://youtu.be/qnNRdUMULoo)  
+- Unity Multiplayer Lobby & Friends Services: Unity Docs  
+
+**Music Credits:**
+
+- Calm Ambient by Marc Van der Meulen – [YouTube](https://www.youtube.com/watch?v=GzHbvCmlQ8Y)  
+- Midnight Velvet by Dagored – [YouTube](https://www.youtube.com/watch?v=BCT3WFa9BeY&list=PLRPR8uJQx5tFIRjGuOSd5q1ON4DamlH8-&index=3)  
 
 ## Contact
 
-Tamer Hussen - Tamer.Hussen@mail.bcu.ac.uk
+**Developer:** Tamer Hussen  
+**Email:** Tamer.Hussen@mail.bcu.ac.uk  
+
