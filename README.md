@@ -1,4 +1,4 @@
-# 3D Horror-Comedy Mobile Game
+# Static Run
 
 **Genre:** First-Person Horror / Comedy  
 **Theme:** Meme-inspired Survival Maze  
