@@ -46,9 +46,23 @@ This mobile game is a first-person survival maze experience inspired by Pac-Man,
 
 ## Installation / Build Instructions (Android)
 
+### Install APK
 1. Download the `.apk` file.  
 2. Install on your Android device.  
 3. Open the game and enjoy.  
+
+### Build from Unity Project
+1. Open the project in Unity 3D.
+2. Go to File, then Build Settings.
+3. Select Android as the target platform.
+4. Click Switch Platform (this ensures all build settings are configured for Android).
+5. Add the scenes you want to include in the build under Scenes In Build.
+6. Configure Player Settings:
+  * Set package name, version, and orientation (Landscape).
+  * Set minimum API level and other required Android options.
+7. Click Build and Run to generate the .apk file.
+8. Install and play on an Android device.
+
 
 ## Development Status / TODO
 
@@ -59,11 +73,9 @@ This mobile game is a first-person survival maze experience inspired by Pac-Man,
 - [x] Add Haptic Feedback  
 - [x] Implement Enemy AI & Movement  
 - [x] Add Jump Scares  
-- [ ] Build Player, Enemy, Fruits, and Orb Models (temporary models used)  
+- [x] Build Player, Enemy, Fruits, and Orb Models
 - [ ] Enhance Fog & Atmospheric Effects  
 - [ ] Increase Creepy / Horror Elements  
-
----
 
 ## References
 

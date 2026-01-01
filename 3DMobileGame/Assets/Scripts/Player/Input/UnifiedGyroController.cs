@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// attach this to Main Camera ONLY
-// remove all other gyro scripts
 public class UnifiedGyroController : MonoBehaviour
 {
     [Header("References")]
@@ -34,10 +32,8 @@ public class UnifiedGyroController : MonoBehaviour
 
     void Start()
     {
-        // save initial camera rotation
         initialLocalRotation = transform.localRotation;
 
-        // find player if not assigned
         if (player == null)
         {
             player = transform.parent;
@@ -49,7 +45,6 @@ public class UnifiedGyroController : MonoBehaviour
             }
         }
 
-        // init gyro
         InitializeGyro();
     }
 
@@ -60,7 +55,6 @@ public class UnifiedGyroController : MonoBehaviour
             Input.gyro.enabled = true;
             gyroAvailable = true;
 
-            // wait a moment then calibrate
             Invoke(nameof(CalibrateGyro), 0.5f);
 
             if (showDebugLogs)
@@ -78,30 +72,22 @@ public class UnifiedGyroController : MonoBehaviour
     {
         if (!gyroAvailable) return;
 
-        // get gyro data converted to unity space
         Quaternion deviceRotation = GetGyroRotation();
 
-        // extract pitch (up/down) and roll (tilt left/right)
         Vector3 euler = deviceRotation.eulerAngles;
 
-        // convert to -180 to 180 range
         float pitch = NormalizeAngle(euler.x);
         float roll = NormalizeAngle(euler.z);
 
-        // clamp pitch for comfort
         pitch = Mathf.Clamp(pitch, maxDownAngle, maxUpAngle);
 
-        // smooth the pitch value
         currentPitch = Mathf.Lerp(currentPitch, pitch, Time.deltaTime * pitchSensitivity);
 
-        // build target rotation: pitch for look up/down, roll for lean
         Quaternion pitchRotation = Quaternion.Euler(currentPitch, 0f, 0f);
         Quaternion rollRotation = Quaternion.Euler(0f, 0f, roll * rollLeanAmount);
 
-        // combine rotations
         Quaternion targetRotation = initialLocalRotation * pitchRotation * rollRotation;
 
-        // smoothly apply to camera
         transform.localRotation = Quaternion.Slerp(
             transform.localRotation,
             targetRotation,
@@ -116,10 +102,8 @@ public class UnifiedGyroController : MonoBehaviour
 
     Quaternion GetGyroRotation()
     {
-        // get raw gyro attitude
         Quaternion gyroAttitude = Input.gyro.attitude;
 
-        // convert from right-handed (gyro) to left-handed (unity)
         Quaternion convertedRotation = new Quaternion(
             gyroAttitude.x,
             gyroAttitude.y,
@@ -127,7 +111,6 @@ public class UnifiedGyroController : MonoBehaviour
             -gyroAttitude.w
         );
 
-        // apply calibration offset
         return gyroCalibration * convertedRotation;
     }
 
@@ -135,7 +118,6 @@ public class UnifiedGyroController : MonoBehaviour
     {
         if (!gyroAvailable) return;
 
-        // get current gyro reading
         Quaternion currentGyro = Input.gyro.attitude;
         currentGyro = new Quaternion(
             currentGyro.x,
@@ -144,10 +126,8 @@ public class UnifiedGyroController : MonoBehaviour
             -currentGyro.w
         );
 
-        // store inverse as calibration offset
         gyroCalibration = Quaternion.Inverse(currentGyro);
 
-        // reset pitch
         currentPitch = 0f;
 
         if (showDebugLogs)
@@ -156,7 +136,6 @@ public class UnifiedGyroController : MonoBehaviour
 
     float NormalizeAngle(float angle)
     {
-        // convert 0-360 to -180 to 180
         if (angle > 180f)
             angle -= 360f;
         return angle;
@@ -164,7 +143,6 @@ public class UnifiedGyroController : MonoBehaviour
 
     void OnApplicationFocus(bool hasFocus)
     {
-        // re-enable gyro when app regains focus
         if (hasFocus && gyroAvailable)
         {
             Input.gyro.enabled = true;
@@ -175,7 +153,6 @@ public class UnifiedGyroController : MonoBehaviour
 
     void OnApplicationPause(bool isPaused)
     {
-        // handle app pause/resume
         if (!isPaused && gyroAvailable)
         {
             Input.gyro.enabled = true;

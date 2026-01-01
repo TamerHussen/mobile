@@ -42,12 +42,11 @@ public class MusicManager : MonoBehaviour
                 PlayMusic(lobbyMusic);
                 break;
             case "Test":
-            case "Level1":
-            case "Level2":
-            case "Level3":
-            case "Level4":
-            case "Level5":
-            case "Level6":
+            case "Green":
+            case "Blue":
+            case "Purple":
+            case "Red":
+            case "Dark":
                 PlayMusic(levelMusic);
                 break;
         }

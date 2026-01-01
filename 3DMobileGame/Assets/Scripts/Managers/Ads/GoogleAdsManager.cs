@@ -65,20 +65,17 @@ public class GoogleAdsManager : MonoBehaviour
 
     void Start()
     {
-        // safety check - don't init if already done
         if (isInitialized)
         {
             Debug.LogWarning("GoogleAdsManager already initialized, skipping");
             return;
         }
 
-        // delay so android doesn't choke on startup
         StartCoroutine(DelayedInitialization());
     }
 
     IEnumerator DelayedInitialization()
     {
-        // give the device a sec to wake up properly
         yield return new WaitForSeconds(initDelay);
 
         InitializeAds();
@@ -107,7 +104,6 @@ public class GoogleAdsManager : MonoBehaviour
                 isInitialized = true;
                 Debug.Log("Google Mobile Ads initialized successfully");
 
-                // preload ads now that we're ready
                 LoadRewardedAd();
                 LoadInterstitialAd();
 
@@ -186,14 +182,12 @@ public class GoogleAdsManager : MonoBehaviour
 
             rewardedAd.Show((Reward reward) =>
             {
-                // this callback fires from ad SDK thread, not main thread
                 if (rewardAlreadyGiven)
                     return;
 
                 rewardAlreadyGiven = true;
                 Debug.Log($"User earned reward: {reward.Amount} {reward.Type}");
 
-                // just set flag - Update() will handle it on main thread
                 pendingReward = true;
             });
         }

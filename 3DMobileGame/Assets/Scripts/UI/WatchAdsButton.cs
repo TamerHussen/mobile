@@ -15,14 +15,24 @@ public class WatchAdButton : MonoBehaviour
     private float checkTimer = 0f;
     private int adsWatchedThisSession = 0;
     private const int MAX_ADS_PER_SESSION = 5;
+    private bool isProcessingAd = false;
 
     void Start()
     {
         if (button == null)
             button = GetComponent<Button>();
 
+        button.onClick.RemoveAllListeners();
         button.onClick.AddListener(OnWatchAdClicked);
+
         LoadAdWatchCount();
+        UpdateButtonState();
+    }
+
+    void OnEnable()
+    {
+        isProcessingAd = false;
+        checkTimer = 0f;
         UpdateButtonState();
     }
 
@@ -38,6 +48,12 @@ public class WatchAdButton : MonoBehaviour
 
     void OnWatchAdClicked()
     {
+        if (isProcessingAd)
+        {
+            Debug.Log("Already processing an ad, wait");
+            return;
+        }
+
         if (adsWatchedThisSession >= MAX_ADS_PER_SESSION)
         {
             Debug.Log("Max ads reached for this session");
@@ -48,10 +64,15 @@ public class WatchAdButton : MonoBehaviour
 
         if (GoogleAdsManager.Instance != null && GoogleAdsManager.Instance.IsRewardedAdReady())
         {
-            GoogleAdsManager.Instance.ShowRewardedAd(OnAdRewarded, OnAdFailed);
+            isProcessingAd = true;
 
             if (buttonText != null)
                 buttonText.text = "Loading Ad...";
+
+            GoogleAdsManager.Instance.ShowRewardedAd(
+                () => OnAdRewarded(),
+                () => OnAdFailed()
+            );
         }
         else
         {
@@ -65,6 +86,10 @@ public class WatchAdButton : MonoBehaviour
 
     void OnAdRewarded()
     {
+        if (this == null || !gameObject.activeInHierarchy)
+            return;
+
+        isProcessingAd = false;
         adsWatchedThisSession++;
         SaveAdWatchCount();
 
@@ -75,6 +100,10 @@ public class WatchAdButton : MonoBehaviour
 
     void OnAdFailed()
     {
+        if (this == null || !gameObject.activeInHierarchy)
+            return;
+
+        isProcessingAd = false;
         Debug.LogWarning("Ad failed to load or was closed");
         UpdateButtonState();
     }
@@ -101,11 +130,20 @@ public class WatchAdButton : MonoBehaviour
         }
 
         bool isReady = GoogleAdsManager.Instance.IsRewardedAdReady();
-        button.interactable = isReady;
 
-        buttonText.text = isReady ? "Watch Ad" : "Loading...";
+        // don't allow clicking while processing
+        button.interactable = isReady && !isProcessingAd;
 
-        if (rewardText != null && isReady)
+        if (isProcessingAd)
+        {
+            buttonText.text = "Loading...";
+        }
+        else
+        {
+            buttonText.text = isReady ? "Watch Ad" : "Loading...";
+        }
+
+        if (rewardText != null && isReady && !isProcessingAd)
         {
             int remaining = MAX_ADS_PER_SESSION - adsWatchedThisSession;
             int rewardAmount = GoogleAdsManager.Instance.coinsPerAd;
@@ -128,5 +166,16 @@ public class WatchAdButton : MonoBehaviour
     {
         PlayerPrefs.SetInt("AdsWatchedThisSession", 0);
         PlayerPrefs.Save();
+    }
+
+    void OnDisable()
+    {
+        isProcessingAd = false;
+    }
+
+    void OnDestroy()
+    {
+        if (button != null)
+            button.onClick.RemoveAllListeners();
     }
 }

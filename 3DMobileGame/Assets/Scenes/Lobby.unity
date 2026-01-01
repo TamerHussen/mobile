@@ -4171,7 +4171,6 @@ GameObject:
   - component: {fileID: 297417410}
   - component: {fileID: 297417409}
   - component: {fileID: 297417411}
-  - component: {fileID: 297417413}
   m_Layer: 0
   m_Name: LobbyManager
   m_TagString: Untagged
@@ -4277,22 +4276,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a774ee5dc2fd2df4c9ea6eb3b6262b66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &297417413
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 297417403}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1e07a50630cf544cae7b5330efa3564, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 1309573327}
-  buttonText: {fileID: 700334683}
-  rewardText: {fileID: 1897469799}
-  checkInterval: 1
 --- !u!1 &299664048
 GameObject:
   m_ObjectHideFlags: 0
@@ -12967,6 +12950,7 @@ GameObject:
   - component: {fileID: 1223485006}
   - component: {fileID: 1223485005}
   - component: {fileID: 1223485009}
+  - component: {fileID: 1223485010}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -13075,6 +13059,22 @@ MonoBehaviour:
   m_FriendsViewUGUI: {fileID: 968781043293372327}
   m_RequestsViewUGUI: {fileID: 968781043293372326}
   m_BlocksViewUGUI: {fileID: 968781043293372325}
+--- !u!114 &1223485010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1223485003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1e07a50630cf544cae7b5330efa3564, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 1309573327}
+  buttonText: {fileID: 700334683}
+  rewardText: {fileID: 1897469799}
+  checkInterval: 1
 --- !u!1 &1233110984
 GameObject:
   m_ObjectHideFlags: 0
